@@ -1,0 +1,85 @@
+Coding style pre kod do projektu IFJ/IAL:
+
+Variables:          double basicVar, globalIFJRating;
+Arrays:             float importantValues[250];
+                    int *randomIntegers = malloc(8);
+Member variables:   _member, _currentSpeed
+Structs:            typedef struct
+                    {
+                        int _pressure;
+                    } YellowSubmarine;
+Functions:          happyLittleFun(), MD5Check()
+Pointers:           int *a = NULL;
+Pointers as arg:    fun(int* arg)
+Defines:            SOMETHING_LIKE_THIS
+Constants:          const double Pi = 3.14;
+                    const int TwoDozens = 24;
+Enums:              typedef enum {Black, White, Purple, Red, Green} Color;
+Combinable enums:   typedef enum {Generous = 1, Kind = 2, Friendly = 4,
+                                  Funny = 8} GoodTraits;
+
+                                  
+Braces:
+typedef struct
+{
+} Test; 
+
+void foo()
+{
+}
+
+for(;;){
+}
+
+while(true){
+}
+
+do{
+}while(true)
+
+switch(something){
+case first:{
+    break;}
+case second:
+case third:{
+    break;}
+case fourth:
+    break;
+default:
+}
+
+Zdovodnenie:
+
+Structs:
+Vychadza z c++ stylu - aby bolo mozne pouzivat strukturu ako uzivatelom
+definovany typ, tak sa ponecha anonymna a az priamo typ sa pomenuje.
+
+Pointers:
+Je mozne pisat v jednom riadku viacero deklaracii k danemu typu rozneho
+druhu (aj ked to neni moc ziadane):
+{
+    int *a, b;
+    a = &b;
+}
+Argumenty sa vsak pisu vzdy po jednom.
+
+Member variables:
+Dostatocne odlisi clenske premenne narozdiel od 'myMember' a na druhej
+strane najkratsi zapis ('m' v m_member je zbytocne). 
+
+Constants:
+Enumy su celociselne konstanty, preto aj vseobecne konstanty
+zacinaju velkym.
+
+Combinable enums:
+Typ aj premenna ma na konci 's' aby sa zdoraznila moznost
+kombinovania stylov:
+GoodTraits myTraits = Generous | Kind;
+
+Braces pri switch:
+Obcas je potrebne v ramci jednoho case nieco dodeklarovat. Na to je
+treba pridat zatvorky, idealne za posledny case ktory spada do
+rovnakeho obsluzneho bloku.
+
+Lamanie riadku vzdy podla najelepsieho uvazenia ale aby davalo zmysel,
+vid. combinable enums.
