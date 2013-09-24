@@ -1,10 +1,10 @@
-********************************
-********************************
-***                          ***
-***    INI: Ni Interpreter   ***
-***                          ***
-********************************
-********************************
+*********************************
+*********************************
+***                           ***
+***    INI: Ni Interpreter    ***
+***                           ***
+*********************************
+*********************************
 
 This project was created as:
  - a way to learn more about Programming languages, Interpreter implementations
@@ -18,10 +18,9 @@ This project was created as:
 
 Team leader: Marek Milkovič
 
-// @TODO: everybody commit your own name
 Authors:
 	Ján Spišiak
-	Lukas Vrabec
+	Lukáš Vrabec
 	Ivan Ševčík
 	Marek Bertovič
 	Marek Milkovič
