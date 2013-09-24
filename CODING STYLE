@@ -14,15 +14,21 @@ Pointers as arg:    fun(int *arg)
 Defines:            SOMETHING_LIKE_THIS
 Constants:          const double Pi = 3.14;
                     const int TwoDozens = 24;
-Enums:              typedef enum {Black,
-                                  White,
-                                  Purple,
-                                  Red,
-                                  Green} Color;
-Combinable enums:   typedef enum {Generous = 1,
-                                  Kind = 2,
-                                  Friendly = 4,
-                                  Funny = 8} GoodTraits;
+Enums:              typedef enum
+                    {
+                        Black,
+                        White,
+                        Purple,
+                        Red,
+                        Green
+                    } Color;
+Combinable enums:   typedef enum
+                    {
+                        Generous = 1,
+                        Kind = 2,
+                        Friendly = 4,
+                        Funny = 8
+                    } GoodTraits;
 
                                   
 Braces:
