@@ -1,10 +1,20 @@
-*********************************
-*								*
-*		INI: Ni Interpreter		*
-*								*
-*********************************
+********************************
+********************************
+***                          ***
+***    INI: Ni Interpreter   ***
+***                          ***
+********************************
+********************************
 
-- as a part of project "Implementing imperative language interpreter IFJ13"
+This project was created as:
+ - a way to learn more about Programming languages, Interpreter implementations
+   and generally underlying techniques used in programming, and methods used
+   in team development and management
+ - a part of project "Implementing imperative language interpreter IFJ13"
+
+*******************************
+*           Credits           *
+*******************************
 
 Team leader:
 
