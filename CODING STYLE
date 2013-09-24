@@ -10,12 +10,18 @@ Structs:            typedef struct
                     } YellowSubmarine;
 Functions:          happyLittleFun(), MD5Check()
 Pointers:           int *a = NULL;
-Pointers as arg:    fun(int* arg)
+Pointers as arg:    fun(int *arg)
 Defines:            SOMETHING_LIKE_THIS
 Constants:          const double Pi = 3.14;
                     const int TwoDozens = 24;
-Enums:              typedef enum {Black, White, Purple, Red, Green} Color;
-Combinable enums:   typedef enum {Generous = 1, Kind = 2, Friendly = 4,
+Enums:              typedef enum {Black,
+                                  White,
+                                  Purple,
+                                  Red,
+                                  Green} Color;
+Combinable enums:   typedef enum {Generous = 1,
+                                  Kind = 2,
+                                  Friendly = 4,
                                   Funny = 8} GoodTraits;
 
                                   
@@ -24,20 +30,20 @@ typedef struct
 {
 } Test; 
 
-void foo()
+void foo(void *ptr, int count)
 {
 }
 
-for(;;){
+for (;;) {
 }
 
-while(true){
+while (true) {
 }
 
-do{
-}while(true)
+do {
+} while (true);
 
-switch(something){
+switch (something) {
 case first:{
     break;}
 case second:
