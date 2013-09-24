@@ -40,6 +40,13 @@ void foo(void *ptr, int count)
 {
 }
 
+if () {
+}
+else if () {
+}
+else {
+}
+
 for (;;) {
 }
 
