@@ -1,0 +1,7 @@
+# Binary & object files
+ini
+*.o
+
+# Temporary files
+*.*~
+*.swap
