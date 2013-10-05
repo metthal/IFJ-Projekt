@@ -16,6 +16,7 @@ LFLAGS_PROFILE = -pg
 SRC_FILES = $(wildcard *.c)
 OBJ_FILES = $(SRC_FILES:.c=.o)
 TAR_FILE = xmilko01.tar.gz
+PACKED_FILES = $(SRC_FILES) Makefile
 
 # Targets
 release: CFLAGS += $(CFLAGS_RELEASE)
@@ -38,6 +39,6 @@ clean:
 	$(RM) $(PROJECT) $(OBJ_FILES) $(TAR_FILE)
 
 pack:
-	$(TAR) $(TAR_FILE) $(SRC_FILES)
+	$(TAR) $(TAR_FILE) $(PACKED_FILES)
 
-.PHONY: build debug profile clean pack
+.PHONY: build release debug profile clean pack
