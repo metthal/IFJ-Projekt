@@ -30,10 +30,10 @@ profile: CFLAGS += $(CFLAGS_PROFILE)
 profile: LFLAGS += $(LFLAGS_PROFILE)
 profile: build
 
-calltrace:
+callgraph:
 	@$(eval COMMIT_HASH := $(shell git log --pretty=format:%h -n 1))
 	@$(eval DATE := $(shell date "+%H.%M.%S.%d.%m.%y"))
-	@gprof ini > profile.log.$(DATE).$(COMMIT_HASH)
+	@gprof $(PROJECT) > profile.log.$(DATE).$(COMMIT_HASH)
 
 analyze:
 	@cppcheck --enable=all .
@@ -50,4 +50,4 @@ clean:
 pack:
 	$(TAR) $(TAR_FILE) $(PACKED_FILES)
 
-.PHONY: build release debug profile clean pack analyze calltrace
+.PHONY: build release debug profile clean pack analyze callgraph
