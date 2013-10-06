@@ -17,6 +17,7 @@ SRC_FILES = $(wildcard *.c)
 OBJ_FILES = $(SRC_FILES:.c=.o)
 TAR_FILE = xmilko01.tar.gz
 PACKED_FILES = $(SRC_FILES) Makefile
+TEMP_FILES = gmon.out
 
 # Targets
 release: CFLAGS += $(CFLAGS_RELEASE)
@@ -29,6 +30,14 @@ profile: CFLAGS += $(CFLAGS_PROFILE)
 profile: LFLAGS += $(LFLAGS_PROFILE)
 profile: build
 
+calltrace:
+	@$(eval COMMIT_HASH := $(shell git log --pretty=format:%h -n 1))
+	@$(eval DATE := $(shell date "+%H.%M.%S.%d.%m.%y"))
+	@gprof ini > profile.log.$(DATE).$(COMMIT_HASH)
+
+analyze:
+	@cppcheck --enable=all .
+
 build: $(OBJ_FILES)
 	$(CC) $^ -o $(PROJECT) $(LFLAGS)
 
@@ -36,9 +45,9 @@ build: $(OBJ_FILES)
 	$(CC) $(CFLAGS) $< -o $@
 
 clean:
-	$(RM) $(PROJECT) $(OBJ_FILES) $(TAR_FILE)
+	$(RM) $(PROJECT) $(OBJ_FILES) $(TAR_FILE) $(TEMP_FILES)
 
 pack:
 	$(TAR) $(TAR_FILE) $(PACKED_FILES)
 
-.PHONY: build release debug profile clean pack
+.PHONY: build release debug profile clean pack analyze calltrace
