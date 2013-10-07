@@ -1,11 +1,15 @@
 # Variables
 PROJECT = ini
+PROJECT_TEST = $(PROJECT)-test
 
 CC = gcc
 RM = rm -f
 TAR = tar -czf
 
-CFLAGS = -Wall -Wextra -std=c99 -c
+STD_C99 = -std=c99
+STD_GNU99 = -std=gnu99
+
+CFLAGS = -Wall -Wextra -c
 CFLAGS_RELEASE = -O2 -s
 CFLAGS_DEBUG = -O0 -g
 CFLAGS_PROFILE = $(CFLAGS_DEBUG) -pg
@@ -13,10 +17,15 @@ CFLAGS_PROFILE = $(CFLAGS_DEBUG) -pg
 LFLAGS =
 LFLAGS_PROFILE = -pg
 
-SRC_FILES = $(wildcard *.c)
+TEST_SRC_FILES = $(wildcard test*.c)
+TEST_HEADER_FILES = $(wildcard test*.h)
+TEST_OBJ_FILES = $(TEST_SRC_FILES:.c=.o)
+
+SRC_FILES = $(filter-out $(TEST_SRC_FILES), $(wildcard *.c))
+HEADER_FILES = $(filter-out $(TEST_HEADER_FILES), $(wildcard *.h))
 OBJ_FILES = $(SRC_FILES:.c=.o)
 TAR_FILE = xmilko01.tar.gz
-PACKED_FILES = $(SRC_FILES) Makefile
+PACKED_FILES = $(SRC_FILES) $(HEADER_FILES) Makefile
 TEMP_FILES = gmon.out
 
 # Targets
@@ -36,8 +45,9 @@ callgraph:
 	@gprof $(PROJECT) > profile.log.$(DATE).$(COMMIT_HASH)
 
 analyze:
-	@cppcheck --enable=all .
+	@cppcheck --enable=all $(SRC_FILES) $(HEADER_FILES)
 
+build: CFLAGS += $(STD_C99)
 build: $(OBJ_FILES)
 	$(CC) $^ -o $(PROJECT) $(LFLAGS)
 
@@ -45,9 +55,13 @@ build: $(OBJ_FILES)
 	$(CC) $(CFLAGS) $< -o $@
 
 clean:
-	$(RM) $(PROJECT) $(OBJ_FILES) $(TAR_FILE) $(TEMP_FILES)
+	$(RM) $(PROJECT) $(PROJECT_TEST) $(OBJ_FILES) $(TAR_FILE) $(TEMP_FILES) $(TEST_OBJ_FILES)
 
 pack:
 	$(TAR) $(TAR_FILE) $(PACKED_FILES)
 
-.PHONY: build release debug profile clean pack analyze callgraph
+test: CFLAGS += $(CFLAGS_DEBUG) $(STD_GNU99)
+test: $(TEST_OBJ_FILES)
+	$(CC) $^ -o $(PROJECT_TEST) $(LFLAGS)
+
+.PHONY: build release debug profile clean pack analyze callgraph test

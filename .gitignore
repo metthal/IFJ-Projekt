@@ -1,5 +1,5 @@
 # Binary & object files
-ini
+ini*
 *.o
 
 # Temporary files
