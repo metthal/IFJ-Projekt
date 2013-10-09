@@ -19,11 +19,11 @@ LFLAGS_PROFILE = -pg
 
 TEST_SRC_FILES = $(wildcard test*.c)
 TEST_HEADER_FILES = $(wildcard test*.h)
-TEST_OBJ_FILES = $(TEST_SRC_FILES:.c=.o)
+TEST_OBJ_FILES = $(patsubst %.c, %.o, $(wildcard *.c))
 
 SRC_FILES = $(filter-out $(TEST_SRC_FILES), $(wildcard *.c))
 HEADER_FILES = $(filter-out $(TEST_HEADER_FILES), $(wildcard *.h))
-OBJ_FILES = $(SRC_FILES:.c=.o)
+OBJ_FILES = $(patsubst %.c, %.o, $(SRC_FILES))
 TAR_FILE = xmilko01.tar.gz
 PACKED_FILES = $(SRC_FILES) $(HEADER_FILES) Makefile
 TEMP_FILES = gmon.out
