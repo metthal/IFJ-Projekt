@@ -12,6 +12,7 @@ typedef void (*TestEP)();
 
 static const uint8_t TestNameLen = 40;
 static const uint8_t TestResultPos = 50;
+extern uint32_t testCountOk, testCountFailed, onlyFailed;
 
 typedef enum
 {
@@ -43,27 +44,37 @@ static inline void testResult(uint8_t result, const char *testName, const char *
         testName = buffer;
     }
 
-    printf("%s", testName);
-    uint8_t spaceCount = TestResultPos - strlen(testName);
-    for (uint8_t i = 0; i < spaceCount; ++i)
-        putchar(' ');
+    if (!onlyFailed || result == TestFailed) {
+        printf("%s", testName);
+
+        uint8_t spaceCount = TestResultPos - strlen(testName);
+        for (uint8_t i = 0; i < spaceCount; ++i)
+            putchar(' ');
+    }
 
     if (result == TestOk) {
-        printf("[ ");
-        printfc(1, 32, "PASS");
-        printf(" ]\n");
+        if (!onlyFailed) {
+            printf("[ ");
+            printfc(1, 32, "PASS");
+            printf(" ]\n");
+        }
+
+        testCountOk++;
     }
     else {
         printf("[ ");
         printfc(1, 31, "FAIL");
         printf(" ]\n");
         printf("Test at %s:%u failed!\n\t%s\n", file, line, expr);
+        testCountFailed++;
     }
 }
 
-#define TEST_SUITE(testSuiteName)           extern void testSuiteName();
-#define TEST_SUITE_START(testSuiteName)     void testSuiteName() { printf("Starting test suite %s in %s...\n", #testSuiteName , __FILE__);
-#define TEST_SUITE_END                      }
+#define REGISTER_TEST_SUITE(testSuiteName)      testSuites[testSuiteCount++] = &testSuiteName;
+#define RUN_TEST_SUITES                         for (uint8_t i = 0; i < testSuiteCount; ++i) (*testSuites[i])();
+#define TEST_SUITE(testSuiteName)               extern void testSuiteName();
+#define TEST_SUITE_START(testSuiteName)         void testSuiteName() { printf("Starting test suite %s in %s...\n", #testSuiteName , __FILE__);
+#define TEST_SUITE_END                          }
 
 #define SHOULD_EQUAL(TestName, val1, val2)      \
         if (val1 == val2)                       \
