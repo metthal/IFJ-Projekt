@@ -15,6 +15,7 @@ static uint8_t const STRING_RESIZE_DEC_RATE = 3;
 static uint16_t const STRING_DEFAULT_SIZE = 16;
 
 String* newString();
+String* newStringSize(uint32_t size);
 String* newStringS(const char* str, uint32_t len);
 void freeString(String **pps);
 

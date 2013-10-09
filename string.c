@@ -25,6 +25,23 @@ String* newString()
     return ps;
 }
 
+String* newStringSize(uint32_t size)
+{
+    String *ps = malloc(sizeof(String));
+    if (ps != NULL) {
+        ps->size = size;
+        ps->length = 1;
+        ps->data = malloc(sizeof(char) * size);
+        if (ps->data != NULL) {
+            ps->data[0] = '\0';
+        } else {
+            free(ps);
+            ps = NULL;
+        }
+    }
+    return ps;
+}
+
 String* newStringS(const char *str, uint32_t len)
 {
     if (str[len - 1] == '\0') {
@@ -68,7 +85,7 @@ char* stringResize(String *ps, uint32_t size)
 
 String* stringClone(String *ps)
 {
-    String *nps = newString(ps->size);
+    String *nps = newStringSize(ps->size);
     if (nps != NULL) {
         nps->length = ps->length;
         memcpy(nps->data, ps->data, ps->length);
