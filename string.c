@@ -93,6 +93,12 @@ String* stringClone(String *ps)
     return nps;
 }
 
+void stringEmpty(String *ps)
+{
+    ps->data[0] = '\0';
+    ps->length = 1;
+}
+
 void stringPush(String *ps, char c)
 {
     if (!(ps->length < ps->size)) {

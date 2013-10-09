@@ -22,6 +22,7 @@ void freeString(String **pps);
 char* stringResize(String *ps, uint32_t size);
 String* stringClone(String *ps);
 
+void stringEmpty(String *ps);
 void stringPush(String *ps, char c);
 char stringPop(String *ps);
 void stringCopy(String *src, String *dest);
