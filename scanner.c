@@ -1,23 +1,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <ctype.h>
 #include "scanner.h"
 
 int32_t charStreamSwitch = 1;
 int32_t lastChar;
-FILE* source;
+FILE *source;
 
 ScannerTokenType scannerGetToken()
 {
-    ScannerTokenType token = STT_Empty;
+    // TODO ScannerTokenType token = STT_Empty;
     ScannerTokenState tokenState = STS_NOT_FINISHED;
     ScannerState state = SS_Empty;
     int32_t symbol;
 
-    while ( tokenState == STS_NOT_FINISHED )
+    while (tokenState == STS_NOT_FINISHED)
     {
-        if ( charStreamSwitch ) {
-            if ( ( symbol = getc(source) ) == EOF ) {
+        if (charStreamSwitch) {
+            if ((symbol = getc(source)) == EOF) {
                 return STT_EOF;
             }
         }
@@ -25,20 +26,20 @@ ScannerTokenType scannerGetToken()
             symbol = lastChar;
             charStreamSwitch=1;
         }
-        switch ( state ) {
+        switch (state) {
             case SS_Empty : {
-                if (( symbol >= 'a' && symbol <= 'z') || ( symbol >= 'A' && symbol <= 'Z')) {
+                if ((symbol >= 'a' && symbol <= 'z') || (symbol >= 'A' && symbol <= 'Z')) {
                     state = SS_Identifier;
                 }
-                else if ( symbol >= '0' && symbol <= '9')  {
+                else if (symbol >= '0' && symbol <= '9')  {
                     state = SS_Number;
                 }
-                else if ( isspace( symbol ) )
+                else if (isspace(symbol))
                 {
                     ;
                 }
                 else {
-                    switch ( symbol ) {
+                    switch (symbol) {
                         case '"' : {
                             state = SS_String;
                             break;
@@ -53,43 +54,33 @@ ScannerTokenType scannerGetToken()
                         }
                         case ';' : {
                             return STT_Semicolon;
-                            break;
                         }
                         case '{' : {
                             return STT_LeftCurlyBracket;
-                            break;
                         }
                         case '}' : {
                             return STT_RightCurlyBracket;
-                            break;
                         }
                         case '*' : {
                             return STT_Asterisk;
-                            break;
                         }
                         case '+' : {
                             return STT_Plus;
-                            break;
                         }
                         case '-' : {
                             return STT_Minus;
-                            break;
                         }
                         case '(' : {
                             return STT_LeftBracket;
-                            break;
                         }
                         case ')' : {
                             return STT_RightBracket;
-                            break;
                         }
                         case ',' : {
                             return STT_Comma;
-                            break;
                         }
                         case ':' : {
                             return STT_Colon;
-                            break;
                         }
                         case '>' : {
                             state = SS_Greater;
@@ -112,7 +103,7 @@ ScannerTokenType scannerGetToken()
                 break;
             }
             case SS_Greater : {
-                if ( symbol == '=' ) {
+                if (symbol == '=') {
                     return STT_GreaterEqual;
                 }
                 else {
@@ -122,7 +113,7 @@ ScannerTokenType scannerGetToken()
                 }
             }
             case SS_Less : {
-                if ( symbol == '=' ) {
+                if (symbol == '=') {
                     return STT_LessEqual;
                 }
                 else {
@@ -132,7 +123,7 @@ ScannerTokenType scannerGetToken()
                 }
             }
             case SS_Assigment : {
-                if ( symbol == '=' ) {
+                if (symbol == '=') {
                     state = SS_Equal;
                     break;
                 }
@@ -143,7 +134,7 @@ ScannerTokenType scannerGetToken()
                 }
             }
             case SS_Dollar : {
-                if ( ( symbol >= 'a' && symbol <= 'z' ) || ( symbol >= 'A' && symbol <= 'Z' ) || ( symbol == '_' ) ) {
+                if ((symbol >= 'a' && symbol <= 'z') || (symbol >= 'A' && symbol <= 'Z') || (symbol == '_')) {
                     state = SS_Variable;
                     // STRING PUSH
                     break;
@@ -153,8 +144,8 @@ ScannerTokenType scannerGetToken()
                 }
             }
             case SS_Variable : {
-                if ( ( symbol >= 'a' && symbol <= 'z' ) || ( symbol >= 'A' && symbol <= 'Z' ) || ( symbol == '_' ) ||
-                     ( symbol >= '0' && symbol <= '9' )) {
+                if ((symbol >= 'a' && symbol <= 'z') || (symbol >= 'A' && symbol <= 'Z') || (symbol == '_') ||
+                     (symbol >= '0' && symbol <= '9')) {
                     // STRING PUSH
                     state = SS_Variable; // STILL THE SAME STATE
                     break;
@@ -166,12 +157,12 @@ ScannerTokenType scannerGetToken()
                 }
             }
             case SS_Number : {
-                if ( symbol >= '0' && symbol <= '9') {
+                if (symbol >= '0' && symbol <= '9') {
                     state = SS_Number;
                     // PUSH STRING
                     break;
                 }
-                else if ( symbol == '.') {
+                else if (symbol == '.') {
                     state = SS_Double;
                 }
                 // ELSE IF EXPONENT
@@ -182,7 +173,7 @@ ScannerTokenType scannerGetToken()
                 }
             }
             case SS_Identifier : {
-                if ( ( symbol == '_' ) || ( symbol >= 'a' && symbol <= 'z') || ( symbol >= ' A' && symbol <= 'Z' ) || ( symbol >= '0' && symbol <= '9') ) {
+                if ((symbol == '_') || (symbol >= 'a' && symbol <= 'z') || (symbol >= 'A' && symbol <= 'Z') || (symbol >= '0' && symbol <= '9')) {
                     state = SS_Identifier;
                     break;
                 }
@@ -193,7 +184,7 @@ ScannerTokenType scannerGetToken()
                 }
             }
             case SS_Double : {
-                if ( symbol >= '0' && symbol <= '9') {
+                if (symbol >= '0' && symbol <= '9') {
                     state = SS_Double;
                     // PUSH STRING
                     break;
@@ -205,11 +196,11 @@ ScannerTokenType scannerGetToken()
                 }
             }
             case SS_Divide : {
-                if ( symbol == '*' ) {
+                if (symbol == '*') {
                     state = SS_BlockComment;
                     break;
                 }
-                else if ( symbol == '/' ) {
+                else if (symbol == '/') {
                     state = SS_Comment;
                     break;
                 }
@@ -220,7 +211,7 @@ ScannerTokenType scannerGetToken()
                 }
             }
             case SS_BlockComment : {
-                if ( symbol == '*' ) {
+                if (symbol == '*') {
                     state = SS_BlockCommentFinish;
                     break;
                 }
@@ -230,7 +221,7 @@ ScannerTokenType scannerGetToken()
                 }
             }
             case SS_BlockCommentFinish : {
-                if ( symbol == '/' ) {
+                if (symbol == '/') {
                     state = SS_Empty;
                     break;
                 }
@@ -242,17 +233,16 @@ ScannerTokenType scannerGetToken()
                 }
             }
             case SS_Comment : {
-                if ( symbol == '\n') {
+                if (symbol == '\n') {
                     state = SS_Empty;
-                    break;
                 }
                 else {
                     state = SS_Comment;
-                    break;
                 }
+                break;
             }
             case SS_Equal : {
-                if ( symbol == '=' ) {
+                if (symbol == '=') {
                     return STT_Equal;
                 }
                 else {
@@ -262,7 +252,7 @@ ScannerTokenType scannerGetToken()
                 }
             }
             case SS_Exclamation : {
-                if ( symbol == '=' ) {
+                if (symbol == '=') {
                     state = SS_NotEqual;
                     break;
                 }
@@ -273,7 +263,7 @@ ScannerTokenType scannerGetToken()
                 }
             }
             case SS_NotEqual : {
-                if ( symbol == '=' ) {
+                if (symbol == '=') {
                     return STT_NotEqual;
                 }
                 else {
@@ -283,7 +273,7 @@ ScannerTokenType scannerGetToken()
                 }
             }
             case SS_String : {
-                if ( symbol == '"' ) {
+                if (symbol == '"') {
                     return STT_String;
                 }
                 else {
@@ -295,6 +285,7 @@ ScannerTokenType scannerGetToken()
 
     }
 
+    return STT_LexError
 }
 
 

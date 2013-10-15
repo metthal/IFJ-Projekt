@@ -1,3 +1,6 @@
+#ifndef SCANNER_H
+#define SCANNER_H
+
 typedef enum {
     KTT_If,
     KTT_Else,
@@ -70,4 +73,6 @@ typedef enum {
 } ScannerState;
 
 ScannerTokenType scannerGetToken();
+
+#endif
 
