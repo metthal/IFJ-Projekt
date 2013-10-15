@@ -83,6 +83,7 @@ stringAdd(b, c);
 SHOULD_EQUAL_STR("stringAdd()", b->data, "Hello World! Bye World!");
 
 // stringLength()
+stringSetS(b, "Hello World! Bye Bye World!", 27);
 SHOULD_EQUAL("stringLength()", stringLength(b), 27);
 
 // stringCompare()
