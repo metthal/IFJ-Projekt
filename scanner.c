@@ -285,7 +285,7 @@ ScannerTokenType scannerGetToken()
 
     }
 
-    return STT_LexError
+    return STT_LexError;
 }
 
 
