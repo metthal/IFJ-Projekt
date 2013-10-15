@@ -172,3 +172,9 @@ void stringAddS(String *dest, const char *src, uint32_t len)
     dest->length = newLength;
     dest->data[dest->length - 1] = '\0';
 }
+
+uint32_t stringLength(String *ps)
+{
+    return ps->length - 1;
+}
+

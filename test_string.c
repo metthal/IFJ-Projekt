@@ -82,6 +82,9 @@ SHOULD_EQUAL_STR("stringAddS()", b->data, "Hello World! ");
 stringAdd(b, c);
 SHOULD_EQUAL_STR("stringAdd()", b->data, "Hello World! Bye World!");
 
+// stringLength()
+SHOULD_EQUAL("stringLength()", stringLength(b), 27);
+
 // freeString()
 combinedTestResult = 0;
 freeString(&a);

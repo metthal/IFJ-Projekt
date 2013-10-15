@@ -31,4 +31,6 @@ void stringSetS(String *ps, const char *str, uint32_t len);
 void stringAdd(String *dest, String *src);
 void stringAddS(String *ps, const char *str, uint32_t len);
 
+uint32_t stringLength(String *ps);
+
 #endif
