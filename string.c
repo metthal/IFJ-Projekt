@@ -178,3 +178,11 @@ uint32_t stringLength(String *ps)
     return ps->length - 1;
 }
 
+int16_t stringCompare(String *a, String *b)
+{
+    const unsigned char *s1 = (unsigned char*)a->data, *s2 = (unsigned char*)b->data;
+    while (*s1 && (*s1 == *s2)) {
+        s1++,s2++;
+    }
+    return *s1 - *s2;
+}

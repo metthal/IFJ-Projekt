@@ -85,6 +85,17 @@ SHOULD_EQUAL_STR("stringAdd()", b->data, "Hello World! Bye World!");
 // stringLength()
 SHOULD_EQUAL("stringLength()", stringLength(b), 27);
 
+// stringCompare()
+stringSetS(a, "a", 1);
+stringSetS(b, "ab", 2);
+SHOULD_BE_LESS("stringCompare() 1", stringCompare(a, b), 0);
+SHOULD_BE_GRT("stringCompare() 2", stringCompare(b, a), 0);
+stringSetS(a, "ab", 2);
+SHOULD_EQUAL("stringCompare() 3", stringCompare(b, a), 0);
+stringEmpty(a);
+SHOULD_BE_LESS("stringCompare() 4", stringCompare(a, b), 0);
+SHOULD_BE_GRT("stringCompare() 5", stringCompare(b, a), 0);
+
 // freeString()
 combinedTestResult = 0;
 freeString(&a);
