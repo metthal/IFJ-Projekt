@@ -47,6 +47,9 @@ callgraph:
 analyze:
 	@cppcheck --enable=all $(SRC_FILES) $(HEADER_FILES)
 
+analyzeAll:
+	@cppcheck --enable=all $(SRC_FILES) $(TEST_SRC_FILES) $(HEADER_FILES) $(TEST_HEADER_FILES)
+
 build: CFLAGS += $(STD_C99)
 build: $(OBJ_FILES)
 	$(CC) $^ -o $(PROJECT) $(LFLAGS)
@@ -64,4 +67,4 @@ test: CFLAGS += $(CFLAGS_DEBUG) $(STD_GNU99)
 test: $(TEST_OBJ_FILES)
 	$(CC) $^ -o $(PROJECT_TEST) $(LFLAGS)
 
-.PHONY: build release debug profile clean pack analyze callgraph test
+.PHONY: build release debug profile clean pack analyze analyzeAll callgraph test
