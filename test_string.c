@@ -15,6 +15,30 @@ uint16_t stringCompareRaw(String *a, String *b)
 TEST_SUITE_START(StringTests);
 
 int combinedTestResult = 0;
+// initString()
+String x;
+initString(&x);
+SHOULD_EQUAL("initString() Length", x.length, 1);
+SHOULD_EQUAL_STR("initString() Data", x.data, "");
+
+// deleteString()
+deleteString(&x);
+SHOULD_EQUAL("delete() Size", x.size, 0);
+SHOULD_EQUAL("delete() Length", x.length, 0);
+SHOULD_EQUAL("delete() Data", x.data, NULL);
+
+// initStringSize()
+initStringSize(&x, 16);
+SHOULD_EQUAL("initStringSize() Size", x.size, 16);
+SHOULD_EQUAL("initStringSize() Length", x.length, 1);
+SHOULD_EQUAL_STR("initStringSize() Data", x.data, "");
+deleteString(&x);
+
+// initStringS()
+initStringS(&x, "Alalalalal", 10);
+SHOULD_EQUAL("initString() Length", x.length, 11);
+SHOULD_EQUAL_STR("initString() Data", x.data, "Alalalalal");
+deleteString(&x);
 
 // newString*()
 String *a = newString();

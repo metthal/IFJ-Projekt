@@ -8,16 +8,57 @@
         STRING->data = realloc(STRING->data, SIZE); \
         STRING->size = SIZE;
 
+static inline char* _initStringSize(String *ps, uint32_t size)
+{
+    ps->size = size;
+    ps->length = 1;
+    ps->data = malloc(sizeof(char) * size);
+    if (ps->data != NULL) {
+        ps->data[0] = '\0';
+    } else {
+        // init failed
+    }
+    return ps->data;
+}
+
+void initString(String *ps)
+{
+    _initStringSize(ps, STRING_DEFAULT_SIZE);
+}
+
+void initStringSize(String *ps, uint32_t size)
+{
+    _initStringSize(ps, size);
+}
+
+void initStringS(String *ps, const char* str, uint32_t len)
+{
+    ps->size = len + 1;
+    ps->length = len + 1;
+    ps->data = malloc(sizeof(char) * (len + 1));
+    if (ps->data != NULL) {
+        memcpy(ps->data, str, len);
+        ps->data[len] = '\0';
+    } else {
+        // init failed
+    }
+}
+
+void deleteString(String *ps)
+{
+    if (ps) {
+        free(ps->data);
+        ps->data = NULL;
+        ps->size = 0;
+        ps->length = 0;
+    }
+}
+
 String* newString()
 {
     String *ps = malloc(sizeof(String));
     if (ps != NULL) {
-        ps->size = STRING_DEFAULT_SIZE;
-        ps->length = 1;
-        ps->data = malloc(sizeof(char) * STRING_DEFAULT_SIZE);
-        if (ps->data != NULL) {
-            ps->data[0] = '\0';
-        } else {
+        if (!_initStringSize(ps, STRING_DEFAULT_SIZE)) {
             free(ps);
             ps = NULL;
         }
@@ -29,12 +70,7 @@ String* newStringSize(uint32_t size)
 {
     String *ps = malloc(sizeof(String));
     if (ps != NULL) {
-        ps->size = size;
-        ps->length = 1;
-        ps->data = malloc(sizeof(char) * size);
-        if (ps->data != NULL) {
-            ps->data[0] = '\0';
-        } else {
+        if (!_initStringSize(ps, size)) {
             free(ps);
             ps = NULL;
         }
