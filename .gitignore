@@ -5,3 +5,6 @@ ini*
 # Temporary files
 *.*~
 *.swp
+
+# ctags
+tags
