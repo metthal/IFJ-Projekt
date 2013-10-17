@@ -22,12 +22,12 @@ typedef enum
 
 static inline void printfc(uint8_t color, uint8_t style, const char *fmt, ...)
 {
-    char buffer[256];
     va_list args;
     va_start(args, fmt);
     if (!isatty(fileno(stdout)))
         vprintf(fmt, args);
     else {
+        char buffer[256];
         vsprintf(buffer, fmt, args);
         printf("\033[%u;%um%s\033[00m", style, color, buffer);
     }

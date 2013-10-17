@@ -22,12 +22,12 @@ double stringToDouble(const String *str);
  * @param num Integer to convert.
  * @return New instance of string object with converted value.
  */
-String *intToString(int64_t num);
+String* intToString(int64_t num);
 
 /** Converts double to string.
  * @param num Double to convert.
  * @return New instance of string object with converted value.
  */
-String *doubleToString(double num, uint8_t precision);
+String* doubleToString(double num, uint8_t precision);
 
 #endif

@@ -27,82 +27,64 @@ ScannerTokenType scannerGetToken()
             charStreamSwitch=1;
         }
         switch (state) {
-            case SS_Empty : {
+            case SS_Empty: {
                 if ((symbol >= 'a' && symbol <= 'z') || (symbol >= 'A' && symbol <= 'Z')) {
                     state = SS_Identifier;
                 }
-                else if (symbol >= '0' && symbol <= '9')  {
+                else if (symbol >= '0' && symbol <= '9') {
                     state = SS_Number;
                 }
-                else if (isspace(symbol))
-                {
+                else if (isspace(symbol)) {
                     ;
                 }
                 else {
                     switch (symbol) {
-                        case '"' : {
+                        case '"':
                             state = SS_String;
                             break;
-                        }
-                        case '/' : {
+                        case '/':
                             state = SS_Divide;
                             break;
-                        }
-                        case '!' : {
+                        case '!':
                             state = SS_Exclamation;
                             break;
-                        }
-                        case ';' : {
+                        case ';':
                             return STT_Semicolon;
-                        }
-                        case '{' : {
+                        case '{':
                             return STT_LeftCurlyBracket;
-                        }
-                        case '}' : {
+                        case '}':
                             return STT_RightCurlyBracket;
-                        }
-                        case '*' : {
+                        case '*':
                             return STT_Asterisk;
-                        }
-                        case '+' : {
+                        case '+':
                             return STT_Plus;
-                        }
-                        case '-' : {
+                        case '-':
                             return STT_Minus;
-                        }
-                        case '(' : {
+                        case '(':
                             return STT_LeftBracket;
-                        }
-                        case ')' : {
+                        case ')':
                             return STT_RightBracket;
-                        }
-                        case ',' : {
+                        case ',':
                             return STT_Comma;
-                        }
-                        case ':' : {
+                        case ':':
                             return STT_Colon;
-                        }
-                        case '>' : {
+                        case '>':
                             state = SS_Greater;
                             break;
-                        }
-                        case '<' : {
+                        case '<':
                             state = SS_Less;
                             break;
-                        }
-                        case '=' : {
+                        case '=':
                             state = SS_Assigment;
                             break;
-                        }
-                        case '$' : {
+                        case '$':
                             state = SS_Dollar;
                             break;
-                        }
                     }
                 }
                 break;
             }
-            case SS_Greater : {
+            case SS_Greater: {
                 if (symbol == '=') {
                     return STT_GreaterEqual;
                 }
@@ -112,7 +94,7 @@ ScannerTokenType scannerGetToken()
                     return STT_Greater;
                 }
             }
-            case SS_Less : {
+            case SS_Less: {
                 if (symbol == '=') {
                     return STT_LessEqual;
                 }
@@ -122,45 +104,44 @@ ScannerTokenType scannerGetToken()
                     return STT_Less;
                 }
             }
-            case SS_Assigment : {
+            case SS_Assigment: {
                 if (symbol == '=') {
                     state = SS_Equal;
-                    break;
                 }
                 else {
                     lastChar = symbol;
                     charStreamSwitch = 0;
                     return STT_Assigment;
                 }
+                break;
             }
-            case SS_Dollar : {
+            case SS_Dollar: {
                 if ((symbol >= 'a' && symbol <= 'z') || (symbol >= 'A' && symbol <= 'Z') || (symbol == '_')) {
                     state = SS_Variable;
                     // STRING PUSH
-                    break;
                 }
                 else {
                     return STT_LexError;// LEX ERROR ???
                 }
+                break;
             }
-            case SS_Variable : {
+            case SS_Variable: {
                 if ((symbol >= 'a' && symbol <= 'z') || (symbol >= 'A' && symbol <= 'Z') || (symbol == '_') ||
                      (symbol >= '0' && symbol <= '9')) {
                     // STRING PUSH
                     state = SS_Variable; // STILL THE SAME STATE
-                    break;
                 }
                 else {
                     lastChar = symbol;
                     charStreamSwitch = 0;
                     return STT_Variable; // PLUS RETURN STRING SOMEWHERE
                 }
+                break;
             }
-            case SS_Number : {
+            case SS_Number: {
                 if (symbol >= '0' && symbol <= '9') {
                     state = SS_Number;
                     // PUSH STRING
-                    break;
                 }
                 else if (symbol == '.') {
                     state = SS_Double;
@@ -171,68 +152,66 @@ ScannerTokenType scannerGetToken()
                     charStreamSwitch = 0;
                     return STT_Number;
                 }
+                break;
             }
-            case SS_Identifier : {
+            case SS_Identifier: {
                 if ((symbol == '_') || (symbol >= 'a' && symbol <= 'z') || (symbol >= 'A' && symbol <= 'Z') || (symbol >= '0' && symbol <= '9')) {
                     state = SS_Identifier;
-                    break;
                 }
                 else {
                     lastChar = symbol;
                     charStreamSwitch = 0;
                     return STT_Identifier;
                 }
+                break;
             }
-            case SS_Double : {
+            case SS_Double: {
                 if (symbol >= '0' && symbol <= '9') {
                     state = SS_Double;
                     // PUSH STRING
-                    break;
                 }
                 else {
                     lastChar = symbol;
                     charStreamSwitch = 0;
                     return STT_Double;
                 }
+                break;
             }
-            case SS_Divide : {
+            case SS_Divide: {
                 if (symbol == '*') {
                     state = SS_BlockComment;
-                    break;
                 }
                 else if (symbol == '/') {
                     state = SS_Comment;
-                    break;
                 }
                 else {
                     lastChar = symbol;
                     charStreamSwitch = 0;
                     return STT_Divide;
                 }
+                break;
             }
-            case SS_BlockComment : {
+            case SS_BlockComment: {
                 if (symbol == '*') {
                     state = SS_BlockCommentFinish;
-                    break;
                 }
                 else {
                     state = SS_BlockComment;
-                    break;
                 }
+                break;
             }
-            case SS_BlockCommentFinish : {
+            case SS_BlockCommentFinish: {
                 if (symbol == '/') {
                     state = SS_Empty;
-                    break;
                 }
                 else {
                     state = SS_BlockComment;
                     lastChar = symbol;
                     charStreamSwitch = 0;
-                    break;
                 }
+                break;
             }
-            case SS_Comment : {
+            case SS_Comment: {
                 if (symbol == '\n') {
                     state = SS_Empty;
                 }
@@ -241,7 +220,7 @@ ScannerTokenType scannerGetToken()
                 }
                 break;
             }
-            case SS_Equal : {
+            case SS_Equal: {
                 if (symbol == '=') {
                     return STT_Equal;
                 }
@@ -251,18 +230,18 @@ ScannerTokenType scannerGetToken()
                     return STT_LexError;
                 }
             }
-            case SS_Exclamation : {
+            case SS_Exclamation: {
                 if (symbol == '=') {
                     state = SS_NotEqual;
-                    break;
                 }
                 else {
                     lastChar = symbol;
                     charStreamSwitch = 0;
                     return STT_LexError;
                 }
+                break;
             }
-            case SS_NotEqual : {
+            case SS_NotEqual: {
                 if (symbol == '=') {
                     return STT_NotEqual;
                 }
@@ -272,7 +251,7 @@ ScannerTokenType scannerGetToken()
                     return STT_LexError;
                 }
             }
-            case SS_String : {
+            case SS_String: {
                 if (symbol == '"') {
                     return STT_String;
                 }
@@ -280,9 +259,9 @@ ScannerTokenType scannerGetToken()
                     state = SS_String;
                     // CONTENT OF THE STRING + NEW AUTOMAT
                 }
+                break;
             }
         }
-
     }
 
     return STT_LexError;
