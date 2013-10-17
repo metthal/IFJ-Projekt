@@ -5,3 +5,9 @@ ini*
 # Temporary files
 *.*~
 *.swp
+
+# Doxydoc
+doxydoc
+
+# Hidden files
+.*
