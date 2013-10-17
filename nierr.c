@@ -7,14 +7,14 @@ void printError()
 {
     if(niErr.type == ERR_None) return;
 
-    printf("Error at %s:%d:%s: ", niErr.file, niErr.line, niErr.fun);
+    fprintf(stderr, "Error at %s:%d:%s: ", niErr.file, niErr.line, niErr.fun);
     switch(niErr.type)
     {
     case ERR_Unknown:
-        printf("Unknown error.\n");
+        fprintf(stderr, "Unknown error.\n");
         break;
     default:
-        printf("Undocumented error.\n");
+        fprintf(stderr, "Undocumented error.\n");
         break;
     }
 }
