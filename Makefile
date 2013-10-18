@@ -3,7 +3,7 @@ PROJECT = ini
 PROJECT_TEST = $(PROJECT)-test
 
 CC = gcc
-RM = rm -f
+RM = rm -rf
 TAR = tar -czf
 
 STD_C99 = -std=c99
@@ -27,6 +27,8 @@ OBJ_FILES = $(patsubst %.c, %.o, $(SRC_FILES))
 TAR_FILE = xmilko01.tar.gz
 PACKED_FILES = $(SRC_FILES) $(HEADER_FILES) Makefile
 TEMP_FILES = gmon.out
+DOXYFILE = doxyconfig
+DOC_DIR = doxydoc
 
 # Targets
 release: CFLAGS += $(CFLAGS_RELEASE)
@@ -58,7 +60,7 @@ build: $(OBJ_FILES)
 	$(CC) $(CFLAGS) $< -o $@
 
 clean:
-	$(RM) $(PROJECT) $(PROJECT_TEST) $(OBJ_FILES) $(TAR_FILE) $(TEMP_FILES) $(TEST_OBJ_FILES)
+	$(RM) $(PROJECT) $(PROJECT_TEST) $(OBJ_FILES) $(TAR_FILE) $(TEMP_FILES) $(TEST_OBJ_FILES) $(DOC_DIR)
 
 pack:
 	$(TAR) $(TAR_FILE) $(PACKED_FILES)
@@ -70,4 +72,7 @@ test: $(TEST_OBJ_FILES)
 ctags:
 	@ctags $(SRC_FILES) $(TEST_SRC_FILES) $(HEADER_FILES) $(TEST_HEADER_FILES)
 
-.PHONY: build release debug profile clean pack analyze analyzeAll callgraph test ctags
+doc:
+	@doxygen $(DOXYFILE)
+
+.PHONY: build release debug profile clean pack analyze analyzeAll callgraph test ctags doc
