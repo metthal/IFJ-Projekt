@@ -67,4 +67,7 @@ test: CFLAGS += $(CFLAGS_DEBUG) $(STD_GNU99)
 test: $(TEST_OBJ_FILES)
 	$(CC) $^ -o $(PROJECT_TEST) $(LFLAGS)
 
-.PHONY: build release debug profile clean pack analyze analyzeAll callgraph test
+ctags:
+	@ctags $(SRC_FILES) $(TEST_SRC_FILES) $(HEADER_FILES) $(TEST_HEADER_FILES)
+
+.PHONY: build release debug profile clean pack analyze analyzeAll callgraph test ctags

@@ -12,3 +12,6 @@ doxydoc
 # Hidden files
 .*
 !.gitignore
+
+# ctags
+tags
