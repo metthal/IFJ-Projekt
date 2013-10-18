@@ -11,3 +11,4 @@ doxydoc
 
 # Hidden files
 .*
+!.gitignore

@@ -6,7 +6,7 @@
 int64_t stringToInt(const String *str)
 {
     int64_t tmp;
-    char* endptr = 0;
+    char *endptr = 0;
     tmp = strtoll(str->data, &endptr, 10);
     if (endptr == str->data)
         setError(ERR_Convert);
@@ -23,7 +23,7 @@ double stringToDouble(const String *str)
     return tmp;
 }
 
-String *intToString(int64_t num)
+String* intToString(int64_t num)
 {
     String *tmp;
     /* Buffer size explanation.
@@ -43,7 +43,7 @@ String *intToString(int64_t num)
 }
 
 // Just basic implementation, will be improved as needed
-String *doubleToString(double num, uint8_t precision)
+String* doubleToString(double num, uint8_t precision)
 {
     String *tmp = newString();
     /* Buffer size explanation.

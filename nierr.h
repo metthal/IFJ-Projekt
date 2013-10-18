@@ -25,7 +25,7 @@ typedef struct
     int line;
     const char *file;
     const char *fun;
-}NiError;
+} NiError;
 
 extern NiError niErr;
 
@@ -36,9 +36,9 @@ void printError();
  */
 static inline NiErrorType getError()
 {
-    #ifdef DEBUG
-        printError();
-    #endif
+#ifdef DEBUG
+    printError();
+#endif
     return niErr.type;
 }
 
@@ -46,7 +46,8 @@ static inline NiErrorType getError()
  * @param err One of NiErrorType values.
  */
 #define setError(err) setErrorExp(err, __LINE__, __FILE__, __func__)
-static inline void setErrorExp(NiErrorType errType, int line, const char* file, const char* fun)
+static inline void setErrorExp(NiErrorType errType, int line, const char *file,
+        const char *fun)
 {
     niErr.type = errType;
     niErr.line = line;
