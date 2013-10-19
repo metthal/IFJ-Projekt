@@ -12,6 +12,7 @@ doxydoc
 # Hidden files
 .*
 !.gitignore
+!.gitattributes
 
 # ctags
 tags
