@@ -8,7 +8,7 @@ uint32_t testCountOk = 0, testCountFailed = 0, onlyFailed = 0;
 // Here add test suite so test.c knows what test suites it can expect
 TEST_SUITE(StringTests)
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
     if (argc == 2 && (strcmp(argv[1], "-f") == 0 || strcmp(argv[1], "--failed") == 0))
         onlyFailed = 1;
