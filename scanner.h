@@ -1,9 +1,12 @@
 #ifndef SCANNER_H
 #define SCANNER_H
 
+#include "string.h"
+
 typedef enum {
     KTT_If,
     KTT_Else,
+    KTT_Elseif,
     KTT_Continue,
     KTT_Break,
     KTT_While,
@@ -45,6 +48,7 @@ typedef enum {
     STT_Divide,
     STT_NotEqual,
     STT_String,
+    STT_Php
 } ScannerTokenType;
 
 typedef enum {
@@ -72,7 +76,22 @@ typedef enum {
     SS_String,
 } ScannerState;
 
-ScannerTokenType scannerGetToken();
+typedef struct {
+
+    ScannerTokenType type;
+    union {
+        double d;
+        int n;
+        KeywordTokenType keywordType;
+        String str;
+    };
+} Token;
+
+void resetScanner();
+void checkKeyword(String *str, Token *token);
+FILE* openFile(const char *fileName);
+Token* scannerGetToken();
+Token* newToken();
 
 #endif
 

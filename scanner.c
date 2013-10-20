@@ -3,24 +3,149 @@
 #include <stdint.h>
 #include <ctype.h>
 #include "scanner.h"
+#include "string.h"
+#include "convert.h"
+#include "nierr.h"
 
 int32_t charStreamSwitch = 1;
 int32_t lastChar;
 FILE *source;
 
-ScannerTokenType scannerGetToken()
+void resetScanner()
 {
+    charStreamSwitch = 1;
+    lastChar = 0;
+    if(source) {
+        fclose(source);
+    }
+}
+
+void checkKeyword(String *str, Token *token)
+{
+    switch (str->data[0]) {
+        case 'e': {
+            if (stringCompareS(str, "else", 4) == 0) {
+                token->type = STT_Keyword;
+                token->keywordType = KTT_Else;
+            }
+            else if (stringCompareS(str, "elseif", 6) == 0){
+                token->type = STT_Keyword;
+                token->keywordType = KTT_Elseif;
+            }
+            else {
+                token->type = STT_Identifier;
+            }
+            break;
+        }
+        case 'f': {
+            if (stringCompareS(str, "false", 5) == 0) {
+                token->type = STT_Keyword;
+                token->keywordType = KTT_False;
+            }
+            else if (stringCompareS(str, "for", 3) == 0){
+                token->type = STT_Keyword;
+                token->keywordType = KTT_For;
+            }
+            else if (stringCompareS(str, "function", 8) == 0){
+                token->type = STT_Keyword;
+                token->keywordType = KTT_Function;
+            }
+            else {
+                token->type = STT_Identifier;
+            }
+            break;
+        }
+        case 'i': {
+            if (stringCompareS(str, "if", 2) == 0) {
+                token->type = STT_Keyword;
+                token->keywordType = KTT_If;
+            }
+            else {
+                token->type = STT_Identifier;
+            }
+            break;
+        }
+        case 'n': {
+            if (stringCompareS(str, "null", 4) == 0) {
+                token->type = STT_Keyword;
+                token->keywordType = KTT_Null;
+            }
+            else {
+                token->type = STT_Identifier;
+            }
+            break;
+        }
+        case 'r': {
+            if (stringCompareS(str, "return", 6) == 0) {
+                token->type = STT_Keyword;
+                token->keywordType = KTT_Return;
+            }
+            else {
+                token->type = STT_Identifier;
+            }
+            break;
+        }
+        case 't': {
+            if (stringCompareS(str, "true", 4) == 0) {
+                token->type = STT_Keyword;
+                token->keywordType = KTT_True;
+            }
+            else {
+                token->type = STT_Identifier;
+            }
+            break;
+        }
+        case 'w': {
+            if (stringCompareS(str, "while", 5) == 0) {
+                token->type = STT_Keyword;
+                token->keywordType = KTT_While;
+            }
+            else {
+                token->type = STT_Identifier;
+            }
+            break;
+        }
+        default:
+            token->type = STT_Identifier;
+            break;
+    }
+}
+
+
+FILE* openFile(const char *fileName) // OPEN FILE AND RETURN POINTER ON IT
+{
+    source = fopen(fileName, "r");
+    return source;
+}
+
+Token* newToken() // FUNCTION CREATES NEWTOKEN STRUCTURE
+{
+    Token* tmp = malloc(sizeof(Token));
+    return tmp;
+}
+
+
+Token* scannerGetToken() // FUNCTION, WHICH RETURNS POINTER ON TOKEN STRUCTURE
+{
+    Token *token;
+
+    token = newToken();
     // TODO ScannerTokenType token = STT_Empty;
     ScannerTokenState tokenState = STS_NOT_FINISHED;
     ScannerState state = SS_Empty;
     int32_t symbol;
+    int32_t firsTimeSwitch = 1;
+
+    String *tmpStrPtr = &(token->str);
+    initString(tmpStrPtr);
+
+    String *strDigits;
+    strDigits = newString();
 
     while (tokenState == STS_NOT_FINISHED)
     {
         if (charStreamSwitch) {
-            if ((symbol = getc(source)) == EOF) {
-                return STT_EOF;
-            }
+            symbol = getc(source)
         }
         else {
             symbol = lastChar;
@@ -30,12 +155,18 @@ ScannerTokenType scannerGetToken()
             case SS_Empty: {
                 if ((symbol >= 'a' && symbol <= 'z') || (symbol >= 'A' && symbol <= 'Z')) {
                     state = SS_Identifier;
+                    stringPush(tmpStrPtr,symbol);
                 }
                 else if (symbol >= '0' && symbol <= '9') {
+                    stringPush(strDigits,symbol);
                     state = SS_Number;
                 }
                 else if (isspace(symbol)) {
                     ;
+                }
+                else if (symbol == EOF) {
+                    token->type = STT_EOF;
+                    return token;
                 }
                 else {
                     switch (symbol) {
@@ -49,25 +180,35 @@ ScannerTokenType scannerGetToken()
                             state = SS_Exclamation;
                             break;
                         case ';':
-                            return STT_Semicolon;
+                            token->type = STT_Semicolon;
+                            return token;
                         case '{':
-                            return STT_LeftCurlyBracket;
+                            token->type = STT_LeftCurlyBracket;
+                            return token;
                         case '}':
-                            return STT_RightCurlyBracket;
+                            token->type = STT_RightCurlyBracket;
+                            return token;
                         case '*':
-                            return STT_Asterisk;
+                            token->type = STT_Asterisk;
+                            return token;
                         case '+':
-                            return STT_Plus;
+                            token->type = STT_Plus;
+                            return token;
                         case '-':
-                            return STT_Minus;
+                            token->type = STT_Minus;
+                            return token;
                         case '(':
-                            return STT_LeftBracket;
+                            token->type = STT_LeftBracket;
+                            return token;
                         case ')':
-                            return STT_RightBracket;
+                            token->type = STT_RightBracket;
+                            return token;
                         case ',':
-                            return STT_Comma;
+                            token->type = STT_Comma;
+                            return token;
                         case ':':
-                            return STT_Colon;
+                            token->type = STT_Colon;
+                            return token;
                         case '>':
                             state = SS_Greater;
                             break;
@@ -86,22 +227,26 @@ ScannerTokenType scannerGetToken()
             }
             case SS_Greater: {
                 if (symbol == '=') {
-                    return STT_GreaterEqual;
+                    token->type = STT_GreaterEqual;
+                    return token;
                 }
                 else {
                     lastChar = symbol;
                     charStreamSwitch = 0;
-                    return STT_Greater;
+                    token->type = STT_Greater;
+                    return token;
                 }
             }
             case SS_Less: {
                 if (symbol == '=') {
-                    return STT_LessEqual;
+                    token->type = STT_LessEqual;
+                    return token;
                 }
                 else {
                     lastChar = symbol;
                     charStreamSwitch = 0;
-                    return STT_Less;
+                    token->type = STT_Less;
+                    return token;
                 }
             }
             case SS_Assigment: {
@@ -111,69 +256,85 @@ ScannerTokenType scannerGetToken()
                 else {
                     lastChar = symbol;
                     charStreamSwitch = 0;
-                    return STT_Assigment;
+                    token->type = STT_Assigment;
+                    return token;
                 }
                 break;
             }
             case SS_Dollar: {
                 if ((symbol >= 'a' && symbol <= 'z') || (symbol >= 'A' && symbol <= 'Z') || (symbol == '_')) {
                     state = SS_Variable;
-                    // STRING PUSH
+                    stringPush(tmpStrPtr, symbol);
+                    break;
                 }
                 else {
-                    return STT_LexError;// LEX ERROR ???
+                    setError(ERR_LexFile);
+                    return NULL;
                 }
                 break;
             }
             case SS_Variable: {
                 if ((symbol >= 'a' && symbol <= 'z') || (symbol >= 'A' && symbol <= 'Z') || (symbol == '_') ||
                      (symbol >= '0' && symbol <= '9')) {
-                    // STRING PUSH
-                    state = SS_Variable; // STILL THE SAME STATE
+                    stringPush(tmpStrPtr, symbol);
+                    state = SS_Variable;
                 }
                 else {
                     lastChar = symbol;
                     charStreamSwitch = 0;
-                    return STT_Variable; // PLUS RETURN STRING SOMEWHERE
+                    token->type = STT_Variable;
+                    return token;
                 }
                 break;
             }
             case SS_Number: {
                 if (symbol >= '0' && symbol <= '9') {
                     state = SS_Number;
-                    // PUSH STRING
+                    stringPush(strDigits, symbol);
                 }
                 else if (symbol == '.') {
                     state = SS_Double;
+                    stringPush(strDigits, symbol);
                 }
-                // ELSE IF EXPONENT
+                // TODO ELSE IF EXPONENT
                 else {
                     lastChar = symbol;
                     charStreamSwitch = 0;
-                    return STT_Number;
+                    token->n = stringToInt(strDigits);
+                    token->type = STT_Number;
+                    return token;
                 }
                 break;
             }
             case SS_Identifier: {
                 if ((symbol == '_') || (symbol >= 'a' && symbol <= 'z') || (symbol >= 'A' && symbol <= 'Z') || (symbol >= '0' && symbol <= '9')) {
+                    stringPush(tmpStrPtr, symbol);
                     state = SS_Identifier;
                 }
                 else {
                     lastChar = symbol;
                     charStreamSwitch = 0;
-                    return STT_Identifier;
+                    checkKeyword(tmpStrPtr, token); // FUNCTION CHECKS IF IDENTIFIER, WHICH HAS BEEN FOUND AINT A RESERVED ( KEYWORD ) WORD
+                    return token;
                 }
                 break;
             }
             case SS_Double: {
                 if (symbol >= '0' && symbol <= '9') {
                     state = SS_Double;
-                    // PUSH STRING
+                    stringPush(strDigits, symbol);
+                    firsTimeSwitch = 0;
+                }
+                else if ((symbol == EOF) && (firsTimeSwitch)) {
+                    setError(ERR_LexFile);
+                    return NULL;
                 }
                 else {
                     lastChar = symbol;
                     charStreamSwitch = 0;
-                    return STT_Double;
+                    token->d = stringToDouble(strDigits);
+                    token->type = STT_Double;
+                    return token;
                 }
                 break;
             }
@@ -187,13 +348,19 @@ ScannerTokenType scannerGetToken()
                 else {
                     lastChar = symbol;
                     charStreamSwitch = 0;
-                    return STT_Divide;
+                    token->type = STT_Divide;
+                    return token;
                 }
                 break;
             }
             case SS_BlockComment: {
                 if (symbol == '*') {
                     state = SS_BlockCommentFinish;
+                }
+                else if (symbol == EOF) {
+                    // @TODO , IS IT MISTAKE OR NOT ?
+                    token->type = STT_EOF;
+                    return token;
                 }
                 else {
                     state = SS_BlockComment;
@@ -203,6 +370,11 @@ ScannerTokenType scannerGetToken()
             case SS_BlockCommentFinish: {
                 if (symbol == '/') {
                     state = SS_Empty;
+                }
+                else if (symbol == EOF) {
+                    // @TODO , IS IT MISTAKE OR NOT ?
+                    token->type = STT_EOF;
+                    return token;
                 }
                 else {
                     state = SS_BlockComment;
@@ -215,6 +387,10 @@ ScannerTokenType scannerGetToken()
                 if (symbol == '\n') {
                     state = SS_Empty;
                 }
+                else if (symbol == EOF) {
+                    token->type = STT_EOF;
+                    return token;
+                }
                 else {
                     state = SS_Comment;
                 }
@@ -222,12 +398,14 @@ ScannerTokenType scannerGetToken()
             }
             case SS_Equal: {
                 if (symbol == '=') {
-                    return STT_Equal;
+                    token->type = STT_Equal;
+                    return token;
                 }
                 else {
                     lastChar = symbol;
                     charStreamSwitch = 0;
-                    return STT_LexError;
+                    setError(ERR_LexFile);
+                    return NULL;
                 }
             }
             case SS_Exclamation: {
@@ -237,34 +415,44 @@ ScannerTokenType scannerGetToken()
                 else {
                     lastChar = symbol;
                     charStreamSwitch = 0;
-                    return STT_LexError;
+                    setError(ERR_LexFile);
+                    return NULL;
                 }
                 break;
             }
             case SS_NotEqual: {
                 if (symbol == '=') {
-                    return STT_NotEqual;
+                    token->type = STT_NotEqual;
+                    return token;
                 }
                 else {
                     lastChar = symbol;
                     charStreamSwitch = 0;
-                    return STT_LexError;
+                    setError(ERR_LexFile);
+                    return NULL;
                 }
             }
             case SS_String: {
                 if (symbol == '"') {
-                    return STT_String;
+                    token->type = STT_String;
+                    return token;
+                }
+                else if (symbol == EOF) {
+                    setError(ERR_LexFile);
+                    return NULL;
                 }
                 else {
                     state = SS_String;
-                    // CONTENT OF THE STRING + NEW AUTOMAT
+                    stringPush(tmpStrPtr, symbol);
+                    // TODO = AUTOMAT
                 }
                 break;
             }
         }
     }
 
-    return STT_LexError;
+    setError(ERR_LexFile);
+    return NULL;
 }
 
 
