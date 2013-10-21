@@ -19,3 +19,6 @@ tags
 
 # packed file
 xmilko01.tar.gz
+
+# project files
+*.kdev4
