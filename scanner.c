@@ -218,7 +218,7 @@ Token* scannerGetToken() // FUNCTION, WHICH RETURNS POINTER ON TOKEN STRUCTURE
                             state = SS_Less;
                             break;
                         case '=':
-                            state = SS_Assigment;
+                            state = SS_Assignment;
                             break;
                         case '$':
                             state = SS_Dollar;
@@ -251,14 +251,14 @@ Token* scannerGetToken() // FUNCTION, WHICH RETURNS POINTER ON TOKEN STRUCTURE
                     return token;
                 }
             }
-            case SS_Assigment: {
+            case SS_Assignment: {
                 if (symbol == '=') {
                     state = SS_Equal;
                 }
                 else {
                     lastChar = symbol;
                     charStreamSwitch = 0;
-                    token->type = STT_Assigment;
+                    token->type = STT_Assignment;
                     return token;
                 }
                 break;
