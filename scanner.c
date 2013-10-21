@@ -17,6 +17,7 @@ void resetScanner()
     lastChar = 0;
     if (source) {
         fclose(source);
+        source = NULL;
     }
 }
 
@@ -113,8 +114,10 @@ void checkKeyword(String *str, Token *token)
 
 FILE* openFile(const char *fileName) // OPEN FILE AND RETURN POINTER ON IT
 {
-    if (source)
+    if (source) {
         fclose(source);
+        source = NULL;
+    }
 
     source = fopen(fileName, "r");
     return source;
