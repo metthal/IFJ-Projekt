@@ -46,7 +46,7 @@ void initStringS(String *ps, const char *str, uint32_t len)
 
 void deleteString(String *ps)
 {
-    if (ps) {
+    if (ps != NULL) {
         free(ps->data);
         ps->data = NULL;
         ps->size = 0;
@@ -97,8 +97,8 @@ String* newStringS(const char *str, uint32_t len)
 }
 
 void freeString(String **pps) {
-    if (pps) {
-        if (*pps) {
+    if (pps != NULL) {
+        if (*pps != NULL) {
             free((*pps)->data);
         }
         free(*pps);
