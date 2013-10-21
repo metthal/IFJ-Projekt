@@ -101,12 +101,14 @@ SHOULD_EQUAL("GetToken - $var - EOF", token->type, STT_EOF);
 overwriteFile(filePath, "1337");
 token = scannerGetToken();
 SHOULD_EQUAL("GetToken - number", token->type, STT_Number);
+SHOULD_EQUAL("GetToken - number - Value", token->n, 1337);
 token = scannerGetToken();
 SHOULD_EQUAL("GetToken - number - EOF", token->type, STT_EOF);
 
 overwriteFile(filePath, "function");
 token = scannerGetToken();
 SHOULD_EQUAL("GetToken - keyword (function)", token->type, STT_Keyword);
+SHOULD_EQUAL("GetToken - keyword (function) - keyword type", token->keywordType, KTT_Function);
 token = scannerGetToken();
 SHOULD_EQUAL("GetToken - keyword (function) - EOF", token->type, STT_EOF);
 
@@ -161,14 +163,23 @@ SHOULD_EQUAL("GetToken - not equal - EOF", token->type, STT_EOF);
 overwriteFile(filePath, "\"string\"");
 token = scannerGetToken();
 SHOULD_EQUAL("GetToken - string", token->type, STT_String);
+SHOULD_EQUAL_STR("GetToken - string - string data", token->str.data, "string");
 token = scannerGetToken();
 SHOULD_EQUAL("GetToken - string - EOF", token->type, STT_EOF);
 
 overwriteFile(filePath, "12.03");
 token = scannerGetToken();
 SHOULD_EQUAL("GetToken - double", token->type, STT_Double);
+SHOULD_EQUAL("GetToken - double - Value", token->d, 12.03);
 token = scannerGetToken();
 SHOULD_EQUAL("GetToken - double - EOF", token->type, STT_EOF);
+
+overwriteFile(filePath, "12.03E+04");
+token = scannerGetToken();
+SHOULD_EQUAL("GetToken - double exponent", token->type, STT_Double);
+SHOULD_EQUAL("GetToken - double exponent - Value", token->d, 12.03E+04);
+token = scannerGetToken();
+SHOULD_EQUAL("GetToken - double exponent - EOF", token->type, STT_EOF);
 
 overwriteFile(filePath, "/");
 token = scannerGetToken();
@@ -194,6 +205,68 @@ SHOULD_EQUAL("GetToken - multitoken - EOF", token->type, STT_EOF);
 
 overwriteFile(filePath, "12.");
 token = scannerGetToken();
-SHOULD_EQUAL("GetToken - lex error 1", token, NULL);
+SHOULD_EQUAL("GetToken - lex error double", token, NULL);
+
+overwriteFile(filePath, ":");
+token = scannerGetToken();
+SHOULD_EQUAL("GetToken - Colon", token, NULL);
+
+overwriteFile(filePath, "$");
+token = scannerGetToken();
+SHOULD_EQUAL("GetToken - lex error $", token, NULL);
+
+overwriteFile(filePath, "$s.$s");
+token = scannerGetToken();
+SHOULD_EQUAL("GetToken - multitoken - concat - operand1", token->type, STT_Variable);
+token = scannerGetToken();
+SHOULD_EQUAL("GetToken - multitoken - concat - operator", token->type, STT_Dot);
+token = scannerGetToken();
+SHOULD_EQUAL("GetToken - multitoken - concat - operand2", token->type, STT_Variable);
+
+overwriteFile(filePath, "$var //comment $comment");
+token = scannerGetToken();
+SHOULD_EQUAL("GetToken - multitoken - comment - var", token->type, STT_Variable);
+token = scannerGetToken();
+SHOULD_EQUAL("GetToken - multitoken - comment - EOF", token->type, STT_EOF);
+
+overwriteFile(filePath, "$var /* comment \n comment2 */ $var2");
+token = scannerGetToken();
+SHOULD_EQUAL("GetToken - multitoken - multiline comment - var1", token->type, STT_Variable);
+token = scannerGetToken();
+SHOULD_EQUAL("GetToken - multitoken - multiline comment - var2", token->type, STT_Variable);
+token = scannerGetToken();
+SHOULD_EQUAL("GetToken - multitoken - multiline comment - EOF", token->type, STT_EOF);
+
+overwriteFile(filePath, "==");
+token = scannerGetToken();
+SHOULD_EQUAL("GetToken - lex error double equal", token, NULL);
+
+overwriteFile(filePath, "if else elseif continue break while for true false return function null");
+token = scannerGetToken();
+SHOULD_EQUAL("GetToken - keywordType - If", token->keywordType, KTT_If);
+token = scannerGetToken();
+SHOULD_EQUAL("GetToken - keywordType - Else", token->keywordType, KTT_Else);
+token = scannerGetToken();
+SHOULD_EQUAL("GetToken - keywordType - ElseIf", token->keywordType, KTT_Elseif);
+token = scannerGetToken();
+SHOULD_EQUAL("GetToken - keywordType - Continue", token->keywordType, KTT_Continue);
+token = scannerGetToken();
+SHOULD_EQUAL("GetToken - keywordType - Break", token->keywordType, KTT_Break);
+token = scannerGetToken();
+SHOULD_EQUAL("GetToken - keywordType - While", token->keywordType, KTT_While);
+token = scannerGetToken();
+SHOULD_EQUAL("GetToken - keywordType - For", token->keywordType, KTT_For);
+token = scannerGetToken();
+SHOULD_EQUAL("GetToken - keywordType - True", token->keywordType, KTT_True);
+token = scannerGetToken();
+SHOULD_EQUAL("GetToken - keywordType - False", token->keywordType, KTT_False);
+token = scannerGetToken();
+SHOULD_EQUAL("GetToken - keywordType - Return", token->keywordType, KTT_Return);
+token = scannerGetToken();
+SHOULD_EQUAL("GetToken - keywordType - Function", token->keywordType, KTT_Function);
+token = scannerGetToken();
+SHOULD_EQUAL("GetToken - keywordType - Null", token->keywordType, KTT_Null);
+
+// @todo need tests for symbol table.
 
 TEST_SUITE_END

@@ -50,7 +50,8 @@ typedef enum
     STT_Divide,
     STT_NotEqual,
     STT_String,
-    STT_Php
+    STT_Php,
+    STT_Dot
 } ScannerTokenType;
 
 typedef enum
