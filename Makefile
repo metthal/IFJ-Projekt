@@ -19,7 +19,7 @@ LFLAGS_PROFILE = -pg
 
 TEST_SRC_FILES = $(wildcard test*.c)
 TEST_HEADER_FILES = $(wildcard test*.h)
-TEST_OBJ_FILES = $(patsubst %.c, %.o, $(wildcard *.c))
+TEST_OBJ_FILES = $(filter-out main.o, $(patsubst %.c, %.o, $(wildcard *.c)))
 
 SRC_FILES = $(filter-out $(TEST_SRC_FILES), $(wildcard *.c))
 HEADER_FILES = $(filter-out $(TEST_HEADER_FILES), $(wildcard *.h))
