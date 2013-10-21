@@ -4,9 +4,9 @@ TestEP testSuites[256];
 uint8_t testSuiteCount = 0;
 uint32_t testCountOk = 0, testCountFailed = 0, onlyFailed = 0;
 
-
 // Here add test suite so test.c knows what test suites it can expect
 TEST_SUITE(StringTests)
+TEST_SUITE(ScannerTests)
 
 int main(int argc, char **argv)
 {
@@ -15,6 +15,7 @@ int main(int argc, char **argv)
 
     // Register new test suite here if you want to run the test suite
     REGISTER_TEST_SUITE(StringTests)
+    REGISTER_TEST_SUITE(ScannerTests)
 
     RUN_TEST_SUITES
 
