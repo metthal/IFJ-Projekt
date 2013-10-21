@@ -4,7 +4,8 @@
 #include <ctype.h>
 #include <stdint.h>
 
-typedef struct {
+typedef struct
+{
     uint32_t size;
     uint32_t length;
     char *data;
@@ -16,12 +17,12 @@ static uint16_t const STRING_DEFAULT_SIZE = 16;
 
 void initString(String *ps);
 void initStringSize(String *ps, uint32_t size);
-void initStringS(String *ps, const char* str, uint32_t len);
+void initStringS(String *ps, const char *str, uint32_t len);
 void deleteString(String *ps);
 
 String* newString();
 String* newStringSize(uint32_t size);
-String* newStringS(const char* str, uint32_t len);
+String* newStringS(const char *str, uint32_t len);
 void freeString(String **pps);
 
 char* stringResize(String *ps, uint32_t size);

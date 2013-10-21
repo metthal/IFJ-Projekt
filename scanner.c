@@ -15,7 +15,7 @@ void resetScanner()
 {
     charStreamSwitch = 1;
     lastChar = 0;
-    if(source) {
+    if (source) {
         fclose(source);
     }
 }
@@ -111,9 +111,11 @@ void checkKeyword(String *str, Token *token)
     }
 }
 
-
 FILE* openFile(const char *fileName) // OPEN FILE AND RETURN POINTER ON IT
 {
+    if (source)
+        fclose(source);
+
     source = fopen(fileName, "r");
     return source;
 }
@@ -124,12 +126,9 @@ Token* newToken() // FUNCTION CREATES NEWTOKEN STRUCTURE
     return tmp;
 }
 
-
 Token* scannerGetToken() // FUNCTION, WHICH RETURNS POINTER ON TOKEN STRUCTURE
 {
-    Token *token;
-
-    token = newToken();
+    Token *token = newToken();
     // TODO ScannerTokenType token = STT_Empty;
     ScannerTokenState tokenState = STS_NOT_FINISHED;
     ScannerState state = SS_Empty;
@@ -139,18 +138,18 @@ Token* scannerGetToken() // FUNCTION, WHICH RETURNS POINTER ON TOKEN STRUCTURE
     String *tmpStrPtr = &(token->str);
     initString(tmpStrPtr);
 
-    String *strDigits;
-    strDigits = newString();
+    String *strDigits = newString();
 
     while (tokenState == STS_NOT_FINISHED)
     {
         if (charStreamSwitch) {
-            symbol = getc(source)
+            symbol = getc(source);
         }
         else {
             symbol = lastChar;
-            charStreamSwitch=1;
+            charStreamSwitch = 1;
         }
+
         switch (state) {
             case SS_Empty: {
                 if ((symbol >= 'a' && symbol <= 'z') || (symbol >= 'A' && symbol <= 'Z')) {

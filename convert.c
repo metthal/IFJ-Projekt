@@ -5,9 +5,8 @@
 
 int64_t stringToInt(const String *str)
 {
-    int64_t tmp;
-    char *endptr = 0;
-    tmp = strtoll(str->data, &endptr, 10);
+    char *endptr = NULL;
+    int64_t tmp = strtoll(str->data, &endptr, 10);
     if (endptr == str->data)
         setError(ERR_Convert);
     return tmp;
@@ -15,9 +14,8 @@ int64_t stringToInt(const String *str)
 
 double stringToDouble(const String *str)
 {
-    double tmp;
-    char* endptr = 0;
-    tmp = strtod(str->data, &endptr);
+    char *endptr = NULL;
+    double tmp = strtod(str->data, &endptr);
     if (endptr == str->data)
         setError(ERR_Convert);
     return tmp;
@@ -25,7 +23,7 @@ double stringToDouble(const String *str)
 
 String* intToString(int64_t num)
 {
-    String *tmp;
+    String *tmp = NULL;
     /* Buffer size explanation.
      * Unsigned:
      * log10(2^64) = 19.2 => 20 + 1 (null terminator)

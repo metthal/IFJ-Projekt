@@ -2,7 +2,3 @@
 
 *.c text eol=lf
 *.h text eol=lf
-
-ini binary
-ini-test binary
-*.o binary

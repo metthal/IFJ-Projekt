@@ -31,7 +31,7 @@ void initStringSize(String *ps, uint32_t size)
     _initStringSize(ps, size);
 }
 
-void initStringS(String *ps, const char* str, uint32_t len)
+void initStringS(String *ps, const char *str, uint32_t len)
 {
     ps->size = len + 1;
     ps->length = len + 1;

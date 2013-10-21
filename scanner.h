@@ -3,7 +3,8 @@
 
 #include "string.h"
 
-typedef enum {
+typedef enum
+{
     KTT_If,
     KTT_Else,
     KTT_Elseif,
@@ -18,7 +19,8 @@ typedef enum {
     KTT_Null,
 } KeywordTokenType;
 
-typedef enum {
+typedef enum
+{
     STT_Semicolon,
     STT_LeftCurlyBracket,
     STT_Asterisk,
@@ -51,12 +53,14 @@ typedef enum {
     STT_Php
 } ScannerTokenType;
 
-typedef enum {
+typedef enum
+{
     STS_FINISHED,
     STS_NOT_FINISHED,
 } ScannerTokenState;
 
-typedef enum {
+typedef enum
+{
     SS_Identifier,
     SS_Dollar,
     SS_Number,
@@ -76,10 +80,11 @@ typedef enum {
     SS_String,
 } ScannerState;
 
-typedef struct {
-
+typedef struct
+{
     ScannerTokenType type;
-    union {
+    union
+    {
         double d;
         int n;
         KeywordTokenType keywordType;
