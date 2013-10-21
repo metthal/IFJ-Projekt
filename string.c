@@ -80,9 +80,6 @@ String* newStringSize(uint32_t size)
 
 String* newStringS(const char *str, uint32_t len)
 {
-    if (str[len - 1] == '\0') {
-        len--;
-    }
     String *ps = malloc(sizeof(String));
     if (ps != NULL) {
         ps->size = len + 1;
@@ -148,9 +145,6 @@ void stringPush(String *ps, char c)
 
 char stringPop(String *ps)
 {
-    if (ps->length <= 1) {
-        return 0;
-    }
     char c = ps->data[ps->length - 2];
     ps->data[ps->length - 2] = '\0';
     ps->length--;
@@ -176,9 +170,6 @@ void stringSet(String *dest, String *src)
 
 void stringSetS(String *dest, const char *str, uint32_t len)
 {
-    if (str[len - 1] == '\0') {
-        len--;
-    }
     STRING_RESIZE_RAW(dest, len + 1);
     memcpy(dest->data, str, len);
     dest->data[len] = '\0';
@@ -197,9 +188,6 @@ void stringAdd(String *dest, String *src)
 
 void stringAddS(String *dest, const char *src, uint32_t len)
 {
-    if (src[len - 1] == '\0') {
-        len--;
-    }
     uint32_t newLength = dest->length + len;
     if (dest->size < newLength) {
         STRING_RESIZE_RAW(dest, newLength);
