@@ -4,6 +4,9 @@
 #include <ctype.h>
 #include <stdint.h>
 
+// Shortcut for declaring str in arguments
+#define CSTR_ARG(str)	str, sizeof(str) - 1
+
 typedef struct
 {
     uint32_t size;
