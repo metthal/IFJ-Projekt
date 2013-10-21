@@ -92,11 +92,15 @@ typedef struct
     };
 } Token;
 
-void resetScanner();
 void checkKeyword(String *str, Token *token);
-FILE* openFile(const char *fileName);
 Token* scannerGetToken();
 Token* newToken();
+void initToken(Token *pt);
+void deleteToken(Token *pt);
+void freeToken(Token **ppt);
+
+void scannerReset();
+FILE* scannerOpenFile(const char *fileName);
 
 #endif
 

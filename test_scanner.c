@@ -20,8 +20,8 @@ uint8_t overwriteFile(const char *fileName, const char *content)
         return 0;
 
     fprintf(file, "%s", content);
-    resetScanner();
-    openFile(filePath);
+    scannerReset();
+    scannerOpenFile(filePath);
     fclose(file);
     return 1;
 }
@@ -30,10 +30,10 @@ TEST_SUITE_START(ScannerTests);
 
 generateFilePath();
 
-SHOULD_EQUAL("openFile - not existing file", openFile(filePath), NULL);
+SHOULD_EQUAL("openFile - not existing file", scannerOpenFile(filePath), NULL);
 
 overwriteFile(filePath, "");
-SHOULD_NOT_EQUAL("openFile - existing file", openFile(filePath), NULL);
+SHOULD_NOT_EQUAL("openFile - existing file", scannerOpenFile(filePath), NULL);
 
 token = scannerGetToken();
 SHOULD_EQUAL("GetToken - empty file - EOF", token->type, STT_EOF);
@@ -268,5 +268,7 @@ token = scannerGetToken();
 SHOULD_EQUAL("GetToken - keywordType - Null", token->keywordType, KTT_Null);
 
 // @todo need tests for symbol table.
+
+scannerReset();
 
 TEST_SUITE_END

@@ -11,13 +11,41 @@ int32_t charStreamSwitch = 1;
 int32_t lastChar;
 FILE *source;
 
-void resetScanner()
+Token* newToken() // FUNCTION CREATES NEWTOKEN STRUCTURE
 {
-    charStreamSwitch = 1;
-    lastChar = 0;
-    if (source) {
-        fclose(source);
-        source = NULL;
+    Token* tmp = malloc(sizeof(Token));
+    tmp->type = STT_Empty;
+    return tmp;
+}
+
+void initToken(Token *pt)
+{
+    pt->type = STT_Empty;
+}
+
+void deleteToken(Token *pt)
+{
+    if (pt != NULL) {
+        if ((pt->type == STT_Variable)
+            || (pt->type == STT_Identifier)
+            || (pt->type == STT_String)) {
+            deleteString(&pt->str);
+        }
+    }
+}
+
+void freeToken(Token **ppt)
+{
+    if (ppt != NULL) {
+        if (*ppt != NULL) {
+            if (((*ppt)->type == STT_Variable)
+                || ((*ppt)->type == STT_Identifier)
+                || ((*ppt)->type == STT_String)) {
+                deleteString(&(*ppt)->str);
+            }
+        }
+        free(*ppt);
+        *ppt = NULL;
     }
 }
 
@@ -112,21 +140,25 @@ void checkKeyword(String *str, Token *token)
     }
 }
 
-FILE* openFile(const char *fileName) // OPEN FILE AND RETURN POINTER ON IT
+void scannerReset()
 {
-    if (source) {
+    charStreamSwitch = 1;
+    lastChar = 0;
+    if (source != NULL) {
+        fclose(source);
+        source = NULL;
+    }
+}
+
+FILE* scannerOpenFile(const char *fileName) // OPEN FILE AND RETURN POINTER ON IT
+{
+    if (source != NULL) {
         fclose(source);
         source = NULL;
     }
 
     source = fopen(fileName, "r");
     return source;
-}
-
-Token* newToken() // FUNCTION CREATES NEWTOKEN STRUCTURE
-{
-    Token* tmp = malloc(sizeof(Token));
-    return tmp;
 }
 
 Token* scannerGetToken() // FUNCTION, WHICH RETURNS POINTER ON TOKEN STRUCTURE
