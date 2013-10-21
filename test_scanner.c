@@ -236,7 +236,7 @@ token = scannerGetToken();
 SHOULD_EQUAL("GetToken - divide - EOF", token->type, STT_EOF);
 freeToken(&token);
 
-overwriteFile(filePath, "<?php");
+overwriteFile(filePath, "<?php ");
 token = scannerGetToken();
 SHOULD_EQUAL("GetToken - <?php", token->type, STT_Php);
 freeToken(&token);
