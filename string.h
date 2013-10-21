@@ -36,9 +36,9 @@ void stringPush(String *ps, char c);
 char stringPop(String *ps);
 void stringCopy(String *src, String *dest);
 void stringSet(String *dest, String *src);
-void stringSetS(String *ps, const char *str, uint32_t len);
+void stringSetS(String *dest, const char *src, uint32_t len);
 void stringAdd(String *dest, String *src);
-void stringAddS(String *ps, const char *str, uint32_t len);
+void stringAddS(String *dest, const char *src, uint32_t len);
 
 uint32_t stringLength(String *ps);
 

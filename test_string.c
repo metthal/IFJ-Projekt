@@ -3,18 +3,8 @@
 #include "test.h"
 #include "string.h"
 
-uint16_t stringCompareRaw(String *a, String *b)
-{
-    if ((a->size != b->size)
-        || (a->length != b->length)) {
-        return 0;
-    }
-    return !strcmp(a->data, b->data);
-}
-
 TEST_SUITE_START(StringTests);
 
-int combinedTestResult = 0;
 // initString()
 String x;
 initString(&x);
@@ -35,79 +25,85 @@ SHOULD_EQUAL_STR("initStringSize() Data", x.data, "");
 deleteString(&x);
 
 // initStringS()
-initStringS(&x, "Alalalalal", 10);
+initStringS(&x, CSTR_ARG("Alalalalal"));
 SHOULD_EQUAL("initString() Length", x.length, 11);
 SHOULD_EQUAL_STR("initString() Data", x.data, "Alalalalal");
 deleteString(&x);
 
 // newString*()
 String *a = newString();
-SHOULD_EQUAL_STR("newString()", a->data, "");
-String *e = newStringSize(16);
-if ((e->size = 16)
-    && (!strcmp(e->data, ""))) {
-    combinedTestResult = 1;
-}
-SHOULD_BE_TRUE("newStringSize()", combinedTestResult);
-String *b = newStringS("Hello World!", 13);
-SHOULD_EQUAL_STR("newStringS()", b->data, "Hello World!");
+SHOULD_EQUAL("newString() Length", a->length, 1);
+SHOULD_EQUAL_STR("newString() Data", a->data, "");
+
+String *b = newStringSize(16);
+SHOULD_EQUAL("newStringSize() Size", b->size, 16);
+SHOULD_EQUAL("newStringSize() Length", b->length, 1);
+SHOULD_EQUAL_STR("newStringSize() Data", b->data, "");
+
+String *c = newStringS(CSTR_ARG("Hello World!"));
+SHOULD_EQUAL("newStringS() Length", c->length, 13);
+SHOULD_EQUAL_STR("newStringS() Data", c->data, "Hello World!");
 
 // stringResize()
 stringResize(a, 50);
-SHOULD_EQUAL("stringResize()", a->size, 50);
+SHOULD_EQUAL("stringResize() Size", a->size, 50);
 
 // stringClone()
-String *c = stringClone(b);
-combinedTestResult = 0;
-if (stringCompareRaw(c, b)) {
-    combinedTestResult = 1;
-}
-SHOULD_BE_TRUE("stringClone()", combinedTestResult);
+String *d = stringClone(b);
+SHOULD_EQUAL("stringClone() Length", d->length, b->length);
+SHOULD_EQUAL_STR("stringClone() Data", d->data, b->data);
 
 // stringEmpty()
-stringEmpty(c);
-combinedTestResult = 0;
-if ((c->length == 1)
-    && (!strcmp(c->data, ""))) {
-    combinedTestResult = 1;
-}
-SHOULD_BE_TRUE("stringEmpty()", combinedTestResult);
+stringEmpty(d);
+SHOULD_EQUAL("stringEmpty() Length", d->length, 1);
+SHOULD_EQUAL_STR("stringEmpty() Data", d->data, "");
+
+// stringSet()
+stringSet(a, c);
+SHOULD_EQUAL("stringSet() Length", a->length, c->length);
+SHOULD_EQUAL_STR("stringSet() Data", a->data, c->data);
+
+// stringSetS()
+stringSetS(c, CSTR_ARG("Bye Bye World!"));
+SHOULD_EQUAL("stringSet() Length", c->length, 15);
+SHOULD_EQUAL_STR("stringSetS() Data", c->data, "Bye Bye World!");
 
 // stringPush()
 stringEmpty(a);
 for (uint8_t i = 'a'; i < 'a' + 26; i++) {
     stringPush(a, i);
 }
-SHOULD_EQUAL_STR("stringPush()", a->data, "abcdefghijklmnopqrstuvwxyz");
+SHOULD_EQUAL("stringPush() Length", a->length, 27);
+SHOULD_EQUAL_STR("stringPush() Data", a->data, "abcdefghijklmnopqrstuvwxyz");
 
 // stringPop()
+stringSetS(a, CSTR_ARG("abcdefghijklmnopqrstuvwxyz"));
 for (uint8_t i = 0; i < 18; i++) {
     stringPop(a);
 }
-SHOULD_EQUAL_STR("stringPop()", a->data, "abcdefgh");
+SHOULD_EQUAL("stringPop() Length", a->length, 9);
+SHOULD_EQUAL_STR("stringPop() Data", a->data, "abcdefgh");
 
 // stringCopy()
 stringCopy(b, c);
-SHOULD_EQUAL_STR("stringCopy()", b->data, c->data);
-
-// stringSet()
-stringSet(c, a);
-SHOULD_EQUAL_STR("stringSet()", c->data, a->data);
-
-// stringSetS()
-stringSetS(c, "Bye World!", 11);
-SHOULD_EQUAL_STR("stringSetS()", c->data, "Bye World!");
+SHOULD_EQUAL("stringCopy() Length", b->length, c->length);
+SHOULD_EQUAL_STR("stringCopy() Data", b->data, c->data);
 
 // stringAddS()
-stringAddS(b, " ", 2);
-SHOULD_EQUAL_STR("stringAddS()", b->data, "Hello World! ");
+stringSetS(b, CSTR_ARG("Hello World!"));
+stringAddS(b, CSTR_ARG(" "));
+SHOULD_EQUAL("stringAddS() Length", b->length, 14);
+SHOULD_EQUAL_STR("stringAddS() Data", b->data, "Hello World! ");
 
 // stringAdd()
+stringSetS(b, CSTR_ARG("Hello World! "));
+stringSetS(c, CSTR_ARG("Bye Bye World!"));
 stringAdd(b, c);
-SHOULD_EQUAL_STR("stringAdd()", b->data, "Hello World! Bye World!");
+SHOULD_EQUAL("stringAdd() Length", b->length, 28);
+SHOULD_EQUAL_STR("stringAdd() Data", b->data, "Hello World! Bye Bye World!");
 
 // stringLength()
-stringSetS(b, "Hello World! Bye Bye World!", 27);
+stringSetS(b, CSTR_ARG("Hello World! Bye Bye World!"));
 SHOULD_EQUAL("stringLength()", stringLength(b), 27);
 
 // stringCompare()
@@ -134,12 +130,12 @@ SHOULD_BE_GRT("stringCompareSS() 2", stringCompareSS(CSTR_ARG("ab"), CSTR_ARG("a
 SHOULD_BE_LESS("stringCompareSS() 3", stringCompareSS(CSTR_ARG("a"), CSTR_ARG("ab")), 0);
 
 // freeString()
-combinedTestResult = 0;
+int combinedTestResult = 0;
 freeString(&a);
 freeString(&b);
 freeString(&c);
-freeString(&e);
-if (!(a || b || c || e)) {
+freeString(&d);
+if (!(a || b || c || d)) {
     combinedTestResult = 1;
 }
 SHOULD_BE_TRUE("freeString()", combinedTestResult);
