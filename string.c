@@ -205,10 +205,10 @@ uint32_t stringLength(String *ps)
 static inline int16_t _stringCompareSS(const char *a, uint32_t aLen, const char *b, uint32_t bLen)
 {
     if (aLen < bLen) {
-        return -b[aLen - 1];
+        return -b[aLen];
     }
-    if (aLen > bLen) {
-        return a[bLen - 1];
+    else if (aLen > bLen) {
+        return a[bLen];
     }
     const unsigned char *s1 = (unsigned char*)a, *s2 = (unsigned char*)b;
     while (*s1 && (*s1 == *s2)) {
@@ -219,12 +219,12 @@ static inline int16_t _stringCompareSS(const char *a, uint32_t aLen, const char 
 
 int16_t stringCompare(String *a, String *b)
 {
-    return _stringCompareSS(a->data, a->length, b->data, b->length);
+    return _stringCompareSS(a->data, a->length - 1, b->data, b->length - 1);
 }
 
 int16_t stringCompareS(String *a, const char *b, uint32_t bLen)
 {
-    return _stringCompareSS(a->data, a->length, b, bLen);
+    return _stringCompareSS(a->data, a->length - 1, b, bLen);
 }
 
 int16_t stringCompareSS(const char *a, uint32_t aLen, const char *b, uint32_t bLen)

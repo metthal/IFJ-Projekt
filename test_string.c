@@ -111,15 +111,27 @@ stringSetS(b, "Hello World! Bye Bye World!", 27);
 SHOULD_EQUAL("stringLength()", stringLength(b), 27);
 
 // stringCompare()
-stringSetS(a, "a", 1);
-stringSetS(b, "ab", 2);
+stringSetS(a, CSTR_ARG("a"));
+stringSetS(b, CSTR_ARG("ab"));
 SHOULD_BE_LESS("stringCompare() 1", stringCompare(a, b), 0);
 SHOULD_BE_GRT("stringCompare() 2", stringCompare(b, a), 0);
-stringSetS(a, "ab", 2);
+stringSetS(a, CSTR_ARG("ab"));
 SHOULD_EQUAL("stringCompare() 3", stringCompare(b, a), 0);
 stringEmpty(a);
 SHOULD_BE_LESS("stringCompare() 4", stringCompare(a, b), 0);
 SHOULD_BE_GRT("stringCompare() 5", stringCompare(b, a), 0);
+
+// stringCompareS()
+stringSetS(a, CSTR_ARG("a"));
+SHOULD_EQUAL("stringCompareS() 1", stringCompareS(a, CSTR_ARG("a")), 0);
+stringSetS(a, CSTR_ARG("ab"));
+SHOULD_BE_GRT("stringCompareS() 2", stringCompareS(a, CSTR_ARG("a")), 0);
+SHOULD_BE_LESS("stringCompareS() 3", stringCompareS(a, CSTR_ARG("abc")), 0);
+
+// stringCompareSS()
+SHOULD_EQUAL("stringCompareSS() 1", stringCompareSS(CSTR_ARG("a"), CSTR_ARG("a")), 0);
+SHOULD_BE_GRT("stringCompareSS() 2", stringCompareSS(CSTR_ARG("ab"), CSTR_ARG("a")), 0);
+SHOULD_BE_LESS("stringCompareSS() 3", stringCompareSS(CSTR_ARG("a"), CSTR_ARG("ab")), 0);
 
 // freeString()
 combinedTestResult = 0;
