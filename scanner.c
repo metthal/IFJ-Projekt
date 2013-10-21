@@ -208,8 +208,8 @@ Token* scannerGetToken() // FUNCTION, WHICH RETURNS POINTER ON TOKEN STRUCTURE
                         case ',':
                             token->type = STT_Comma;
                             return token;
-                        case ':':
-                            token->type = STT_Colon;
+                        case '.':
+                            token->type = STT_Dot;
                             return token;
                         case '>':
                             state = SS_Greater;

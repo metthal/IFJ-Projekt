@@ -35,7 +35,6 @@ typedef enum
     STT_Number,
     STT_Keyword,
     STT_Comma,
-    STT_Colon,
     STT_Assignment,
     STT_Greater,
     STT_GreaterEqual,
