@@ -19,10 +19,11 @@ int main(int argc, char **argv)
 
     RUN_TEST_SUITES
 
-    printf("\nTests passed: ");
+    printfc(1, 33, "\nResult:\n");
+    printf("Total tests passed: ");
     printfc(1, 32, "%44u\n", testCountOk);
 
-    printf("Tests failed: ");
+    printf("Total tests failed: ");
     printfc(1, 31, "%44u\n", testCountFailed);
 
     return (testCountFailed > 0);
