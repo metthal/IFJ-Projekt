@@ -5,6 +5,7 @@
 
 typedef enum
 {
+    KTT_None,
     KTT_If,
     KTT_Else,
     KTT_Elseif,
@@ -65,8 +66,6 @@ typedef struct
     };
 } Token;
 
-void checkKeyword(String *str, Token *token);
-Token* scannerGetToken();
 Token* newToken();
 void initToken(Token *pt);
 void deleteToken(Token *pt);
@@ -74,6 +73,7 @@ void freeToken(Token **ppt);
 
 void scannerReset();
 FILE* scannerOpenFile(const char *fileName);
+Token* scannerGetToken();
 
 #endif
 

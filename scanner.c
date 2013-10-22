@@ -76,95 +76,74 @@ void freeToken(Token **ppt)
     }
 }
 
-void checkKeyword(String *str, Token *token)
+KeywordTokenType strToKeyword(String *str)
 {
     switch (str->data[0]) {
+        case 'b': {
+            if (stringCompareS(str, "break", 5) == 0) {
+                return KTT_Break;
+            }
+            break;
+        }
+        case 'c': {
+            if (stringCompareS(str, "continue", 8) == 0) {
+                return KTT_Continue;
+            }
+            break;
+        }
         case 'e': {
             if (stringCompareS(str, "else", 4) == 0) {
-                token->type = STT_Keyword;
-                token->keywordType = KTT_Else;
+                return KTT_Else;
             }
             else if (stringCompareS(str, "elseif", 6) == 0){
-                token->type = STT_Keyword;
-                token->keywordType = KTT_Elseif;
-            }
-            else {
-                token->type = STT_Identifier;
+                return KTT_Elseif;
             }
             break;
         }
         case 'f': {
             if (stringCompareS(str, "false", 5) == 0) {
-                token->type = STT_Keyword;
-                token->keywordType = KTT_False;
+                return KTT_False;
             }
             else if (stringCompareS(str, "for", 3) == 0){
-                token->type = STT_Keyword;
-                token->keywordType = KTT_For;
+                return KTT_For;
             }
             else if (stringCompareS(str, "function", 8) == 0){
-                token->type = STT_Keyword;
-                token->keywordType = KTT_Function;
-            }
-            else {
-                token->type = STT_Identifier;
+                return KTT_Function;
             }
             break;
         }
         case 'i': {
             if (stringCompareS(str, "if", 2) == 0) {
-                token->type = STT_Keyword;
-                token->keywordType = KTT_If;
-            }
-            else {
-                token->type = STT_Identifier;
+                return KTT_If;
             }
             break;
         }
         case 'n': {
             if (stringCompareS(str, "null", 4) == 0) {
-                token->type = STT_Keyword;
-                token->keywordType = KTT_Null;
-            }
-            else {
-                token->type = STT_Identifier;
+                return KTT_Null;
             }
             break;
         }
         case 'r': {
             if (stringCompareS(str, "return", 6) == 0) {
-                token->type = STT_Keyword;
-                token->keywordType = KTT_Return;
-            }
-            else {
-                token->type = STT_Identifier;
+                return KTT_Return;
             }
             break;
         }
         case 't': {
             if (stringCompareS(str, "true", 4) == 0) {
-                token->type = STT_Keyword;
-                token->keywordType = KTT_True;
-            }
-            else {
-                token->type = STT_Identifier;
+                return KTT_True;
             }
             break;
         }
         case 'w': {
             if (stringCompareS(str, "while", 5) == 0) {
-                token->type = STT_Keyword;
-                token->keywordType = KTT_While;
-            }
-            else {
-                token->type = STT_Identifier;
+                return KTT_While;
             }
             break;
         }
-        default:
-            token->type = STT_Identifier;
-            break;
     }
+    return KTT_None;
 }
 
 void scannerReset()
@@ -191,18 +170,14 @@ FILE* scannerOpenFile(const char *fileName) // OPEN FILE AND RETURN POINTER ON I
 Token* scannerGetToken() // FUNCTION, WHICH RETURNS POINTER ON TOKEN STRUCTURE
 {
     Token *token = newToken();
-    // TODO ScannerTokenType token = STT_Empty;
-    ScannerTokenState tokenState = STS_NOT_FINISHED;
+
     ScannerState state = SS_Empty;
     int32_t symbol;
     int32_t firsTimeSwitch = 1;
 
-    String *tmpStrPtr = &(token->str);
-    initString(tmpStrPtr);
+    String *tokenStr = &(token->str);
 
-    String *strDigits = newString();
-
-    while (tokenState == STS_NOT_FINISHED)
+    while (1)
     {
         if (charStreamSwitch) {
             symbol = getc(source);
@@ -216,11 +191,13 @@ Token* scannerGetToken() // FUNCTION, WHICH RETURNS POINTER ON TOKEN STRUCTURE
             case SS_Empty: {
                 if ((symbol >= 'a' && symbol <= 'z') || (symbol >= 'A' && symbol <= 'Z')) {
                     state = SS_Identifier;
-                    stringPush(tmpStrPtr,symbol);
+                    initString(tokenStr);
+                    stringPush(tokenStr,symbol);
                 }
                 else if (symbol >= '0' && symbol <= '9') {
-                    stringPush(strDigits,symbol);
                     state = SS_Number;
+                    initString(tokenStr);
+                    stringPush(tokenStr,symbol);
                 }
                 else if (isspace(symbol)) {
                     ;
@@ -233,6 +210,7 @@ Token* scannerGetToken() // FUNCTION, WHICH RETURNS POINTER ON TOKEN STRUCTURE
                     switch (symbol) {
                         case '"':
                             state = SS_String;
+                            initString(tokenStr);
                             break;
                         case '/':
                             state = SS_Divide;
@@ -282,6 +260,10 @@ Token* scannerGetToken() // FUNCTION, WHICH RETURNS POINTER ON TOKEN STRUCTURE
                         case '$':
                             state = SS_Dollar;
                             break;
+                        default:
+                            freeToken(&token);
+                            setError(ERR_LexFile);
+                            return NULL;
                     }
                 }
                 break;
@@ -309,6 +291,7 @@ Token* scannerGetToken() // FUNCTION, WHICH RETURNS POINTER ON TOKEN STRUCTURE
                     token->type = STT_Less;
                     return token;
                 }
+                break;
             }
             case SS_Assignment: {
                 if (symbol == '=') {
@@ -325,10 +308,12 @@ Token* scannerGetToken() // FUNCTION, WHICH RETURNS POINTER ON TOKEN STRUCTURE
             case SS_Dollar: {
                 if ((symbol >= 'a' && symbol <= 'z') || (symbol >= 'A' && symbol <= 'Z') || (symbol == '_')) {
                     state = SS_Variable;
-                    stringPush(tmpStrPtr, symbol);
+                    initString(tokenStr);
+                    stringPush(tokenStr, symbol);
                     break;
                 }
                 else {
+                    freeToken(&token);
                     setError(ERR_LexFile);
                     return NULL;
                 }
@@ -337,7 +322,7 @@ Token* scannerGetToken() // FUNCTION, WHICH RETURNS POINTER ON TOKEN STRUCTURE
             case SS_Variable: {
                 if ((symbol >= 'a' && symbol <= 'z') || (symbol >= 'A' && symbol <= 'Z') || (symbol == '_') ||
                      (symbol >= '0' && symbol <= '9')) {
-                    stringPush(tmpStrPtr, symbol);
+                    stringPush(tokenStr, symbol);
                     state = SS_Variable;
                 }
                 else {
@@ -351,17 +336,19 @@ Token* scannerGetToken() // FUNCTION, WHICH RETURNS POINTER ON TOKEN STRUCTURE
             case SS_Number: {
                 if (symbol >= '0' && symbol <= '9') {
                     state = SS_Number;
-                    stringPush(strDigits, symbol);
+                    stringPush(tokenStr, symbol);
                 }
                 else if (symbol == '.') {
                     state = SS_Double;
-                    stringPush(strDigits, symbol);
+                    stringPush(tokenStr, symbol);
                 }
                 // TODO ELSE IF EXPONENT
                 else {
                     lastChar = symbol;
                     charStreamSwitch = 0;
-                    token->n = stringToInt(strDigits);
+                    int n = stringToInt(tokenStr);
+                    deleteString(tokenStr);
+                    token->n = n;
                     token->type = STT_Number;
                     return token;
                 }
@@ -369,31 +356,43 @@ Token* scannerGetToken() // FUNCTION, WHICH RETURNS POINTER ON TOKEN STRUCTURE
             }
             case SS_Identifier: {
                 if ((symbol == '_') || (symbol >= 'a' && symbol <= 'z') || (symbol >= 'A' && symbol <= 'Z') || (symbol >= '0' && symbol <= '9')) {
-                    stringPush(tmpStrPtr, symbol);
+                    stringPush(tokenStr, symbol);
                     state = SS_Identifier;
                 }
                 else {
                     lastChar = symbol;
                     charStreamSwitch = 0;
-                    checkKeyword(tmpStrPtr, token); // FUNCTION CHECKS IF IDENTIFIER, WHICH HAS BEEN FOUND AINT A RESERVED ( KEYWORD ) WORD
-                    return token;
+                    KeywordTokenType keywordType = strToKeyword(tokenStr); // FUNCTION CHECKS IF IDENTIFIER, WHICH HAS BEEN FOUND AINT A RESERVED ( KEYWORD ) WORD
+                    if (keywordType == KTT_None) {
+                        token->type = STT_Identifier;
+                        return token;
+                    } else {
+                        deleteString(tokenStr);
+                        token->type = STT_Keyword;
+                        token->keywordType = keywordType;
+                        return token;
+                    }
                 }
                 break;
             }
             case SS_Double: {
                 if (symbol >= '0' && symbol <= '9') {
                     state = SS_Double;
-                    stringPush(strDigits, symbol);
+                    stringPush(tokenStr, symbol);
                     firsTimeSwitch = 0;
                 }
                 else if ((symbol == EOF) && (firsTimeSwitch)) {
+                    deleteString(tokenStr);
+                    freeToken(&token);
                     setError(ERR_LexFile);
                     return NULL;
                 }
                 else {
                     lastChar = symbol;
                     charStreamSwitch = 0;
-                    token->d = stringToDouble(strDigits);
+                    double d = stringToDouble(tokenStr);
+                    deleteString(tokenStr);
+                    token->d = d;
                     token->type = STT_Double;
                     return token;
                 }
@@ -465,6 +464,7 @@ Token* scannerGetToken() // FUNCTION, WHICH RETURNS POINTER ON TOKEN STRUCTURE
                 else {
                     lastChar = symbol;
                     charStreamSwitch = 0;
+                    freeToken(&token);
                     setError(ERR_LexFile);
                     return NULL;
                 }
@@ -476,6 +476,7 @@ Token* scannerGetToken() // FUNCTION, WHICH RETURNS POINTER ON TOKEN STRUCTURE
                 else {
                     lastChar = symbol;
                     charStreamSwitch = 0;
+                    freeToken(&token);
                     setError(ERR_LexFile);
                     return NULL;
                 }
@@ -489,6 +490,7 @@ Token* scannerGetToken() // FUNCTION, WHICH RETURNS POINTER ON TOKEN STRUCTURE
                 else {
                     lastChar = symbol;
                     charStreamSwitch = 0;
+                    freeToken(&token);
                     setError(ERR_LexFile);
                     return NULL;
                 }
@@ -499,21 +501,19 @@ Token* scannerGetToken() // FUNCTION, WHICH RETURNS POINTER ON TOKEN STRUCTURE
                     return token;
                 }
                 else if (symbol == EOF) {
+                    freeToken(&token);
                     setError(ERR_LexFile);
                     return NULL;
                 }
                 else {
                     state = SS_String;
-                    stringPush(tmpStrPtr, symbol);
+                    stringPush(tokenStr, symbol);
                     // TODO = AUTOMAT
                 }
                 break;
             }
         }
     }
-
-    setError(ERR_LexFile);
-    return NULL;
 }
 
 
