@@ -75,17 +75,17 @@ static inline void testResult(uint8_t result, const char *testName, const char *
 #define RUN_TEST_SUITES                         for (uint8_t i = 0; i < testSuiteCount; ++i) (*testSuites[i])();
 #define TEST_SUITE(testSuiteName)               extern void testSuiteName();
 
-#define TEST_SUITE_START(testSuiteName)         	\
-    void testSuiteName() {							\
-        printfc(1, 33, "\n%s:\n", #testSuiteName);	\
+#define TEST_SUITE_START(testSuiteName)             \
+    void testSuiteName() {                          \
+        printfc(1, 33, "\n%s:\n", #testSuiteName);  \
         printf("Starting test suite in %s...\n", __FILE__); \
         uint32_t testCountOkStart = testCountOk, testCountFailedStart = testCountFailed;
 
-#define TEST_SUITE_END                          	\
-        printf("Suite tests passed: ");				\
-        printfc(1, 32, "%44u\n", testCountOk - testCountOkStart); \
-        printf("Suite tests failed: ");				\
-        printfc(1, 31, "%44u\n", testCountFailed - testCountFailedStart); \
+#define TEST_SUITE_END                              \
+        printf("Suite tests passed: ");             \
+        printfc(1, 32, "%38u\n", testCountOk - testCountOkStart); \
+        printf("Suite tests failed: ");             \
+        printfc(1, 31, "%38u\n", testCountFailed - testCountFailedStart); \
     }
 
 #define SHOULD_EQUAL(TestName, val1, val2)      \

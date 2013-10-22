@@ -21,10 +21,10 @@ int main(int argc, char **argv)
 
     printfc(1, 33, "\nResult:\n");
     printf("Total tests passed: ");
-    printfc(1, 32, "%44u\n", testCountOk);
+    printfc(1, 32, "%38u\n", testCountOk);
 
     printf("Total tests failed: ");
-    printfc(1, 31, "%44u\n", testCountFailed);
+    printfc(1, 31, "%38u\n", testCountFailed);
 
     return (testCountFailed > 0);
 }
