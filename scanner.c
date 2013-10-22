@@ -7,6 +7,33 @@
 #include "convert.h"
 #include "nierr.h"
 
+typedef enum
+{
+    STS_FINISHED,
+    STS_NOT_FINISHED,
+} ScannerTokenState;
+
+typedef enum
+{
+    SS_Identifier,
+    SS_Dollar,
+    SS_Number,
+    SS_Greater,
+    SS_Less,
+    SS_Assignment,
+    SS_Equal,
+    SS_Empty,
+    SS_Variable,
+    SS_Double,
+    SS_Divide,
+    SS_BlockComment,
+    SS_BlockCommentFinish,
+    SS_Comment,
+    SS_Exclamation,
+    SS_NotEqual,
+    SS_String,
+} ScannerState;
+
 int32_t charStreamSwitch = 1;
 int32_t lastChar;
 FILE *source;
