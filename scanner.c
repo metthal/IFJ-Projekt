@@ -9,12 +9,6 @@
 
 typedef enum
 {
-    STS_FINISHED,
-    STS_NOT_FINISHED,
-} ScannerTokenState;
-
-typedef enum
-{
     SS_Identifier,
     SS_Dollar,
     SS_Number,
@@ -32,6 +26,10 @@ typedef enum
     SS_Exclamation,
     SS_NotEqual,
     SS_String,
+    SS_Php_0,
+    SS_Php_1,
+    SS_Php_2,
+    SS_Php_3,
 } ScannerState;
 
 int32_t charStreamSwitch = 1;
@@ -285,6 +283,9 @@ Token* scannerGetToken() // FUNCTION, WHICH RETURNS POINTER ON TOKEN STRUCTURE
                     token->type = STT_LessEqual;
                     return token;
                 }
+                else if (symbol == '?') {
+                    state = SS_Php_0;
+                }
                 else {
                     lastChar = symbol;
                     charStreamSwitch = 0;
@@ -511,6 +512,50 @@ Token* scannerGetToken() // FUNCTION, WHICH RETURNS POINTER ON TOKEN STRUCTURE
                     // TODO = AUTOMAT
                 }
                 break;
+            }
+            case SS_Php_0: {
+                if (symbol == 'p') {
+                    state = SS_Php_1;
+                }	
+                else {
+                    freeToken(&token);
+                    setError(ERR_LexFile);
+                    return NULL;	
+                }
+                break;
+            }
+            case SS_Php_1: {
+                if (symbol == 'h') {
+                    state = SS_Php_2;
+                }	
+                else {
+                    freeToken(&token);
+                    setError(ERR_LexFile);
+                    return NULL;	
+                }
+                break;
+            }
+            case SS_Php_2: {
+                if (symbol == 'p') {
+                    state = SS_Php_3;
+                }	
+                else {
+                    freeToken(&token);
+                    setError(ERR_LexFile);
+                    return NULL;	
+                }
+                break;
+            }
+            case SS_Php_3: {
+                if (isspace(symbol)) {
+                    token->type = STT_Php;
+                    return token;
+                }	
+                else {
+                    freeToken(&token);
+                    setError(ERR_LexFile);
+                    return NULL;	
+                }
             }
         }
     }

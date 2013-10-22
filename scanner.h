@@ -76,4 +76,3 @@ FILE* scannerOpenFile(const char *fileName);
 Token* scannerGetToken();
 
 #endif
-
