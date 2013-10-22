@@ -37,6 +37,7 @@ static inline void printfc(uint8_t color, uint8_t style, const char *fmt, ...)
 static inline void testResult(uint8_t result, const char *testName, const char *file, uint32_t line, const char *expr)
 {
     char buffer[TestNameLen + 1];
+    memset(buffer, 0, TestNameLen + 1);
 
     if (strlen(testName) >= TestNameLen) {
         strncpy(buffer, testName, TestNameLen - 1);
