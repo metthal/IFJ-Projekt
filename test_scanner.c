@@ -176,6 +176,13 @@ SHOULD_EQUAL_STR("GetToken - string - string data", token->str.data, "string");
 token = nextToken();
 SHOULD_EQUAL("GetToken - string - EOF", token->type, STT_EOF);
 
+// "Ahoj
+// $svete!` \a\'\r\f\b\0\v"
+overwriteFile(filePath, "\"\\\"Ahoj\\n\\$vete\\x21` \\a\\'\\r\\f\\b\\0\\v\\\"\"");
+token = nextToken();
+SHOULD_EQUAL("GetToken - string - escape sequences", token->type, STT_String);
+SHOULD_EQUAL_STR("GetToken - string - escape sequences - data", token->str.data, "\"Ahoj\n$svete!` \\a\\'\\r\\f\\b\\0\\v\"");
+
 overwriteFile(filePath, "12.03");
 token = nextToken();
 SHOULD_EQUAL("GetToken - double", token->type, STT_Double);
