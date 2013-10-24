@@ -1,8 +1,21 @@
+/**
+ * @file rc.h
+ * @author INI Team
+ *
+ * @brief Result codes and everything about application termination
+ **/
 #ifndef RC_H
 #define RC_H
 
 #include "nierr.h"
 
+/**
+ * @enum ResultCode
+ *
+ * Result or exit codes of the application as defined by assignment
+ *
+ * @todo Remove @ref RC_Unknown before submission, just internal
+ **/
 typedef enum
 {
     RC_Ok               = 0,    ///< Successful intepretation
@@ -16,9 +29,14 @@ typedef enum
     RC_ArithmError      = 12,   ///< Semantic/runtime error - type compatibility in arithmetic expressions
     RC_UnkError         = 13,   ///< Semantic/runtime error - Other errors
     RC_FatalError       = 99,   ///< Error not related to interpreter (bad allocation etc)
-    RC_Unknown          = 100   ///< @todo Remove this before submission, just internal
+    RC_Unknown          = 100   ///< Temporary internal result code
 } ResultCode;
 
+/**
+ * Transforms @ref NiErrorType into @ref ResultCode
+ *
+ * @return Result code of corresponding error type
+ **/
 static inline ResultCode getRcFromError()
 {
     switch (niErr.type) {
