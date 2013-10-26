@@ -1,0 +1,30 @@
+<?php
+
+// Checks if statement
+// Flow marked with *
+$a = 0;             // *
+$b = 1.0;           // *
+                    //
+if ($a){            //
+}                   //
+elseif ($b){        // *
+    $c = true;      // *
+}                   //
+else{               //
+    $a = $a + 1;    //
+}                   //    
+                    //
+if ($a){            //
+}                   //
+elseif ($c){        // *
+    $c = false;     // *
+    if ($c){        // 
+    }               //
+    elseif ($a){    //
+    }               //
+    else{           // *
+        $a = $a + 1;// *
+    }               //
+}
+
+$res = $a == 1; // True

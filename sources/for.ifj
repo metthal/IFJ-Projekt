@@ -1,0 +1,14 @@
+<?php
+
+// Checks for statement
+$i = 0;
+for (;;){
+    $i = $i + 1;
+    if ($i < 10){
+        continue;
+    }
+    break;
+}
+
+for ($j = 0; $j < $i; $j = $j + 1){
+}

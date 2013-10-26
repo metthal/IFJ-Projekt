@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <ctype.h>
@@ -34,7 +33,7 @@ typedef enum
 
 static int32_t charStreamSwitch = 1;
 static int32_t lastChar = 0;
-static FILE *source = 0;
+static FILE *source = NULL;
 
 Token* newToken() // FUNCTION CREATES NEWTOKEN STRUCTURE
 {

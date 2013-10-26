@@ -1,0 +1,17 @@
+<?php
+
+// Checks if late declaration and LST are working
+
+function one()
+{
+    return 1;
+}
+
+$x = 1;
+$a = 2;
+$res = one() + sqr($a) + sqr(5); // Should be 30
+
+function sqr($x){
+    $x = $x * $x;
+    return $x;
+}

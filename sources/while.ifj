@@ -1,0 +1,16 @@
+<?php
+
+// Checks while statement
+
+$i = 10;
+
+while ($i){
+    $i = $i - 1;
+}
+
+while (true){
+    $i = $i + 5;
+    if ($i > 10){
+        break;
+    }
+}

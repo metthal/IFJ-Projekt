@@ -1,0 +1,16 @@
+<?php
+
+// Checks expression evaluation
+$a = 10;
+$b = 10.0;
+$c = $a + $b;
+$d = $a - $b;
+$e = $a * $b;
+$f = $a / $b;
+$g = $a == $b; // True
+$h = $a === $b; // False
+$i = $c > $d; // True
+$j = $e > $f; // True
+$k = (($a + $b) * $a + $b - $c) == 190; // True
+$l = "a" == false; // False
+$m = "" == true; // True
