@@ -16,7 +16,8 @@ typedef enum
     ERR_Unknown,
     ERR_LexFile,
     ERR_NewFailed,
-    ERR_Convert
+    ERR_Convert,
+    ERR_Syntax
 } NiErrorType;
 
 typedef struct

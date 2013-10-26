@@ -32,9 +32,9 @@ typedef enum
     SS_Php_3,
 } ScannerState;
 
-int32_t charStreamSwitch = 1;
-int32_t lastChar;
-FILE *source;
+static int32_t charStreamSwitch = 1;
+static int32_t lastChar = 0;
+static FILE *source = 0;
 
 Token* newToken() // FUNCTION CREATES NEWTOKEN STRUCTURE
 {
