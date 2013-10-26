@@ -17,7 +17,6 @@ typedef enum
     SS_Equal,
     SS_Empty,
     SS_Variable,
-    SS_Double,
     SS_Divide,
     SS_BlockComment,
     SS_BlockCommentFinish,
@@ -29,6 +28,11 @@ typedef enum
     SS_Php_1,
     SS_Php_2,
     SS_Php_3,
+    SS_ExponentSgn,
+    SS_DoubleSgn,
+    SS_DoubleMantissa,
+    SS_ExponentPlusMinus,
+    SS_ExponentMantissa,
 } ScannerState;
 
 static int32_t charStreamSwitch = 1;
@@ -92,7 +96,7 @@ KeywordTokenType strToKeyword(String *str)
             if (stringCompareS(str, "else", 4) == 0) {
                 return KTT_Else;
             }
-            else if (stringCompareS(str, "elseif", 6) == 0){
+            else if (stringCompareS(str, "elseif", 6) == 0) {
                 return KTT_Elseif;
             }
             break;
@@ -101,10 +105,10 @@ KeywordTokenType strToKeyword(String *str)
             if (stringCompareS(str, "false", 5) == 0) {
                 return KTT_False;
             }
-            else if (stringCompareS(str, "for", 3) == 0){
+            else if (stringCompareS(str, "for", 3) == 0) {
                 return KTT_For;
             }
-            else if (stringCompareS(str, "function", 8) == 0){
+            else if (stringCompareS(str, "function", 8) == 0) {
                 return KTT_Function;
             }
             break;
@@ -170,7 +174,6 @@ Token* scannerGetToken() // FUNCTION, WHICH RETURNS POINTER ON TOKEN STRUCTURE
 
     ScannerState state = SS_Empty;
     int32_t symbol;
-    int32_t firsTimeSwitch = 1;
 
     String *tokenStr = &(token->str);
 
@@ -339,10 +342,13 @@ Token* scannerGetToken() // FUNCTION, WHICH RETURNS POINTER ON TOKEN STRUCTURE
                     stringPush(tokenStr, symbol);
                 }
                 else if (symbol == '.') {
-                    state = SS_Double;
+                    state = SS_DoubleSgn;
                     stringPush(tokenStr, symbol);
                 }
-                // TODO ELSE IF EXPONENT
+                else if (symbol == 'e') {
+                    state = SS_ExponentSgn;
+                    stringPush(tokenStr, symbol);
+                }
                 else {
                     lastChar = symbol;
                     charStreamSwitch = 0;
@@ -351,6 +357,49 @@ Token* scannerGetToken() // FUNCTION, WHICH RETURNS POINTER ON TOKEN STRUCTURE
                     token->n = n;
                     token->type = STT_Number;
                     return token;
+                }
+                break;
+            }
+            case SS_DoubleSgn: {
+                if (symbol >= '0' && symbol <= '9') {
+                    state = SS_DoubleMantissa;
+                    stringPush(tokenStr, symbol);
+                }
+                else {
+                    deleteString(tokenStr);
+                    freeToken(&token);
+                    setError(ERR_LexFile);
+                    return NULL;
+                }
+                break;
+            }
+            case SS_ExponentSgn: {
+                if (symbol >= '0' && symbol <= '9') {
+                    state = SS_DoubleMantissa;
+                    stringPush(tokenStr, symbol);
+                }
+                else if (symbol == '+' || symbol == '-') {
+                    state = SS_ExponentPlusMinus;
+                    stringPush(tokenStr, symbol);
+                }
+                else {
+                    deleteString(tokenStr);
+                    freeToken(&token);
+                    setError(ERR_LexFile);
+                    return NULL;
+                }
+                break;
+            }
+            case SS_ExponentPlusMinus: {
+                if (symbol >= '0' && symbol <= '9') {
+                    state = SS_ExponentMantissa;
+                    stringPush(tokenStr, symbol);
+                }
+                else {
+                    deleteString(tokenStr);
+                    freeToken(&token);
+                    setError(ERR_LexFile);
+                    return NULL;
                 }
                 break;
             }
@@ -375,17 +424,30 @@ Token* scannerGetToken() // FUNCTION, WHICH RETURNS POINTER ON TOKEN STRUCTURE
                 }
                 break;
             }
-            case SS_Double: {
+            case SS_DoubleMantissa: {
                 if (symbol >= '0' && symbol <= '9') {
-                    state = SS_Double;
+                    state = SS_DoubleMantissa;
                     stringPush(tokenStr, symbol);
-                    firsTimeSwitch = 0;
                 }
-                else if ((symbol == EOF) && (firsTimeSwitch)) {
+                else if (symbol == 'e' || symbol == 'E') {
+                    state = SS_ExponentSgn;
+                    stringPush(tokenStr, symbol);
+                }
+                else {
+                    lastChar = symbol;
+                    charStreamSwitch = 0;
+                    double d = stringToDouble(tokenStr);
                     deleteString(tokenStr);
-                    freeToken(&token);
-                    setError(ERR_LexFile);
-                    return NULL;
+                    token->d = d;
+                    token->type = STT_Double;
+                    return token;
+                }
+                break;
+            }
+            case SS_ExponentMantissa: {
+                if (symbol >= '0' && symbol <= '9') {
+                    state = SS_ExponentMantissa;
+                    stringPush(tokenStr, symbol);
                 }
                 else {
                     lastChar = symbol;
@@ -515,33 +577,33 @@ Token* scannerGetToken() // FUNCTION, WHICH RETURNS POINTER ON TOKEN STRUCTURE
             case SS_Php_0: {
                 if (symbol == 'p') {
                     state = SS_Php_1;
-                }	
+                }
                 else {
                     freeToken(&token);
                     setError(ERR_LexFile);
-                    return NULL;	
+                    return NULL;
                 }
                 break;
             }
             case SS_Php_1: {
                 if (symbol == 'h') {
                     state = SS_Php_2;
-                }	
+                }
                 else {
                     freeToken(&token);
                     setError(ERR_LexFile);
-                    return NULL;	
+                    return NULL;
                 }
                 break;
             }
             case SS_Php_2: {
                 if (symbol == 'p') {
                     state = SS_Php_3;
-                }	
+                }
                 else {
                     freeToken(&token);
                     setError(ERR_LexFile);
-                    return NULL;	
+                    return NULL;
                 }
                 break;
             }
@@ -549,11 +611,11 @@ Token* scannerGetToken() // FUNCTION, WHICH RETURNS POINTER ON TOKEN STRUCTURE
                 if (isspace(symbol)) {
                     token->type = STT_Php;
                     return token;
-                }	
+                }
                 else {
                     freeToken(&token);
                     setError(ERR_LexFile);
-                    return NULL;	
+                    return NULL;
                 }
             }
         }
