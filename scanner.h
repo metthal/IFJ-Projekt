@@ -71,6 +71,7 @@ Token* newToken();
 void initToken(Token *pt);
 void deleteToken(Token *pt);
 void freeToken(Token **ppt);
+void tokenCopy(Token *src, Token *dest);
 
 void scannerReset();
 FILE* scannerOpenFile(const char *fileName);

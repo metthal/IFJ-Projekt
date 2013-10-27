@@ -16,6 +16,8 @@ typedef enum
     ERR_Unknown,
     ERR_LexFile,
     ERR_NewFailed,
+    ERR_Allocation,
+    ERR_Range,
     ERR_Convert,
     ERR_Syntax
 } NiErrorType;

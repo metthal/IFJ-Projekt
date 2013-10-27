@@ -77,6 +77,22 @@ void freeToken(Token **ppt)
     }
 }
 
+void tokenCopy(Token *src, Token *dest)
+{
+    dest->type = src->type;
+    if(src->type == STT_Variable   ||
+       src->type == STT_Identifier ||
+       src->type == STT_String){
+        stringCopy(&src->str, &dest->str);
+    }
+    else if(src->type == STT_Double)
+        dest->d = src->d;
+    else if(src->type == STT_Number)
+        dest->n = src->n;
+    else if(src->type == STT_Keyword)
+        dest->keywordType = src->keywordType;
+}
+
 KeywordTokenType strToKeyword(String *str)
 {
     switch (str->data[0]) {
@@ -165,6 +181,7 @@ FILE* scannerOpenFile(const char *fileName) // OPEN FILE AND RETURN POINTER ON I
     }
 
     source = fopen(fileName, "r");
+
     return source;
 }
 
