@@ -33,6 +33,9 @@ typedef enum
     SS_DoubleMantissa,
     SS_ExponentPlusMinus,
     SS_ExponentMantissa,
+    SS_StringEscape,
+    SS_HexaString,
+    SS_HexaString_2,
 } ScannerState;
 
 static int32_t charStreamSwitch = 1;
@@ -181,7 +184,13 @@ FILE* scannerOpenFile(const char *fileName) // OPEN FILE AND RETURN POINTER ON I
     }
 
     source = fopen(fileName, "r");
-
+    if (source != NULL)
+        lastChar = getc(source);
+    if(source == NULL || lastChar != '<') {
+        setError(ERR_LexFile);
+        return NULL;
+    }
+    charStreamSwitch = 0;
     return source;
 }
 
@@ -191,6 +200,10 @@ Token* scannerGetToken() // FUNCTION, WHICH RETURNS POINTER ON TOKEN STRUCTURE
 
     ScannerState state = SS_Empty;
     int32_t symbol;
+    int32_t hexaString;
+    int32_t hexaString_2;
+    int32_t hexaStringBackup;
+    int32_t ascii;
 
     String *tokenStr = &(token->str);
 
@@ -580,15 +593,118 @@ Token* scannerGetToken() // FUNCTION, WHICH RETURNS POINTER ON TOKEN STRUCTURE
                     return token;
                 }
                 else if (symbol == EOF) {
+                    deleteString(tokenStr);
                     freeToken(&token);
                     setError(ERR_LexFile);
                     return NULL;
                 }
                 else {
-                    state = SS_String;
-                    stringPush(tokenStr, symbol);
-                    // TODO = AUTOMAT
+                    if (symbol > 31 && symbol != '$') {
+                        if (symbol == '\\') {
+                            state = SS_StringEscape;
+                        }
+                        else {
+                            state = SS_String;
+                            stringPush(tokenStr, symbol);
+                        }
+                    }
+                    else {
+                        deleteString(tokenStr);
+                        freeToken(&token);
+                        setError(ERR_LexFile);
+                        return NULL;
+                    }
                 }
+                break;
+            }
+            case SS_StringEscape: {
+                switch (symbol) {
+                    case 'x': {
+                        state = SS_HexaString;
+                        break;
+                    }
+                    case '$': {
+                        state = SS_String;
+                        stringPush(tokenStr, symbol);
+                        break;
+                    }
+                    case 'n': {
+                        state = SS_String;
+                        stringPush(tokenStr, '\n');
+                        break;
+                    }
+                    case 't': {
+                        state = SS_String;
+                        stringPush(tokenStr, '\t');
+                        break;
+                    }
+                    case '\"': {
+                        state = SS_String;
+                        stringPush(tokenStr, '\"');
+                        break;
+                    }
+                    case '\\': {
+                        state = SS_String;
+                        stringPush(tokenStr, '\\');
+                        break;
+                    }
+                    default: {
+                        state = SS_String;
+                        stringPush(tokenStr, '\\');
+                        stringPush(tokenStr, symbol);
+                        break;
+                    }
+                }
+                break;
+            }
+            case SS_HexaString_2: {
+                if (symbol >= '0' && symbol <= '9') {
+                    hexaString_2 = symbol - '0';
+                    ascii = 16 * hexaString + hexaString_2;
+                    stringPush(tokenStr, ascii);
+                    state = SS_String;
+                }
+                else if (symbol >= 'A' && symbol <= 'F') {
+                    hexaString_2 = symbol - 'A' + 10;
+                    ascii = 16 * hexaString + hexaString_2;
+                    stringPush(tokenStr, ascii);
+                    state = SS_String;
+                }
+                else if (symbol >= 'a' && symbol <= 'f') {
+                    hexaString_2 = symbol - 'a' + 10;
+                    ascii = 16 * hexaString + hexaString_2;
+                    stringPush(tokenStr, ascii);
+                    state = SS_String;
+                }
+                else {
+                    state = SS_String;
+                    stringPush(tokenStr, '\\');
+                    stringPush(tokenStr, 'x');
+                    stringPush(tokenStr, hexaStringBackup);
+                    stringPush(tokenStr, symbol);
+                }
+                break;
+            }
+            case SS_HexaString: {
+                if (symbol >= '0' && symbol <= '9') {
+                    hexaString = symbol - '0';
+                    state = SS_HexaString_2;
+                }
+                else if (symbol >= 'A' && symbol <= 'F') {
+                    hexaString = symbol - 'A' + 10;
+                    state = SS_HexaString_2;
+                }
+                else if (symbol >= 'a' && symbol <= 'f') {
+                    hexaString = symbol - 'a' + 10;
+                    state = SS_HexaString_2;
+                }
+                else {
+                    state = SS_String;
+                    stringPush(tokenStr, '\\');
+                    stringPush(tokenStr, 'x');
+                    stringPush(tokenStr, symbol);
+                }
+                hexaStringBackup = symbol;
                 break;
             }
             case SS_Php_0: {
@@ -638,5 +754,6 @@ Token* scannerGetToken() // FUNCTION, WHICH RETURNS POINTER ON TOKEN STRUCTURE
         }
     }
 }
+
 
 
