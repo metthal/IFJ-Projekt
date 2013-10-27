@@ -41,7 +41,7 @@ typedef enum
 
 static int32_t charStreamSwitch = 1;
 static int32_t lastChar = 0;
-static FILE *source = 0;
+static FILE *source = NULL;
 
 Token* newToken() // FUNCTION CREATES NEWTOKEN STRUCTURE
 {

@@ -181,7 +181,7 @@ SHOULD_EQUAL("GetToken - string - EOF", token->type, STT_EOF);
 overwriteFile(filePath, "\"\\\"Ahoj\\n\\$vete\\x21` \\a\\'\\r\\f\\b\\0\\v\\\"\"");
 token = nextToken();
 SHOULD_EQUAL("GetToken - string - escape sequences", token->type, STT_String);
-SHOULD_EQUAL_STR("GetToken - string - escape sequences - data", token->str.data, "\"Ahoj\n$svete!` \\a\\'\\r\\f\\b\\0\\v\"");
+SHOULD_EQUAL_STR("GetToken - string - escape sequences - data", token->str.data, "\"Ahoj\n$vete!` \\a\\'\\r\\f\\b\\0\\v\"");
 
 overwriteFile(filePath, "12.03");
 token = nextToken();
