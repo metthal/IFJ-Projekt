@@ -1,0 +1,11 @@
+<?php
+
+// Checks if semantic for number of
+// arguments is working
+
+$x = 10;
+$res = f($x); // Not enough arguments
+
+function f ($a, $b){
+    return $a + $b;
+}

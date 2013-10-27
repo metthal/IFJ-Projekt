@@ -231,6 +231,10 @@ overwriteFile(filePath, "$");
 token = nextToken();
 SHOULD_EQUAL("GetToken - lex error $", token, NULL);
 
+overwriteFile(filePath, "\"string");
+token = nextToken();
+SHOULD_EQUAL("GetToken - unexpected end of string - lex error", token, NULL);
+
 overwriteFile(filePath, "$s.$s");
 token = nextToken();
 SHOULD_EQUAL("GetToken - multitoken - concat - operand1", token->type, STT_Variable);

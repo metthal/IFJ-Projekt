@@ -2,6 +2,7 @@
 #define SCANNER_H
 
 #include "string.h"
+#include <stdio.h>
 
 typedef enum
 {

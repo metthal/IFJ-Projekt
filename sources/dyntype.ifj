@@ -1,0 +1,17 @@
+<?php
+
+// Checks if retyping of variable works
+$a = 1;
+$a = 1.0;   // int - double
+$a = "1.0"; // double - str
+$a = true;  // str - bool
+$a = "1.0"; // bool - str
+$a = 1.0;   // str - double
+$a = 1;     // double - int
+$a = true;  // int - bool
+$a = 1;     // bool - int
+$a = "1.0"; // int - str
+$a = 1;     // str - int
+$a = 1.0;   // 
+$a = true;  // double - bool
+$a = 1.0;   // bool - double
