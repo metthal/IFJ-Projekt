@@ -27,10 +27,15 @@ uint8_t overwriteFile(const char *fileName, const char *content)
     if (!file)
         return 0;
 
-    fprintf(file, "%s", content);
+    fprintf(file, "%s\n%s", "<?php", content);
+    fclose(file);
+
     scannerReset();
     scannerOpenFile(filePath);
-    fclose(file);
+
+    // Read php token that is always first.
+    token = nextToken();
+
     return 1;
 }
 
@@ -44,8 +49,10 @@ SHOULD_EQUAL("openFile - not existing file", scannerOpenFile(filePath), NULL);
 overwriteFile(filePath, "");
 SHOULD_NOT_EQUAL("openFile - existing file", scannerOpenFile(filePath), NULL);
 
+overwriteFile(filePath, "");
 token = nextToken();
 SHOULD_EQUAL("GetToken - empty file - EOF", token->type, STT_EOF);
+printf("%d", token->type);
 
 overwriteFile(filePath, ";");
 token = nextToken();

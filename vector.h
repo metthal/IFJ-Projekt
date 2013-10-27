@@ -9,7 +9,7 @@ typedef struct
     uint32_t size; ///< Used size of data container.
     uint32_t capacity; ///< Real size of data container.
     size_t itemSize; ///< Size of single item in bytes.
-    void *data; ///< Data container.
+    uint8_t *data; ///< Data container.
     uint8_t *end; ///< Access optimization member.
 } Vector;
 

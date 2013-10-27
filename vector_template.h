@@ -5,6 +5,8 @@
 #include ITEM_HEADER
 #endif
 
+#include "nierr.h"
+
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -70,7 +72,7 @@ static void CONSTRUCT(free, Vector)(Vector **vec)
         DELETE_ITEM(it);
     free(tmp->data);
     free(*vec);
-    tmp = *vec = NULL;
+    *vec = NULL;
 }
 
 /**
@@ -83,6 +85,7 @@ static void TEMPLATE(vectorClear)(Vector *vec)
     for (uint8_t* it = vec->data; it != vec->end; it += vec->itemSize)
         DELETE_ITEM(it);
     vec->size = 0;
+    vec->end = vec->data;
 }
 
 /**

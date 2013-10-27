@@ -7,7 +7,7 @@
 #define ITEM_HEADER "scanner.h"
 #define ITEM Token
 #define SMALL_ITEM token
-#include "vectorTemplate.h"
+#include "vector_template.h"
 #undef SMALL_ITEM
 #undef ITEM
 #undef HEADER
