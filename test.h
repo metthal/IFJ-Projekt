@@ -12,13 +12,20 @@ typedef void (*TestEP)();
 
 static const uint8_t TestNameLen = 48;
 static const uint8_t TestResultPos = 50;
-extern uint32_t testCountOk, testCountFailed, onlyFailed;
+extern uint32_t testCountOk, testCountFailed, testFlags;
 
 typedef enum
 {
     TestOk,
     TestFailed
 } TestResult;
+
+typedef enum
+{
+    None        = 0,
+    OnlyFailed  = 1,
+    VerboseOut  = 2
+} TestFlags;
 
 static inline void printfc(uint8_t color, uint8_t style, const char *fmt, ...)
 {
@@ -45,7 +52,7 @@ static inline void testResult(uint8_t result, const char *testName, const char *
         testName = buffer;
     }
 
-    if (!onlyFailed || result == TestFailed) {
+    if (!(testFlags & OnlyFailed) || result == TestFailed) {
         printf("%s", testName);
 
         uint8_t spaceCount = TestResultPos - strlen(testName);
@@ -54,7 +61,7 @@ static inline void testResult(uint8_t result, const char *testName, const char *
     }
 
     if (result == TestOk) {
-        if (!onlyFailed) {
+        if (!(testFlags & OnlyFailed)) {
             printf("[ ");
             printfc(1, 32, "PASS");
             printf(" ]\n");
