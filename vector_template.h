@@ -48,6 +48,7 @@ static Vector* CONSTRUCT(new, Vector)()
     vec->capacity = VectorDefaultCapacity;
     vec->itemSize = sizeof(ITEM);
     vec->data = malloc(VectorDefaultCapacity * vec->itemSize);
+    memset(vec->data, 0, VectorDefaultCapacity * vec->itemSize);
 
     if (vec->data == NULL) {
         setError(ERR_NewFailed);
@@ -135,9 +136,9 @@ static void TEMPLATE(vectorPushDefault)(Vector *vec)
  */
 static void TEMPLATE(vectorPop)(Vector *vec)
 {
-    DELETE_ITEM(vec->end);
     vec->size--;
     vec->end -= vec->itemSize;
+    DELETE_ITEM(vec->end);
 }
 
 /**
