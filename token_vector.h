@@ -4,7 +4,7 @@
 #include "vector.h"
 
 #define STRUCT_ITEM
-#define ITEM_HEADER "scanner.h"
+#define ITEM_HEADER "token.h"
 #define ITEM Token
 #define SMALL_ITEM token
 #include "vector_template.h"

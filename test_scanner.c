@@ -45,6 +45,7 @@ generateFilePath();
 token = NULL;
 
 SHOULD_EQUAL("openFile - not existing file", scannerOpenFile(filePath), NULL);
+clearError();
 
 overwriteFile(filePath, "");
 SHOULD_NOT_EQUAL("openFile - existing file", scannerOpenFile(filePath), NULL);
@@ -52,7 +53,6 @@ SHOULD_NOT_EQUAL("openFile - existing file", scannerOpenFile(filePath), NULL);
 overwriteFile(filePath, "");
 token = nextToken();
 SHOULD_EQUAL("GetToken - empty file - EOF", token->type, STT_EOF);
-printf("%d", token->type);
 
 overwriteFile(filePath, ";");
 token = nextToken();
@@ -229,6 +229,7 @@ SHOULD_EQUAL("GetToken - multitoken - EOF", token->type, STT_EOF);
 overwriteFile(filePath, "12.");
 token = nextToken();
 SHOULD_EQUAL("GetToken - lex error double", token, NULL);
+clearError();
 
 overwriteFile(filePath, ":");
 token = nextToken();
@@ -237,10 +238,12 @@ SHOULD_EQUAL("GetToken - Colon", token, NULL);
 overwriteFile(filePath, "$");
 token = nextToken();
 SHOULD_EQUAL("GetToken - lex error $", token, NULL);
+clearError();
 
 overwriteFile(filePath, "\"string");
 token = nextToken();
 SHOULD_EQUAL("GetToken - unexpected end of string - lex error", token, NULL);
+clearError();
 
 overwriteFile(filePath, "$s.$s");
 token = nextToken();
@@ -267,6 +270,7 @@ SHOULD_EQUAL("GetToken - multitoken - multiline comment - EOF", token->type, STT
 overwriteFile(filePath, "==");
 token = nextToken();
 SHOULD_EQUAL("GetToken - lex error double equal", token, NULL);
+clearError();
 
 overwriteFile(filePath, "if else elseif continue break while for true false return function null");
 token = nextToken();

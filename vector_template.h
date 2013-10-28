@@ -9,6 +9,7 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 
 static uint8_t const VectorResizeIncRate = 2;
 static uint8_t const VectorResizeDecRate = 3;
@@ -48,6 +49,9 @@ static Vector* CONSTRUCT(new, Vector)()
     vec->capacity = VectorDefaultCapacity;
     vec->itemSize = sizeof(ITEM);
     vec->data = malloc(VectorDefaultCapacity * vec->itemSize);
+    // TODO: should be solved for all reallocations or
+    // by initializing each item correctly (maybe?)
+    // TODO: debug according to valgrind when commented out
     memset(vec->data, 0, VectorDefaultCapacity * vec->itemSize);
 
     if (vec->data == NULL) {

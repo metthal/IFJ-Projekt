@@ -1,0 +1,60 @@
+#include "token.h"
+#include <stdlib.h>
+#include <string.h>
+
+Token* newToken() // FUNCTION CREATES NEWTOKEN STRUCTURE
+{
+    Token* tmp = malloc(sizeof(Token));
+    tmp->type = STT_Empty;
+    return tmp;
+}
+
+// TODO: proper initialization of data sector
+void initToken(Token *pt)
+{
+    // TODO: Something like this?
+    memset(pt, 0, sizeof(Token));
+    pt->type = STT_Empty;
+}
+
+void deleteToken(Token *pt)
+{
+    if (pt != NULL) {
+        if ((pt->type == STT_Variable)
+            || (pt->type == STT_Identifier)
+            || (pt->type == STT_String)) {
+            deleteString(&pt->str);
+        }
+    }
+}
+
+void freeToken(Token **ppt)
+{
+    if (ppt != NULL) {
+        if (*ppt != NULL) {
+            if (((*ppt)->type == STT_Variable)
+                || ((*ppt)->type == STT_Identifier)
+                || ((*ppt)->type == STT_String)) {
+                deleteString(&(*ppt)->str);
+            }
+        }
+        free(*ppt);
+        *ppt = NULL;
+    }
+}
+
+void tokenCopy(Token *src, Token *dest)
+{
+    dest->type = src->type;
+    if(src->type == STT_Variable   ||
+       src->type == STT_Identifier ||
+       src->type == STT_String){
+        stringCopy(&src->str, &dest->str);
+    }
+    else if(src->type == STT_Double)
+        dest->d = src->d;
+    else if(src->type == STT_Number)
+        dest->n = src->n;
+    else if(src->type == STT_Keyword)
+        dest->keywordType = src->keywordType;
+}
