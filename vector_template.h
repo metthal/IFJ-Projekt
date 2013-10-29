@@ -1,8 +1,8 @@
 #ifndef VECTOR_TEMPLATE_H
 #define VECTOR_TEMPLATE_H
 
-#ifdef ITEM_HEADER
-#include ITEM_HEADER
+#ifdef VECTOR_ITEM_HEADER
+#include VECTOR_ITEM_HEADER
 #endif
 
 #include "nierr.h"
@@ -17,16 +17,16 @@ static uint16_t const VectorDefaultCapacity = 16;
 
 #define MAKE_NAME(x, y, z) x ##y ##z
 #define EXPAND(x, y, z) MAKE_NAME(x, y, z)
-#define TEMPLATE(x) EXPAND(x, ITEM, )
-#define CONSTRUCT(x, y) EXPAND(x, ITEM, y)
+#define TEMPLATE(x) EXPAND(x, VECTOR_ITEM, )
+#define CONSTRUCT(x, y) EXPAND(x, VECTOR_ITEM, y)
 
-#ifdef STRUCT_ITEM
-#define PUSH_BACK_ITEM ITEM*
-#define COPY_ITEM(src, dest) EXPAND(SMALL_ITEM, Copy, )((ITEM*)(src), (ITEM*)(dest))
-#define INIT_ITEM(x) EXPAND(init, ITEM, )((ITEM*)(x))
-#define DELETE_ITEM(x) EXPAND(delete, ITEM, )((ITEM*)(x))
+#ifdef VECTOR_STRUCT_ITEM
+#define PUSH_BACK_ITEM VECTOR_ITEM*
+#define COPY_ITEM(src, dest) TEMPLATE(copy)((src), (VECTOR_ITEM*)(dest))
+#define INIT_ITEM(x) TEMPLATE(init)((VECTOR_ITEM*)(x))
+#define DELETE_ITEM(x) TEMPLATE(delete)((VECTOR_ITEM*)(x))
 #else
-#define PUSH_BACK_ITEM ITEM
+#define PUSH_BACK_ITEM VECTOR_ITEM
 #define COPY_ITEM(src, dest) *(dest) = src
 #define INIT_ITEM(x) (x) = 0
 #define DELETE_ITEM(x)
@@ -47,12 +47,8 @@ static Vector* CONSTRUCT(new, Vector)()
 
     vec->size = 0;
     vec->capacity = VectorDefaultCapacity;
-    vec->itemSize = sizeof(ITEM);
+    vec->itemSize = sizeof(VECTOR_ITEM);
     vec->data = malloc(VectorDefaultCapacity * vec->itemSize);
-    // TODO: should be solved for all reallocations or
-    // by initializing each item correctly (maybe?)
-    // TODO: debug according to valgrind when commented out
-    memset(vec->data, 0, VectorDefaultCapacity * vec->itemSize);
 
     if (vec->data == NULL) {
         setError(ERR_NewFailed);

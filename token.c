@@ -5,14 +5,13 @@
 Token* newToken() // FUNCTION CREATES NEWTOKEN STRUCTURE
 {
     Token* tmp = malloc(sizeof(Token));
+    memset(tmp, 0, sizeof(Token));
     tmp->type = STT_Empty;
     return tmp;
 }
 
-// TODO: proper initialization of data sector
 void initToken(Token *pt)
 {
-    // TODO: Something like this?
     memset(pt, 0, sizeof(Token));
     pt->type = STT_Empty;
 }
@@ -43,8 +42,9 @@ void freeToken(Token **ppt)
     }
 }
 
-void tokenCopy(Token *src, Token *dest)
+void copyToken(Token *src, Token *dest)
 {
+    memset(dest, 0, sizeof(Token));
     dest->type = src->type;
     if(src->type == STT_Variable   ||
        src->type == STT_Identifier ||

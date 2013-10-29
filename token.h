@@ -66,10 +66,43 @@ typedef struct
     };
 } Token;
 
+/**
+ * Constructs new token on heap and initializes it
+ * to default state.
+ * @return Constructed token.
+ */
 Token* newToken();
+
+/**
+ * Initializes already constructed token to default
+ * state. Token must be in uninitialized state.
+ * @param pt Token to initialize.
+ */
 void initToken(Token *pt);
+
+/**
+ * Deletes content of token, freeing all memory
+ * allocated by it's members and token itself.
+ * Leaves token in uninitialized state.
+ * @param pt Token to delete.
+ */
 void deleteToken(Token *pt);
+
+/**
+ * Destroys token on heap, freeing all memory
+ * allocated by it's members and token itself.
+ * The pointer to token is set to NULL afterwards.
+ * @param ppt Pointer to token to free.
+ */
 void freeToken(Token **ppt);
-void tokenCopy(Token *src, Token *dest);
+
+/**
+ * Deep-copies the content of source to destination
+ * token. Destination token must be in just-constructed
+ * or uninitialized state.
+ * @param src Source token that will be copied.
+ * @param dest Destination token that will be copy.
+ */
+void copyToken(Token *src, Token *dest);
 
 #endif
