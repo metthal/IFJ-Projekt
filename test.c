@@ -10,6 +10,7 @@ TestFlags testFlags = None;
 TEST_SUITE(StringTests)
 TEST_SUITE(ScannerTests)
 TEST_SUITE(TokenVectorTests)
+TEST_SUITE(IalTests)
 
 int main(int argc, char **argv)
 {
@@ -42,6 +43,7 @@ int main(int argc, char **argv)
     REGISTER_TEST_SUITE(StringTests)
     REGISTER_TEST_SUITE(ScannerTests)
     REGISTER_TEST_SUITE(TokenVectorTests)
+    REGISTER_TEST_SUITE(IalTests)
 
     RUN_TEST_SUITES
 
