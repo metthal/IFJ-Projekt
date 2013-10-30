@@ -3,7 +3,7 @@
 
 #include "string.h"
 #include "token.h"
-#include "token_vector.h"
+#include "vector.h"
 #include <stdio.h>
 
 void scannerReset();

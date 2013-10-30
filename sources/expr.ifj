@@ -7,10 +7,7 @@ $c = $a + $b;
 $d = $a - $b;
 $e = $a * $b;
 $f = $a / $b;
-$g = $a == $b; // True
 $h = $a === $b; // False
 $i = $c > $d; // True
 $j = $e > $f; // True
-$k = (($a + $b) * $a + $b - $c) == 190; // True
-$l = "a" == false; // False
-$m = "" == true; // True
+$k = (($a + $b) * $a + $b - $c) <= 190; // True

@@ -77,33 +77,4 @@ void* vectorFront(Vector *vec);
  */
 void* vectorBack(Vector *vec);
 
-/**
- * Returns pointer to beginning of vector.
- * Intended to use as iterator.
- * @param vec Vector to operate on.
- * @return Pointer to beginning of vector.
- */
-uint8_t* vectorBegin(Vector *vec);
-
-/**
- * Returns pointer to past-the-end element in
- * vector.
- * This means first address that is out of vector
- * range. Intended use as iterator.
- * @param vec Vector to operate on.
- * @return Pointer to end of vector.
- */
-uint8_t* vectorEnd(Vector *vec);
-
-/**
- * Returns step that can be used for iterating
- * over vector with iterators.
- * @param vec Vector to query.
- * @return Step size represented in bytes.
- */
-static inline size_t vectorStep(Vector *vec)
-{
-    return vec->itemSize;
-}
-
 #endif

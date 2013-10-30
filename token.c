@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-Token* newToken() // FUNCTION CREATES NEWTOKEN STRUCTURE
+Token* newToken()
 {
     Token* tmp = malloc(sizeof(Token));
     memset(tmp, 0, sizeof(Token));

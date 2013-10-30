@@ -37,8 +37,8 @@ clearError();
 SHOULD_EQUAL("vectorFront() Data", ((Token*)vec->data)->type, STT_Less);
 clearError();
 
-// vectorBegin()
-SHOULD_EQUAL("vectorBegin() Data", vectorBegin(vec), vec->data);
+// vectorBeginToken()
+SHOULD_EQUAL("vectorBegin() Data", vectorBeginToken(vec), vec->data);
 clearError();
 
 // vectorPush()
@@ -85,23 +85,23 @@ vectorShrinkToFit(vec);
 SHOULD_EQUAL("vectorShrinkToFit() Capacity", vectorCapacity(vec), 20);
 clearError();
 
-// vectorEnd()
-SHOULD_EQUAL("vectorEnd() End", vectorEnd(vec), vec->end);
-SHOULD_EQUAL("vectorEnd() End", vectorEnd(vec), vec->data + vec->size * vec->itemSize);
+// vectorEndToken()
+SHOULD_EQUAL("vectorEnd() End", vectorEndToken(vec), vec->end);
+SHOULD_EQUAL("vectorEnd() End", vectorEndToken(vec), vec->data + vec->size * vec->itemSize);
 clearError();
 
 // vectorStep()
 uint8_t i = 0;
-for(uint8_t* it = vectorBegin(vec); it != vectorEnd(vec); it += vectorStep(vec))
+for(TokenVectorIterator it = vectorBeginToken(vec); it != vectorEndToken(vec); it++)
     i++;
-SHOULD_EQUAL("vectorStep() Count", i, 20);
+SHOULD_EQUAL("vector iteration Count", i, 20);
 clearError();
 
 // vectorClear()
 vectorClearToken(vec);
 SHOULD_EQUAL("vectorClear() Size", vectorSize(vec), 0);
 SHOULD_EQUAL("vectorClear() Capacity", vectorCapacity(vec), 20);
-SHOULD_EQUAL("vectorClear() End", vectorEnd(vec), vectorBegin(vec));
+SHOULD_EQUAL("vectorClear() End", vectorEndToken(vec), vectorBeginToken(vec));
 clearError();
 
 // freeVector()

@@ -1,5 +1,6 @@
 #include "scanner.h"
 #include "convert.h"
+#include "token_vector.h"
 #include "nierr.h"
 
 #include <stdlib.h>

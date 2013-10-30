@@ -15,3 +15,7 @@ function sqr($x){
     $x = $x * $x;
     return $x;
 }
+
+function dummy($x, $y)
+{
+}

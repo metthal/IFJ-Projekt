@@ -1,23 +1,31 @@
 #include "nierr.h"
 #include "rc.h"
 #include "scanner.h"
+#include "parser.h"
 
-uint8_t processParams(int32_t argc, char **argv)
+uint8_t processParams(int32_t argc, char **argv, Vector** tokenVector)
 {
-    if (argc != 2)
-        return 0;
+    if (argc != 2){
+        *tokenVector = NULL;
+        return 1;
+    }
 
-    return (scannerOpenFile(argv[1]) != NULL);
+    *tokenVector = scannerScanFile(argv[1]);
+    return 0;
 }
 
 int main(int argc, char **argv)
 {
     setError(ERR_None);
 
-    if (!processParams(argc, argv))
+    Vector* tokenVector = NULL;
+    if (processParams(argc, argv, &tokenVector))
         return RC_FatalError;
 
-    ///< @todo Start parser
+    if(getError())
+        return getRcFromError();
+
+    parse(tokenVector);
 
     return getRcFromError();
 }

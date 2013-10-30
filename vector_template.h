@@ -179,6 +179,29 @@ static void TEMPLATE(vectorResize)(Vector *vec, uint32_t size)
     vec->end = newEnd;
 }
 
+/**
+ * Returns iterator at the beginning of vector.
+ * @param vec Vector to operate on.
+ * @return Iterator at the beginning of vector.
+ */
+static VECTOR_ITERATOR TEMPLATE(vectorBegin)(Vector *vec)
+{
+    return (VECTOR_ITERATOR)vec->data;
+}
+
+/**
+ * Returns iterator at the past-the-end element in
+ * vector.
+ * This means first element that is out of vector
+ * range.
+ * @param vec Vector to operate on.
+ * @return Iterator at the end of vector.
+ */
+static VECTOR_ITERATOR TEMPLATE(vectorEnd)(Vector *vec)
+{
+    return (VECTOR_ITERATOR)vec->end;
+}
+
 #undef ITEM_COPY
 #undef PUSH_BACK_ITEM
 #undef CONSTRUCT

@@ -69,13 +69,3 @@ void* vectorBack(Vector *vec)
     }
     return vec->end - vec->itemSize;
 }
-
-uint8_t* vectorBegin(Vector *vec)
-{
-    return vec->data;
-}
-
-uint8_t* vectorEnd(Vector *vec)
-{
-    return vec->end;
-}
