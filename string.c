@@ -126,6 +126,17 @@ String* stringClone(String *ps)
     return nps;
 }
 
+String* stringSubstr(String *ps, uint32_t offset, uint32_t length)
+{
+    String *nps = newStringSize(ps->size);
+    if (nps != NULL) {
+        nps->length = length + 1;
+        memcpy(nps->data, ps->data + offset, length);
+        nps->data[length] = '\0';
+    }
+    return nps;
+}
+
 void stringEmpty(String *ps)
 {
     ps->data[0] = '\0';
