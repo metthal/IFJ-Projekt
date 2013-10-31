@@ -44,19 +44,29 @@ String *c = newStringS(CSTR_ARG("Hello World!"));
 SHOULD_EQUAL("newStringS() Length", c->length, 13);
 SHOULD_EQUAL_STR("newStringS() Data", c->data, "Hello World!");
 
+// freeString()
+freeString(&a);
+SHOULD_EQUAL("stringFree()", a, NULL);
+
+// stringClone()
+a = stringClone(c);
+SHOULD_EQUAL("stringClone() Length", a->length, c->length);
+SHOULD_EQUAL_STR("stringClone() Data", a->data, c->data);
+freeString(&a);
+
+// stringSubstr()
+a = stringSubstr(c, 0, 5);
+SHOULD_EQUAL("stringClone() Length", a->length, 6);
+SHOULD_EQUAL_STR("stringClone() Data", a->data, "Hello");
+
 // stringResize()
 stringResize(a, 50);
 SHOULD_EQUAL("stringResize() Size", a->size, 50);
 
-// stringClone()
-String *d = stringClone(b);
-SHOULD_EQUAL("stringClone() Length", d->length, b->length);
-SHOULD_EQUAL_STR("stringClone() Data", d->data, b->data);
-
 // stringEmpty()
-stringEmpty(d);
-SHOULD_EQUAL("stringEmpty() Length", d->length, 1);
-SHOULD_EQUAL_STR("stringEmpty() Data", d->data, "");
+stringEmpty(a);
+SHOULD_EQUAL("stringEmpty() Length", a->length, 1);
+SHOULD_EQUAL_STR("stringEmpty() Data", a->data, "");
 
 // stringSet()
 stringSet(a, c);
@@ -85,7 +95,7 @@ SHOULD_EQUAL("stringPop() Length", a->length, 9);
 SHOULD_EQUAL_STR("stringPop() Data", a->data, "abcdefgh");
 
 // stringCopy()
-stringCopy(b, c);
+stringCopy(c, b);
 SHOULD_EQUAL("stringCopy() Length", b->length, c->length);
 SHOULD_EQUAL_STR("stringCopy() Data", b->data, c->data);
 
@@ -129,15 +139,9 @@ SHOULD_EQUAL("stringCompareSS() 1", stringCompareSS(CSTR_ARG("a"), CSTR_ARG("a")
 SHOULD_BE_GRT("stringCompareSS() 2", stringCompareSS(CSTR_ARG("ab"), CSTR_ARG("a")), 0);
 SHOULD_BE_LESS("stringCompareSS() 3", stringCompareSS(CSTR_ARG("a"), CSTR_ARG("ab")), 0);
 
-// freeString()
-int combinedTestResult = 0;
+// cleanup
 freeString(&a);
 freeString(&b);
 freeString(&c);
-freeString(&d);
-if (!(a || b || c || d)) {
-    combinedTestResult = 1;
-}
-SHOULD_BE_TRUE("freeString()", combinedTestResult);
 
 TEST_SUITE_END
