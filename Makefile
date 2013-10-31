@@ -30,6 +30,10 @@ TEMP_FILES = gmon.out
 DOXYFILE = doxyconfig
 DOC_DIR = doxydoc
 
+ANALYZE_FLAGS = --enable=all --std=c99
+TEST_BUILD = no
+SHELL = /bin/bash
+
 # Targets
 release: CFLAGS += $(CFLAGS_RELEASE)
 release: build
@@ -47,17 +51,21 @@ callgraph:
 	@gprof $(PROJECT) > profile.log.$(DATE).$(COMMIT_HASH)
 
 analyze:
-	@cppcheck --enable=all $(SRC_FILES) $(HEADER_FILES)
+	@cppcheck $(ANALYZE_FLAGS) $(SRC_FILES) $(HEADER_FILES)
 
 analyzeAll:
-	@cppcheck --enable=all $(SRC_FILES) $(TEST_SRC_FILES) $(HEADER_FILES) $(TEST_HEADER_FILES)
+	@cppcheck $(ANALYZE_FLAGS) $(SRC_FILES) $(TEST_SRC_FILES) $(HEADER_FILES) $(TEST_HEADER_FILES)
 
 build: CFLAGS += $(STD_C99)
 build: $(OBJ_FILES)
 	$(CC) $^ -o $(PROJECT) $(LFLAGS)
 
 %.o: %.c
+ifeq ($(TEST_BUILD),yes)
+	@$(CC) $(CFLAGS) $< -o $@
+else
 	$(CC) $(CFLAGS) $< -o $@
+endif
 
 clean:
 	$(RM) $(PROJECT) $(PROJECT_TEST) $(OBJ_FILES) $(TAR_FILE) $(TEMP_FILES) $(TEST_OBJ_FILES) $(DOC_DIR)
@@ -66,8 +74,13 @@ pack:
 	$(TAR) $(TAR_FILE) $(PACKED_FILES)
 
 test: CFLAGS += $(CFLAGS_DEBUG) $(STD_GNU99)
-test: $(TEST_OBJ_FILES)
-	$(CC) $^ -o $(PROJECT_TEST) $(LFLAGS)
+test: ANALYZE_FLAGS += -q
+test:
+	@$(MAKE) $(TEST_OBJ_FILES) TEST_BUILD=yes CFLAGS="$(CFLAGS)" >/dev/null && \
+		echo -e "\n\033[1;34mStarting static analysis...\033[00m" && \
+		$(MAKE) analyzeAll ANALYZE_FLAGS="$(ANALYZE_FLAGS)" >/dev/null && \
+		echo -e "\n\033[1;34mStarting tests...\033[00m" && \
+		$(CC) $(TEST_OBJ_FILES) -o $(PROJECT_TEST) $(LFLAGS) && ./$(PROJECT_TEST) -f
 
 ctags:
 	@ctags $(SRC_FILES) $(TEST_SRC_FILES) $(HEADER_FILES) $(TEST_HEADER_FILES)

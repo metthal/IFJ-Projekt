@@ -38,7 +38,7 @@ SHOULD_EQUAL("vectorFront() Data", ((Token*)vec->data)->type, STT_Less);
 clearError();
 
 // vectorBeginToken()
-SHOULD_EQUAL("vectorBegin() Data", vectorBeginToken(vec), vec->data);
+SHOULD_EQUAL("vectorBegin() Data", vectorBeginToken(vec), (TokenVectorIterator)vec->data);
 clearError();
 
 // vectorPush()
@@ -86,8 +86,8 @@ SHOULD_EQUAL("vectorShrinkToFit() Capacity", vectorCapacity(vec), 20);
 clearError();
 
 // vectorEndToken()
-SHOULD_EQUAL("vectorEnd() End", vectorEndToken(vec), vec->end);
-SHOULD_EQUAL("vectorEnd() End", vectorEndToken(vec), vec->data + vec->size * vec->itemSize);
+SHOULD_EQUAL("vectorEnd() End", vectorEndToken(vec), (TokenVectorIterator)vec->end);
+SHOULD_EQUAL("vectorEnd() End", vectorEndToken(vec), (TokenVectorIterator)(vec->data + vec->size * vec->itemSize));
 clearError();
 
 // vectorStep()
