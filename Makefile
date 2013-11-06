@@ -76,10 +76,10 @@ pack:
 test: CFLAGS += $(CFLAGS_DEBUG) $(STD_GNU99)
 test: ANALYZE_FLAGS += -q
 test:
-	@$(MAKE) $(TEST_OBJ_FILES) TEST_BUILD=yes CFLAGS="$(CFLAGS)" >/dev/null && \
+	@-$(MAKE) $(TEST_OBJ_FILES) TEST_BUILD=yes CFLAGS="$(CFLAGS)" >/dev/null && \
 		echo -e "\n\033[1;34mStarting static analysis...\033[00m" && \
-		$(MAKE) analyzeAll ANALYZE_FLAGS="$(ANALYZE_FLAGS)" >/dev/null && \
-		echo -e "\n\033[1;34mStarting tests...\033[00m" && \
+		$(MAKE) analyzeAll ANALYZE_FLAGS="$(ANALYZE_FLAGS)" >/dev/null
+	@-echo -e "\n\033[1;34mStarting tests...\033[00m" && \
 		$(CC) $(TEST_OBJ_FILES) -o $(PROJECT_TEST) $(LFLAGS) && ./$(PROJECT_TEST) -f
 
 ctags:
