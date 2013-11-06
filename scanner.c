@@ -394,6 +394,7 @@ void scannerFillToken(Token *token)
                     stringPush(tokenStr, symbol);
                 }
                 else {
+                    deleteString(tokenStr);
                     setError(ERR_LexFile);
                     return;
                 }
@@ -405,6 +406,7 @@ void scannerFillToken(Token *token)
                     stringPush(tokenStr, symbol);
                 }
                 else {
+                    deleteString(tokenStr);
                     setError(ERR_LexFile);
                     return;
                 }
