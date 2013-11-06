@@ -43,7 +43,7 @@ String* intToString(int64_t num)
 // Just basic implementation, will be improved as needed
 String* doubleToString(double num)
 {
-    String *tmp = newString();
+    String *tmp = NULL;
     /* Buffer size explanation.
      * Sign: 1
      * Mantisa: 15-17 digits => 17 + 1 (dot)
