@@ -197,6 +197,13 @@ SHOULD_EQUAL("GetToken - double - Value", token->d, 12.03);
 token = nextToken();
 SHOULD_EQUAL("GetToken - double - EOF", token->type, STT_EOF);
 
+overwriteFile(filePath, "12E-1");
+token = nextToken();
+SHOULD_EQUAL("GetToken - double", token->type, STT_Double);
+SHOULD_EQUAL("GetToken - double - Value", token->d, 12E-1);
+token = nextToken();
+SHOULD_EQUAL("GetToken - double - EOF", token->type, STT_EOF);
+
 overwriteFile(filePath, "12.03E+04");
 token = nextToken();
 SHOULD_EQUAL("GetToken - double exponent", token->type, STT_Double);
@@ -227,6 +234,16 @@ token = nextToken();
 SHOULD_EQUAL("GetToken - multitoken - EOF", token->type, STT_EOF);
 
 overwriteFile(filePath, "12.");
+token = nextToken();
+SHOULD_EQUAL("GetToken - lex error double", token, NULL);
+clearError();
+
+overwriteFile(filePath, "12.e03");
+token = nextToken();
+SHOULD_EQUAL("GetToken - lex error double", token, NULL);
+clearError();
+
+overwriteFile(filePath, "12.3e-");
 token = nextToken();
 SHOULD_EQUAL("GetToken - lex error double", token, NULL);
 clearError();
