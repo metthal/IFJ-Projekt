@@ -41,7 +41,7 @@ String* intToString(int64_t num)
 }
 
 // Just basic implementation, will be improved as needed
-String* doubleToString(double num, uint8_t precision)
+String* doubleToString(double num)
 {
     String *tmp = newString();
     /* Buffer size explanation.
@@ -52,7 +52,7 @@ String* doubleToString(double num, uint8_t precision)
      * 26 chars needed at most.
      */
     char buffer[26];
-    int written = sprintf(buffer, "%.*e", precision, num);
+    int written = sprintf(buffer, "%g", num);
     if (written > 0)
         tmp = newStringS(buffer, written);
     else

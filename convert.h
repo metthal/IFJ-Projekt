@@ -28,6 +28,6 @@ String* intToString(int64_t num);
  * @param num Double to convert.
  * @return New instance of string object with converted value.
  */
-String* doubleToString(double num, uint8_t precision);
+String* doubleToString(double num);
 
 #endif
