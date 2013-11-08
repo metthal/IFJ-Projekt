@@ -31,6 +31,7 @@ DOXYFILE = doxyconfig
 DOC_DIR = doxydoc
 
 ANALYZE_FLAGS = --enable=all --std=c99
+ANALYZE_FILTER = 2>&1 | grep --color=always -Ev "\-\-check\-config|never used" 1>&2
 TEST_BUILD = no
 SHELL = /bin/bash
 
@@ -51,10 +52,10 @@ callgraph:
 	@gprof $(PROJECT) > profile.log.$(DATE).$(COMMIT_HASH)
 
 analyze:
-	@cppcheck $(ANALYZE_FLAGS) $(SRC_FILES) $(HEADER_FILES)
+	@cppcheck $(ANALYZE_FLAGS) $(SRC_FILES) $(HEADER_FILES) $(ANALYZE_FILTER)
 
 analyzeAll:
-	@cppcheck $(ANALYZE_FLAGS) $(SRC_FILES) $(TEST_SRC_FILES) $(HEADER_FILES) $(TEST_HEADER_FILES)
+	@cppcheck $(ANALYZE_FLAGS) $(SRC_FILES) $(TEST_SRC_FILES) $(HEADER_FILES) $(TEST_HEADER_FILES) $(ANALYZE_FILTER)
 
 build: CFLAGS += $(STD_C99)
 build: $(OBJ_FILES)
@@ -76,11 +77,12 @@ pack:
 test: CFLAGS += $(CFLAGS_DEBUG) $(STD_GNU99)
 test: ANALYZE_FLAGS += -q
 test:
-	@-$(MAKE) $(TEST_OBJ_FILES) TEST_BUILD=yes CFLAGS="$(CFLAGS)" >/dev/null && \
-		echo -e "\n\033[1;34mStarting static analysis...\033[00m" && \
-		$(MAKE) analyzeAll ANALYZE_FLAGS="$(ANALYZE_FLAGS)" >/dev/null
-	@-echo -e "\n\033[1;34mStarting tests...\033[00m" && \
-		$(CC) $(TEST_OBJ_FILES) -o $(PROJECT_TEST) $(LFLAGS) && ./$(PROJECT_TEST) -f
+	@$(MAKE) $(TEST_OBJ_FILES) TEST_BUILD=yes CFLAGS="$(CFLAGS)" >/dev/null && \
+		$(CC) $(TEST_OBJ_FILES) -o $(PROJECT_TEST) $(LFLAGS)
+	@-(echo -e "\n\033[1;34mStarting static analysis...\033[00m" && \
+		$(MAKE) analyzeAll ANALYZE_FLAGS="$(ANALYZE_FLAGS)" >/dev/null || true) &&\
+		echo -e "\n\033[1;34mStarting tests...\033[00m" && \
+		./$(PROJECT_TEST) -f
 
 ctags:
 	@ctags $(SRC_FILES) $(TEST_SRC_FILES) $(HEADER_FILES) $(TEST_HEADER_FILES)
