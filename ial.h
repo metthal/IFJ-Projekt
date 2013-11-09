@@ -8,21 +8,24 @@
 #include "vector.h"
 #include "string.h"
 
-typedef struct SymbolEntryStruct {
+typedef struct {
     Symbol symbol;
     uint32_t hash;
-    struct SymbolEntryStruct *next;
+    uint32_t next;
 } SymbolEntry;
 
 static uint16_t const SYMBOL_TABLE_DEFAULT_SIZE = 128;
 
 typedef struct SymbolTable {
-    SymbolEntry **table;
+    uint32_t *table;
     Vector* vec;
     uint32_t size;
     uint32_t count;
 } SymbolTable;
 
+
+SymbolTable* newSymbolTable();
+void freeSymbolTable(SymbolTable **st);
 void initSymbolTable(SymbolTable *st);
 void deleteSymbolTable(SymbolTable *st);
 
