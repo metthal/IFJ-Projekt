@@ -11,6 +11,7 @@ TEST_SUITE(StringTests)
 TEST_SUITE(ScannerTests)
 TEST_SUITE(TokenVectorTests)
 TEST_SUITE(IalTests)
+TEST_SUITE(ConvertTests)
 
 int main(int argc, char **argv)
 {
@@ -44,6 +45,7 @@ int main(int argc, char **argv)
     REGISTER_TEST_SUITE(ScannerTests)
     REGISTER_TEST_SUITE(TokenVectorTests)
     REGISTER_TEST_SUITE(IalTests)
+    REGISTER_TEST_SUITE(ConvertTests)
 
     RUN_TEST_SUITES
 
