@@ -157,12 +157,16 @@ FILE* scannerOpenFile(const char *fileName) // OPEN FILE AND RETURN POINTER ON I
     }
 
     source = fopen(fileName, "r");
-    if (source != NULL)
-        lastChar = getc(source);
-    if(source == NULL || lastChar != '<') {
+    if(source == NULL) {
         setError(ERR_LexFile);
         return NULL;
     }
+    else if ((lastChar = getc(source)) != '<') {4
+        // Syntax error according to forums
+        setError(ERR_Syntax);
+        return NULL;
+    }
+
     charStreamSwitch = 0;
     return source;
 }

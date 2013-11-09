@@ -1,6 +1,3 @@
-#ifndef VECTOR_TEMPLATE_H
-#define VECTOR_TEMPLATE_H
-
 #ifdef VECTOR_ITEM_HEADER
 #include VECTOR_ITEM_HEADER
 #endif
@@ -208,5 +205,3 @@ static VECTOR_ITERATOR TEMPLATE(vectorEnd)(Vector *vec)
 #undef TEMPLATE
 #undef EXPAND
 #undef MAKE_NAME
-
-#endif
