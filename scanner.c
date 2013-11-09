@@ -357,7 +357,7 @@ void scannerFillToken(Token *token)
                     state = SS_DoubleSgn;
                     stringPush(tokenStr, symbol);
                 }
-                else if (symbol == 'e') {
+                else if ((symbol == 'e') || (symbol == 'E')) {
                     state = SS_ExponentSgn;
                     stringPush(tokenStr, symbol);
                 }
