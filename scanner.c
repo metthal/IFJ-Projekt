@@ -7,6 +7,9 @@
 #include <stdint.h>
 #include <ctype.h>
 
+#define PHP_TAG_LENGTH          6
+#define MIN_STRING_CHAR_ASCII   32
+
 typedef enum
 {
     SS_Identifier,
@@ -25,18 +28,14 @@ typedef enum
     SS_Exclamation,
     SS_NotEqual,
     SS_String,
-    SS_Php_0,
-    SS_Php_1,
-    SS_Php_2,
-    SS_Php_3,
-    SS_ExponentSgn,
-    SS_DoubleSgn,
-    SS_DoubleMantissa,
-    SS_ExponentPlusMinus,
-    SS_ExponentMantissa,
+    SS_DoubleDecPoint,
+    SS_DoubleDecPart,
+    SS_DoubleExponent,
+    SS_DoubleExpSign,
+    SS_DoubleExpPart,
     SS_StringEscape,
-    SS_HexaString,
-    SS_HexaString_2,
+    SS_StringEscapeHex0,
+    SS_StringEscapeHex1,
 } ScannerState;
 
 static int32_t charStreamSwitch = 1;
@@ -130,13 +129,13 @@ Vector* scannerScanFile(const char *fileName)
 {
     scannerOpenFile(fileName);
     Vector* vec = newTokenVector();
-    while (1){
+    while (1) {
         vectorPushDefaultToken(vec);
-        Token* token = vectorBack(vec);
+        Token *token = vectorBack(vec);
 
         scannerFillToken(token);
 
-        if (getError()){
+        if (getError()) {
             freeTokenVector(&vec);
             return NULL;
         }
@@ -157,13 +156,22 @@ FILE* scannerOpenFile(const char *fileName) // OPEN FILE AND RETURN POINTER ON I
     }
 
     source = fopen(fileName, "r");
-    if (source != NULL)
-        lastChar = getc(source);
-    if(source == NULL || lastChar != '<') {
+    if (source == NULL) {
         setError(ERR_LexFile);
         return NULL;
     }
-    charStreamSwitch = 0;
+
+    char phpTag[PHP_TAG_LENGTH] = { 0 };
+    if (fread(phpTag, sizeof(char), PHP_TAG_LENGTH, source) != PHP_TAG_LENGTH) {
+        setError(ERR_Syntax);
+        return NULL;
+    }
+
+    if ((strncmp(phpTag, "<?php", PHP_TAG_LENGTH - 1) != 0) || (!isspace(phpTag[PHP_TAG_LENGTH - 1]))) {
+        setError(ERR_Syntax);
+        return NULL;
+    }
+
     return source;
 }
 
@@ -172,7 +180,7 @@ Token* scannerGetToken() // FUNCTION, WHICH RETURNS POINTER ON TOKEN STRUCTURE
     Token *token = newToken();
 
     scannerFillToken(token);
-    if (getError()){
+    if (getError()) {
         freeToken(&token);
         return NULL;
     }
@@ -184,10 +192,8 @@ void scannerFillToken(Token *token)
 {
     ScannerState state = SS_Empty;
     int32_t symbol = 0;
-    int32_t hexaString = 0;
-    int32_t hexaString_2 = 0;
-    int32_t hexaStringBackup = 0;
-    int32_t ascii = 0;
+    char hexCode = 0;
+    char hexCodeBackup = 0;
 
     String *tokenStr = &(token->str);
 
@@ -203,7 +209,7 @@ void scannerFillToken(Token *token)
 
         switch (state) {
             case SS_Empty: {
-                if ((symbol >= 'a' && symbol <= 'z') || (symbol >= 'A' && symbol <= 'Z')) {
+                if ((symbol >= 'a' && symbol <= 'z') || (symbol >= 'A' && symbol <= 'Z') || (symbol == '_')) {
                     state = SS_Identifier;
                     initString(tokenStr);
                     stringPush(tokenStr,symbol);
@@ -298,9 +304,6 @@ void scannerFillToken(Token *token)
                     token->type = STT_LessEqual;
                     return;
                 }
-                else if (symbol == '?') {
-                    state = SS_Php_0;
-                }
                 else {
                     lastChar = symbol;
                     charStreamSwitch = 0;
@@ -354,11 +357,11 @@ void scannerFillToken(Token *token)
                     stringPush(tokenStr, symbol);
                 }
                 else if (symbol == '.') {
-                    state = SS_DoubleSgn;
+                    state = SS_DoubleDecPoint;
                     stringPush(tokenStr, symbol);
                 }
                 else if ((symbol == 'e') || (symbol == 'E')) {
-                    state = SS_ExponentSgn;
+                    state = SS_DoubleExponent;
                     stringPush(tokenStr, symbol);
                 }
                 else {
@@ -372,9 +375,9 @@ void scannerFillToken(Token *token)
                 }
                 break;
             }
-            case SS_DoubleSgn: {
+            case SS_DoubleDecPoint: {
                 if (symbol >= '0' && symbol <= '9') {
-                    state = SS_DoubleMantissa;
+                    state = SS_DoubleDecPart;
                     stringPush(tokenStr, symbol);
                 }
                 else {
@@ -384,13 +387,13 @@ void scannerFillToken(Token *token)
                 }
                 break;
             }
-            case SS_ExponentSgn: {
+            case SS_DoubleExponent: {
                 if (symbol >= '0' && symbol <= '9') {
-                    state = SS_DoubleMantissa;
+                    state = SS_DoubleExpPart;
                     stringPush(tokenStr, symbol);
                 }
-                else if (symbol == '+' || symbol == '-') {
-                    state = SS_ExponentPlusMinus;
+                else if ((symbol == '+') || (symbol == '-')) {
+                    state = SS_DoubleExpSign;
                     stringPush(tokenStr, symbol);
                 }
                 else {
@@ -400,9 +403,9 @@ void scannerFillToken(Token *token)
                 }
                 break;
             }
-            case SS_ExponentPlusMinus: {
+            case SS_DoubleExpSign: {
                 if (symbol >= '0' && symbol <= '9') {
-                    state = SS_ExponentMantissa;
+                    state = SS_DoubleExpPart;
                     stringPush(tokenStr, symbol);
                 }
                 else {
@@ -433,13 +436,13 @@ void scannerFillToken(Token *token)
                 }
                 break;
             }
-            case SS_DoubleMantissa: {
+            case SS_DoubleDecPart: {
                 if (symbol >= '0' && symbol <= '9') {
-                    state = SS_DoubleMantissa;
+                    state = SS_DoubleDecPart;
                     stringPush(tokenStr, symbol);
                 }
                 else if (symbol == 'e' || symbol == 'E') {
-                    state = SS_ExponentSgn;
+                    state = SS_DoubleExponent;
                     stringPush(tokenStr, symbol);
                 }
                 else {
@@ -453,9 +456,9 @@ void scannerFillToken(Token *token)
                 }
                 break;
             }
-            case SS_ExponentMantissa: {
+            case SS_DoubleExpPart: {
                 if (symbol >= '0' && symbol <= '9') {
-                    state = SS_ExponentMantissa;
+                    state = SS_DoubleExpPart;
                     stringPush(tokenStr, symbol);
                 }
                 else {
@@ -574,7 +577,7 @@ void scannerFillToken(Token *token)
                     return;
                 }
                 else {
-                    if (symbol > 31 && symbol != '$') {
+                    if (symbol >= MIN_STRING_CHAR_ASCII && symbol != '$') {
                         if (symbol == '\\') {
                             state = SS_StringEscape;
                         }
@@ -594,7 +597,7 @@ void scannerFillToken(Token *token)
             case SS_StringEscape: {
                 switch (symbol) {
                     case 'x': {
-                        state = SS_HexaString;
+                        state = SS_StringEscapeHex0;
                         break;
                     }
                     case '$': {
@@ -631,46 +634,18 @@ void scannerFillToken(Token *token)
                 }
                 break;
             }
-            case SS_HexaString_2: {
+            case SS_StringEscapeHex0: {
                 if (symbol >= '0' && symbol <= '9') {
-                    hexaString_2 = symbol - '0';
-                    ascii = 16 * hexaString + hexaString_2;
-                    stringPush(tokenStr, ascii);
-                    state = SS_String;
+                    hexCode = symbol - '0';
+                    state = SS_StringEscapeHex1;
                 }
                 else if (symbol >= 'A' && symbol <= 'F') {
-                    hexaString_2 = symbol - 'A' + 10;
-                    ascii = 16 * hexaString + hexaString_2;
-                    stringPush(tokenStr, ascii);
-                    state = SS_String;
+                    hexCode = symbol - 'A' + 10;
+                    state = SS_StringEscapeHex1;
                 }
                 else if (symbol >= 'a' && symbol <= 'f') {
-                    hexaString_2 = symbol - 'a' + 10;
-                    ascii = 16 * hexaString + hexaString_2;
-                    stringPush(tokenStr, ascii);
-                    state = SS_String;
-                }
-                else {
-                    state = SS_String;
-                    stringPush(tokenStr, '\\');
-                    stringPush(tokenStr, 'x');
-                    stringPush(tokenStr, hexaStringBackup);
-                    stringPush(tokenStr, symbol);
-                }
-                break;
-            }
-            case SS_HexaString: {
-                if (symbol >= '0' && symbol <= '9') {
-                    hexaString = symbol - '0';
-                    state = SS_HexaString_2;
-                }
-                else if (symbol >= 'A' && symbol <= 'F') {
-                    hexaString = symbol - 'A' + 10;
-                    state = SS_HexaString_2;
-                }
-                else if (symbol >= 'a' && symbol <= 'f') {
-                    hexaString = symbol - 'a' + 10;
-                    state = SS_HexaString_2;
+                    hexCode = symbol - 'a' + 10;
+                    state = SS_StringEscapeHex1;
                 }
                 else {
                     state = SS_String;
@@ -678,48 +653,33 @@ void scannerFillToken(Token *token)
                     stringPush(tokenStr, 'x');
                     stringPush(tokenStr, symbol);
                 }
-                hexaStringBackup = symbol;
+                hexCodeBackup = symbol;
                 break;
             }
-            case SS_Php_0: {
-                if (symbol == 'p') {
-                    state = SS_Php_1;
+            case SS_StringEscapeHex1: {
+                if (symbol >= '0' && symbol <= '9') {
+                    hexCode = (hexCode << 4) + (symbol - '0');
+                    stringPush(tokenStr, hexCode);
+                    state = SS_String;
+                }
+                else if (symbol >= 'A' && symbol <= 'F') {
+                    hexCode = (hexCode << 4) + (symbol - 'A' + 10);
+                    stringPush(tokenStr, hexCode);
+                    state = SS_String;
+                }
+                else if (symbol >= 'a' && symbol <= 'f') {
+                    hexCode = (hexCode << 4) + (symbol - 'a' + 10);
+                    stringPush(tokenStr, hexCode);
+                    state = SS_String;
                 }
                 else {
-                    setError(ERR_LexFile);
-                    return;
+                    state = SS_String;
+                    stringPush(tokenStr, '\\');
+                    stringPush(tokenStr, 'x');
+                    stringPush(tokenStr, hexCodeBackup);
+                    stringPush(tokenStr, symbol);
                 }
                 break;
-            }
-            case SS_Php_1: {
-                if (symbol == 'h') {
-                    state = SS_Php_2;
-                }
-                else {
-                    setError(ERR_LexFile);
-                    return;
-                }
-                break;
-            }
-            case SS_Php_2: {
-                if (symbol == 'p') {
-                    state = SS_Php_3;
-                }
-                else {
-                    setError(ERR_LexFile);
-                    return;
-                }
-                break;
-            }
-            case SS_Php_3: {
-                if (isspace(symbol)) {
-                    token->type = STT_Php;
-                    return;
-                }
-                else {
-                    setError(ERR_LexFile);
-                    return;
-                }
             }
         }
     }
