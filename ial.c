@@ -22,14 +22,14 @@ typedef const SymbolEntry* ConstSymbolEntryVectorIterator;
 void initSymbolEntry(SymbolEntry *se)
 {
     initSymbol(&(se->symbol));
-    se->next = NULL;
+    se->next = 0;
     return;
 }
 
 void deleteSymbolEntry(SymbolEntry *se)
 {
     deleteSymbol(&(se->symbol));
-    se->next = NULL;
+    se->next = 0;
     return;
 }
 
@@ -47,7 +47,7 @@ uint32_t symbolTableHash(SymbolTable *st, String *key)
     for ( i = 0; i < key->length - 1; ++i ) {
         hash = 33 * hash + (unsigned char)key->data[i];
     }
-    if (st != NULL) {
+    if (st) {
         if ( hash > st->size ) {
             hash = hash % st->size;
         }
@@ -55,20 +55,51 @@ uint32_t symbolTableHash(SymbolTable *st, String *key)
     return hash;
 }
 
-void initSymbolTable(SymbolTable *st)
+static inline void* _initSymbolTable(SymbolTable *st)
 {
-    st->table = malloc(sizeof(SymbolEntry*) * SYMBOL_TABLE_DEFAULT_SIZE);
+    st->table = malloc(sizeof(*(st->table)) * SYMBOL_TABLE_DEFAULT_SIZE);
     if (!st->table) {
         setError(ERR_NewFailed);
-        return;
+        return NULL;
     }
-    memset(st->table, 0, sizeof(SymbolEntry*) * SYMBOL_TABLE_DEFAULT_SIZE);
+    memset(st->table, 0, sizeof(*(st->table)) * SYMBOL_TABLE_DEFAULT_SIZE);
     st->vec = newSymbolEntryVector();
     if (!st->vec) {
-        return;
+        free(st->table);
+        // error should be set already in newSymbolEntryVector()
+        return NULL;
     }
+    // Insert dummy record so that indexes start from one
+    vectorPushDefaultSymbolEntry(st->vec);
     st->size = SYMBOL_TABLE_DEFAULT_SIZE;
     st->count = 0;
+    return st->table;
+}
+
+SymbolTable* newSymbolTable()
+{
+    SymbolTable *st = malloc(sizeof(SymbolTable));
+    if (!st) {
+        setError(ERR_NewFailed);
+        return NULL;
+    }
+    if (!_initSymbolTable(st)) {
+        free(st);
+        return NULL;
+    }
+    return st;
+}
+
+void freeSymbolTable(SymbolTable **st)
+{
+    free((*st)->table);
+    freeSymbolEntryVector(&((*st)->vec));
+    *st = NULL;
+}
+
+void initSymbolTable(SymbolTable *st)
+{
+    _initSymbolTable(st);
 }
 
 void deleteSymbolTable(SymbolTable *st)
@@ -80,19 +111,17 @@ void deleteSymbolTable(SymbolTable *st)
     st->size = 0;
 }
 
-static inline void _symbolTableAddSymbolEntry(SymbolTable *st, SymbolEntry* se)
+static inline void _symbolTableAddSymbolEntry(SymbolTable *st, uint32_t nseIndex, uint32_t hash)
 {
-    uint32_t hash = se->hash % st->size;
-    SymbolEntry *symbolEntry = st->table[hash];
-
-    if (symbolEntry != NULL) {
-        while (symbolEntry->next != NULL) {
-            symbolEntry = symbolEntry->next;
+    if (st->table[hash]) {
+        SymbolEntry *symbolEntry = vectorAt(st->vec, st->table[hash]);
+        while (symbolEntry->next) {
+            symbolEntry = vectorAt(st->vec, symbolEntry->next);
         }
-        symbolEntry->next = se;
+        symbolEntry->next = nseIndex;
     }
     else {
-        st->table[hash] = se;
+        st->table[hash] = nseIndex;
     }
 }
 
@@ -102,13 +131,14 @@ void symbolTableResize(SymbolTable *st, uint32_t size)
     st->table = malloc(size * sizeof(SymbolEntry*));
     if (st->table) {
         memset(st->table, 0, size * sizeof(SymbolEntry*));
+        st->size = size;
         for (uint32_t i = 0; i < st->vec->size; i++) {
-            SymbolEntry* symbolEntry = (SymbolEntry*)st->vec->data + sizeof(SymbolEntry*) * i;
-            if (!symbolEntry->symbol.key->data) {
+            SymbolEntry* symbolEntry = (SymbolEntry*)st->vec->data + i;
+            if (!symbolEntry->symbol.key) {
                 continue;
             }
-            symbolEntry->next = NULL;
-            _symbolTableAddSymbolEntry(st, symbolEntry);
+            symbolEntry->next = 0;
+            _symbolTableAddSymbolEntry(st, i, symbolEntry->hash % size);
         }
     }
     else {
@@ -125,13 +155,16 @@ static inline void symbolTableCheckIncrease(SymbolTable *st)
 
 Symbol* symbolTableFind(SymbolTable *st, String *key)
 {
-    uint32_t hash = symbolTableHash(st, key);
-    SymbolEntry *symbolEntry = st->table[hash];
-    if (symbolEntry != NULL) {
+    uint32_t index = st->table[symbolTableHash(st, key)];
+    SymbolEntry *symbolEntry = NULL;
+    if (index) {
+        symbolEntry = vectorAt(st->vec, index);
         while (stringCompare(key, symbolEntry->symbol.key) != 0) {
-            if ((symbolEntry = symbolEntry->next) == NULL) {
+            if (!symbolEntry->next) {
+                symbolEntry = NULL;
                 break;
             }
+            symbolEntry = vectorAt(st->vec, symbolEntry->next);
         }
     }
     return (Symbol*)symbolEntry;
@@ -140,38 +173,36 @@ Symbol* symbolTableFind(SymbolTable *st, String *key)
 Symbol* symbolTableAdd(SymbolTable *st, String *key)
 {
     uint32_t fullHash = symbolTableHash(NULL, key),
-                hash = fullHash % st->size;
-    SymbolEntry *symbolEntry = st->table[hash], *newSymbolEntry;
+        hash = fullHash % st->size,
+        nseIndex;
+    SymbolEntry *newSymbolEntry;
 
     vectorPushDefaultSymbolEntry(st->vec);
     newSymbolEntry = vectorBack(st->vec);
     if (!newSymbolEntry) {
         return NULL;
     }
+    nseIndex = newSymbolEntry - (SymbolEntry*)st->vec->data;
     newSymbolEntry->hash = fullHash;
     newSymbolEntry->symbol.key = key;
 
-    if (symbolEntry != NULL) {
+    if (st->table[hash]) {
+        SymbolEntry *symbolEntry = vectorAt(st->vec, st->table[hash]);
         while (stringCompare(key, symbolEntry->symbol.key) != 0) {
-            SymbolEntry *previousSymbolEntry = symbolEntry;
-            if ((symbolEntry = symbolEntry->next) == NULL) {
-                previousSymbolEntry->next = newSymbolEntry;
+            if (!symbolEntry->next) {
+                symbolEntry->next = nseIndex;
                 break;
             }
+            symbolEntry = vectorAt(st->vec, symbolEntry->next);
         }
     }
     else {
-        st->table[hash] = newSymbolEntry;
+        st->table[hash] = nseIndex;
     }
 
-    if (symbolEntry == NULL) {
-        st->count++;
-        symbolTableCheckIncrease(st);
-        return &(newSymbolEntry->symbol);
-    } else {
-        vectorPopSymbolEntry(st->vec);
-        return NULL;
-    }
+    st->count++;
+    symbolTableCheckIncrease(st);
+    return &(newSymbolEntry->symbol);
 }
 
 
