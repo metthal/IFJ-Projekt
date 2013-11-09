@@ -1,12 +1,12 @@
 #ifndef CONTEXT_H
 #define CONTEXT_H
 
-#include "symbol_table.h"
+#include "ial.h"
 
 typedef struct{
-    int argc;
-    int localc;
     SymbolTable *localTable;
+    uint16_t argumentCount;
+    uint16_t localVariableCount;
 } Context;
 
 void initContext(Context *pt);

@@ -5,6 +5,54 @@
 
 TEST_SUITE_START(IalTests);
 
+SymbolTable st;
+initSymbolTable(&st);
+
+String *key1 = newStringS(CSTR_ARG("sym1"));
+String *key2 = newStringS(CSTR_ARG("sym2"));
+Symbol *s1 = symbolTableAdd(&st, key1);
+Symbol *s2 = symbolTableAdd(&st, key2);
+if (s1 && s2) {
+    s1 = symbolTableFind(&st, key1);
+    s2 = symbolTableFind(&st, key2);
+    if (s1 && s2) {
+        printf("%s %s\n", s1->key->data, key1->data);
+        SHOULD_EQUAL_STR("symbolTableFind() Basic 1", s1->key->data, key1->data);
+        SHOULD_EQUAL_STR("symbolTableFind() Basic 2", s2->key->data, key2->data);
+    } else {
+        SHOULD_BE_TRUE("symbolTableFind() Basic ptr1", s1);
+        SHOULD_BE_TRUE("symbolTableFind() Basic ptr2", s2);
+    }
+} else {
+    SHOULD_BE_TRUE("symbolTableAdd() Basic ptr1", s1);
+    SHOULD_BE_TRUE("symbolTableAdd() Basic ptr2", s2);
+}
+freeString(&key1);
+freeString(&key2);
+
+key1 = newStringS(CSTR_ARG("AAKW"));
+key2 = newStringS(CSTR_ARG("YYYY"));
+s1 = symbolTableAdd(&st, key1);
+s2 = symbolTableAdd(&st, key2);
+if (s1 && s2) {
+    s1 = symbolTableFind(&st, key1);
+    s2 = symbolTableFind(&st, key2);
+    if (s1 && s2) {
+        SHOULD_EQUAL_STR("symbolTableFind() Conflict 1", s1->key->data, key1->data);
+        SHOULD_EQUAL_STR("symbolTableFind() Conflict 2", s2->key->data, key2->data);
+    } else {
+        SHOULD_BE_TRUE("symbolTableFind() Conflict ptr1", s1);
+        SHOULD_BE_TRUE("symbolTableFind() Conflict ptr2", s2);
+    }
+} else {
+    SHOULD_BE_TRUE("symbolTableAdd() Conflict ptr1", s1);
+    SHOULD_BE_TRUE("symbolTableAdd() Conflict ptr2", s2);
+}
+freeString(&key1);
+freeString(&key2);
+
+deleteSymbolTable(&st);
+
 // stringSubstrSearch()
 String *ps1 = newStringS(CSTR_ARG("Abrakadabra Kadabra!"));
 String *ps2 = newStringS(CSTR_ARG("ada"));

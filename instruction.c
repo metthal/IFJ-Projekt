@@ -1,5 +1,6 @@
 #include "instruction.h"
 #include <stdlib.h>
+#include <string.h>
 
 Instruction* newInstruction()
 {
@@ -29,4 +30,10 @@ void freeInstruction(Instruction **ppt)
         free(*ppt);
         *ppt = NULL;
     }
+}
+
+void copyInstruction(Instruction *src, Instruction *dest)
+{
+    // TODO todo...
+    dest = src;
 }

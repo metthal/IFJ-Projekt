@@ -7,10 +7,12 @@ typedef struct{
 
 Instruction* newInstruction();
 
-void initInstruction(Instruction* pt);
+void initInstruction(Instruction *pt);
 
-void deleteInstruction(Instruction* pt);
+void deleteInstruction(Instruction *pt);
 
-void freeInstruction(Instruction** ppt);
+void freeInstruction(Instruction **ppt);
+
+void copyInstruction(Instruction *src, Instruction *dest);
 
 #endif

@@ -2,6 +2,8 @@
 #include VECTOR_ITEM_HEADER
 #endif
 
+#ifndef VECTOR_TEMPLATE_H
+#define VECTOR_TEMPLATE_H
 #include "nierr.h"
 
 #include <stdint.h>
@@ -11,6 +13,7 @@
 static uint8_t const VectorResizeIncRate = 2;
 static uint8_t const VectorResizeDecRate = 3;
 static uint16_t const VectorDefaultCapacity = 16;
+#endif
 
 #define MAKE_NAME(x, y, z) x ##y ##z
 #define EXPAND(x, y, z) MAKE_NAME(x, y, z)
@@ -19,12 +22,12 @@ static uint16_t const VectorDefaultCapacity = 16;
 
 #ifdef VECTOR_STRUCT_ITEM
 #define PUSH_BACK_ITEM VECTOR_ITEM*
-#define COPY_ITEM(src, dest) TEMPLATE(copy)((src), (VECTOR_ITEM*)(dest))
+#define COPY_ITEM(src, dest) TEMPLATE(copy)((src), (VECTOR_ITERATOR)(dest))
 #define INIT_ITEM(x) TEMPLATE(init)((VECTOR_ITEM*)(x))
 #define DELETE_ITEM(x) TEMPLATE(delete)((VECTOR_ITEM*)(x))
 #else
 #define PUSH_BACK_ITEM VECTOR_ITEM
-#define COPY_ITEM(src, dest) *(dest) = src
+#define COPY_ITEM(src, dest) *((VECTOR_ITERATOR)dest) = src
 #define INIT_ITEM(x) (x) = 0
 #define DELETE_ITEM(x)
 #endif
@@ -199,7 +202,9 @@ static VECTOR_ITERATOR TEMPLATE(vectorEnd)(Vector *vec)
     return (VECTOR_ITERATOR)vec->end;
 }
 
-#undef ITEM_COPY
+#undef INIT_ITEM
+#undef DELETE_ITEM
+#undef COPY_ITEM
 #undef PUSH_BACK_ITEM
 #undef CONSTRUCT
 #undef TEMPLATE

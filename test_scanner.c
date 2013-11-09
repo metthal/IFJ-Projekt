@@ -32,10 +32,6 @@ uint8_t overwriteFile(const char *fileName, const char *content)
 
     scannerReset();
     scannerOpenFile(filePath);
-
-    // Read php token that is always first.
-    token = nextToken();
-
     return 1;
 }
 
@@ -108,11 +104,29 @@ SHOULD_EQUAL("GetToken - identifier", token->type, STT_Identifier);
 token = nextToken();
 SHOULD_EQUAL("GetToken - identifier - EOF", token->type, STT_EOF);
 
+overwriteFile(filePath, "_id");
+token = nextToken();
+SHOULD_EQUAL("GetToken - identifier underscore", token->type, STT_Identifier);
+token = nextToken();
+SHOULD_EQUAL("GetToken - identifier underscore - EOF", token->type, STT_EOF);
+
 overwriteFile(filePath, "$var");
 token = nextToken();
 SHOULD_EQUAL("GetToken - $var", token->type, STT_Variable);
 token = nextToken();
 SHOULD_EQUAL("GetToken - $var - EOF", token->type, STT_EOF);
+
+overwriteFile(filePath, "$if");
+token = nextToken();
+SHOULD_EQUAL("GetToken - $if - variable", token->type, STT_Variable);
+token = nextToken();
+SHOULD_EQUAL("GetToken - $if - EOF", token->type, STT_EOF);
+
+overwriteFile(filePath, "$_var");
+token = nextToken();
+SHOULD_EQUAL("GetToken - $_var - variable", token->type, STT_Variable);
+token = nextToken();
+SHOULD_EQUAL("GetToken - $_var - EOF", token->type, STT_EOF);
 
 overwriteFile(filePath, "1337");
 token = nextToken();
@@ -216,12 +230,6 @@ token = nextToken();
 SHOULD_EQUAL("GetToken - divide", token->type, STT_Divide);
 token = nextToken();
 SHOULD_EQUAL("GetToken - divide - EOF", token->type, STT_EOF);
-
-overwriteFile(filePath, "<?php ");
-token = nextToken();
-SHOULD_EQUAL("GetToken - <?php", token->type, STT_Php);
-token = nextToken();
-SHOULD_EQUAL("GetToken - <?php - EOF", token->type, STT_EOF);
 
 overwriteFile(filePath, "var 123;");
 token = nextToken();

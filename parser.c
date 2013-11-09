@@ -3,6 +3,8 @@
 #include "instruction_vector.h"
 #include "address_vector.h"
 #include "context.h"
+#include "symbol.h"
+#include "ial.h"
 #include "nierr.h"
 
 #include <stdlib.h>
@@ -53,6 +55,7 @@ static uint8_t secondRun = 0;
 // TODO Test all jumping - if, elseif, else, for, while, break, continue...
 // TODO ptr1 in cycles might be called loop, ptr2 endJump
 // TODO INSTR JMP [ptr1 - Top] can be read as jump to ptr1 from Top
+// TODO work with second run - rework everything except func (check that one).
 
 void parse(Vector* tokenVector)
 {
@@ -200,7 +203,7 @@ void func()
         // Reserve space in address table for future InstructionPtr
         vectorPushDefaultInstructionPtr(addressTable);
         // Set relative index to space reserved above.
-        symbol->data->relativeIndex = vectorSize(addressTable) - 1;
+        symbol->data->func.functionAddressIndex = vectorSize(addressTable) - 1;
     }
     else {
         // Symbol should be already in the table so just find it.
@@ -221,7 +224,7 @@ void func()
 
     // Switch context to that of function, so all rules will be
     // working with it's SymbolTable and localc.
-    currentContext = symbol->data->context;
+    currentContext = symbol->data->func.context;
 
     if (!secondRun) {
         // Load arguments to LST in first run.
@@ -244,7 +247,7 @@ void func()
         // Switch place to where instructions for functions are generated
         instructions = functionsInstructions;
         // Set address in address table to point to first function instruction
-        vectorAt(addressTable, symbol->data->relativeIndex) = vectorSize(
+        vectorAt(addressTable, symbol->data->func.functionAddressIndex) = vectorSize(
                 functionsInstructions);
         // TODO add instruction that reserves space for local variables
     }
@@ -574,7 +577,7 @@ void stmt()
                     // break and and continue instructions
                     int fillCount = 10; // number of break or continue stmts
                     for (uint32_t i = 0; i < fillCount; i++) {
-                        // topPtr is top in toBeModified Vector
+                        /*// topPtr is top in toBeModified Vector
                         if (continuestmt) {
                             // topPtr = INSTR JMP [repeat - topPtr + 1]
                         }
@@ -582,7 +585,7 @@ void stmt()
                             // topPtr = INSTR JMP [Top - topPtr + 1]
                         }
 
-                        pop;
+                        pop;*/
                     }
 
                     break;
@@ -950,14 +953,14 @@ Symbol* addLocalVariable()
     // Space reserved at stack frame for Stack and Instruction Pointers
     uint32_t reserved = 2;
 
-    currentContext.localc++;
-    Symbol *symbol = symbolTableAdd(currentContext.localSymbolTable);
+    currentContext.localVariableCount++;
+    Symbol *symbol = symbolTableAdd(currentContext.localTable);
     if (getError())
         return NULL;
 
     symbol->type = ST_Variable;
     symbol->data = newTableVariable();
-    symbol->data->relativeIndex = reserved + currentContext.localc;
+    symbol->data->var.relativeIndex = reserved + currentContext.localVariableCount;
     // TODO default value
 
     return symbol;
@@ -965,14 +968,14 @@ Symbol* addLocalVariable()
 
 Symbol* addParameter()
 {
-    currentContext.argc++;
-    Symbol *symbol = symbolTableAdd(currentContext.localSymbolTable);
+    currentContext.argumentCount++;
+    Symbol *symbol = symbolTableAdd(currentContext.localTable);
     if (getError())
         return NULL;
 
     symbol->type = ST_Variable;
     symbol->data = newTableVariable();
-    symbol->data->relativeIndex = -currentContext.argc;
+    symbol->data->var.relativeIndex = -currentContext.argumentCount;
     // TODO default value
 
     return symbol;

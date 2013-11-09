@@ -3,8 +3,8 @@
 
 void initContext(Context *pt)
 {
-    pt->argc = 0;
-    pt->localc = 0;
+    pt->argumentCount = 0;
+    pt->localVariableCount = 0;
     pt->localTable = newSymbolTable();
 }
 
