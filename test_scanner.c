@@ -32,6 +32,10 @@ uint8_t overwriteFile(const char *fileName, const char *content)
 
     scannerReset();
     scannerOpenFile(filePath);
+
+    // Skip php token
+    token = nextToken();
+
     return 1;
 }
 

@@ -35,6 +35,10 @@ typedef enum
     SS_StringEscape,
     SS_StringEscapeHex0,
     SS_StringEscapeHex1,
+    SS_Php_0,
+    SS_Php_1,
+    SS_Php_2,
+    SS_Php_3
 } ScannerState;
 
 static int32_t charStreamSwitch = 1;
@@ -297,6 +301,9 @@ void scannerFillToken(Token *token)
                 if (symbol == '=') {
                     token->type = STT_LessEqual;
                     return;
+                }
+                else if (symbol == '?') {
+                    state = SS_Php_0;
                 }
                 else {
                     lastChar = symbol;
@@ -674,6 +681,46 @@ void scannerFillToken(Token *token)
                     stringPush(tokenStr, symbol);
                 }
                 break;
+            }
+            case SS_Php_0: {
+                if (symbol == 'p') {
+                    state = SS_Php_1;
+                }
+                else {
+                    setError(ERR_Syntax);
+                    return;
+                }
+                break;
+            }
+            case SS_Php_1: {
+                if (symbol == 'h') {
+                    state = SS_Php_2;
+                }
+                else {
+                    setError(ERR_Syntax);
+                    return;
+                }
+                break;
+            }
+            case SS_Php_2: {
+                if (symbol == 'p') {
+                    state = SS_Php_3;
+                }
+                else {
+                    setError(ERR_Syntax);
+                    return;
+                }
+                break;
+            }
+            case SS_Php_3: {
+                if (isspace(symbol)) {
+                    token->type = STT_Php;
+                    return;
+                }
+                else {
+                    setError(ERR_Syntax);
+                    return;
+                }
             }
         }
     }
