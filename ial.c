@@ -210,11 +210,35 @@ Symbol* symbolTableAdd(SymbolTable *st, String *key)
     return &(newSymbolEntry->symbol);
 }
 
+/*
+void symbolTableRemove(SymbolTable *st, String *key)
+{
+    uint32_t hash = symbolTableHash(st, key);
+    SymbolEntry *previousSymbolEntry, *se = st->table[hash % st->size];
+    if (se != NULL) {
+        while (stringCompare(key, se->symbol.key) != 0) {
+            previousSymbolEntry = se;
+            if ((se = se->next) == NULL) {
+                break;
+            }
+        }
+
+        if (se != NULL) {
+            previousSymbolEntry->next = se->next;
+            symbolEntryVectorRemove(st->vec, se);
+            st->count--;
+        }
+    }
+
+    return;
+}
+*/
 
 uint32_t* stringSubstrSearchBuildTable(const char *str, uint32_t len)
 {
     uint32_t *table = malloc(sizeof(uint32_t) * len);
     if (!table) {
+        setError(ERR_NewFailed);
         return table;
     }
     uint32_t tableIndex = 2, jumpIndex = 0;
@@ -239,6 +263,9 @@ static inline uint32_t _stringSubstrSearchSSO(const char *haystack, uint32_t hay
 {
     uint32_t haystackIndex = offset, needleIndex = 0, result = haystackLen;
     uint32_t *table = stringSubstrSearchBuildTable(needle, needleLen);
+    if (!table) {
+        return haystackLen;
+    }
 
     while (haystackIndex + needleIndex < haystackLen) {
         if (needle[needleIndex] == haystack[haystackIndex + needleIndex]) {
