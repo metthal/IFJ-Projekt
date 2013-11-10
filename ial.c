@@ -92,9 +92,14 @@ SymbolTable* newSymbolTable()
 
 void freeSymbolTable(SymbolTable **st)
 {
-    free((*st)->table);
-    freeSymbolEntryVector(&((*st)->vec));
-    *st = NULL;
+    if (st) {
+        if (*st) {
+            free((*st)->table);
+            freeSymbolEntryVector(&((*st)->vec));
+        }
+        free(*st);
+        *st = NULL;
+    }
 }
 
 void initSymbolTable(SymbolTable *st)
