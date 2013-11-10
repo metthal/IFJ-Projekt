@@ -2,22 +2,8 @@
 #include <stdio.h>
 
 #include "ial.h"
+#include "symbol_entry_vector.h"
 #include "nierr.h"
-
-void initSymbolEntry(SymbolEntry *se);
-void deleteSymbolEntry(SymbolEntry *se);
-void copySymbolEntry(SymbolEntry *src, SymbolEntry *dest);
-
-typedef SymbolEntry* SymbolEntryVectorIterator;
-typedef const SymbolEntry* ConstSymbolEntryVectorIterator;
-
-#define VECTOR_STRUCT_ITEM
-#define VECTOR_ITEM SymbolEntry
-#define VECTOR_ITERATOR SymbolEntryVectorIterator
-#include "vector_template.h"
-#undef VECTOR_ITERATOR
-#undef VECTOR_ITEM
-#undef VECTOR_STRUCT_ITEM
 
 void initSymbolEntry(SymbolEntry *se)
 {
@@ -92,9 +78,14 @@ SymbolTable* newSymbolTable()
 
 void freeSymbolTable(SymbolTable **st)
 {
-    free((*st)->table);
-    freeSymbolEntryVector(&((*st)->vec));
-    *st = NULL;
+    if (st) {
+        if (*st) {
+            free((*st)->table);
+            freeSymbolEntryVector(&((*st)->vec));
+        }
+        free(*st);
+        *st = NULL;
+    }
 }
 
 void initSymbolTable(SymbolTable *st)
@@ -205,11 +196,11 @@ Symbol* symbolTableAdd(SymbolTable *st, const String *key)
     return &(newSymbolEntry->symbol);
 }
 
-
 uint32_t* stringSubstrSearchBuildTable(const char *str, uint32_t len)
 {
     uint32_t *table = malloc(sizeof(uint32_t) * len);
     if (!table) {
+        setError(ERR_NewFailed);
         return table;
     }
     uint32_t tableIndex = 2, jumpIndex = 0;
@@ -234,6 +225,9 @@ static inline uint32_t _stringSubstrSearchSSO(const char *haystack, uint32_t hay
 {
     uint32_t haystackIndex = offset, needleIndex = 0, result = haystackLen;
     uint32_t *table = stringSubstrSearchBuildTable(needle, needleLen);
+    if (!table) {
+        return haystackLen;
+    }
 
     while (haystackIndex + needleIndex < haystackLen) {
         if (needle[needleIndex] == haystack[haystackIndex + needleIndex]) {

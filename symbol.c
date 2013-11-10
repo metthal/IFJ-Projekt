@@ -1,8 +1,9 @@
 #include "symbol.h"
+#include <stdlib.h>
 
 void initSymbol(Symbol *symbol)
 {
-
+    symbol->key = NULL;
 }
 
 void deleteSymbol(Symbol *symbol)

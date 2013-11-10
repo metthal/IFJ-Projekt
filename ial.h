@@ -14,6 +14,11 @@ typedef struct {
     uint32_t next;
 } SymbolEntry;
 
+// TODO ak ich tu nechces mat, sprav novu hlavicku a zdrojak..
+void initSymbolEntry(SymbolEntry *se);
+void deleteSymbolEntry(SymbolEntry *se);
+void copySymbolEntry(SymbolEntry *src, SymbolEntry *dest);
+
 static uint16_t const SYMBOL_TABLE_DEFAULT_SIZE = 128;
 
 typedef struct SymbolTable {
