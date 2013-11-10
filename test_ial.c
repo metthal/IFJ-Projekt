@@ -5,18 +5,23 @@
 
 TEST_SUITE_START(IalTests);
 
-SymbolTable st;
-initSymbolTable(&st);
+SymbolTable ST;
+SymbolTable* st = &ST;
+initSymbolTable(st);
+String *key1;
+String *key2;
+Symbol *s1;
+Symbol *s2;
 
-String *key1 = newStringS(CSTR_ARG("sym1"));
-String *key2 = newStringS(CSTR_ARG("sym2"));
-Symbol *s1 = symbolTableAdd(&st, key1);
-Symbol *s2 = symbolTableAdd(&st, key2);
+// Basic test
+key1 = newStringS(CSTR_ARG("sym1"));
+key2 = newStringS(CSTR_ARG("sym2"));
+s1 = symbolTableAdd(st, key1);
+s2 = symbolTableAdd(st, key2);
 if (s1 && s2) {
-    s1 = symbolTableFind(&st, key1);
-    s2 = symbolTableFind(&st, key2);
+    s1 = symbolTableFind(st, key1);
+    s2 = symbolTableFind(st, key2);
     if (s1 && s2) {
-        printf("%s %s\n", s1->key->data, key1->data);
         SHOULD_EQUAL_STR("symbolTableFind() Basic 1", s1->key->data, key1->data);
         SHOULD_EQUAL_STR("symbolTableFind() Basic 2", s2->key->data, key2->data);
     } else {
@@ -30,13 +35,14 @@ if (s1 && s2) {
 freeString(&key1);
 freeString(&key2);
 
+// Conflict test
 key1 = newStringS(CSTR_ARG("AAKW"));
 key2 = newStringS(CSTR_ARG("YYYY"));
-s1 = symbolTableAdd(&st, key1);
-s2 = symbolTableAdd(&st, key2);
+s1 = symbolTableAdd(st, key1);
+s2 = symbolTableAdd(st, key2);
 if (s1 && s2) {
-    s1 = symbolTableFind(&st, key1);
-    s2 = symbolTableFind(&st, key2);
+    s1 = symbolTableFind(st, key1);
+    s2 = symbolTableFind(st, key2);
     if (s1 && s2) {
         SHOULD_EQUAL_STR("symbolTableFind() Conflict 1", s1->key->data, key1->data);
         SHOULD_EQUAL_STR("symbolTableFind() Conflict 2", s2->key->data, key2->data);
@@ -51,7 +57,54 @@ if (s1 && s2) {
 freeString(&key1);
 freeString(&key2);
 
-deleteSymbolTable(&st);
+deleteSymbolTable(st);
+
+uint32_t combinedTest = 1;
+st = newSymbolTable();
+// Resize test
+#define ENTRIES_COUNT 256
+String **keys = malloc(ENTRIES_COUNT * sizeof(String*));
+key1 = newString();
+for (size_t i = 0; i < ENTRIES_COUNT; i++) {
+    keys[i] = newString();
+    stringPush(key1, 'A' + (i % 25));
+    stringSet(keys[i], key1);
+    s1 = symbolTableAdd(st, keys[i]);
+    if (!s1) {
+        SHOULD_BE_TRUE("symbolTableAdd() Resize ptr", s1);
+        combinedTest = 0;
+    } else {
+        s1->data = (void*)i;
+    }
+}
+
+for (size_t i = 0; i < ENTRIES_COUNT; i++) {
+    s1 = symbolTableFind(st, keys[i]);
+    if (s1) {
+        if ((stringCompare(s1->key, keys[i])) || (s1->data != (void*)i)) {
+            SHOULD_BE_TRUE("symbolTableFind() Resize value", (stringCompare(s1->key, keys[i])) || (s1->data != (void*)i));
+            combinedTest = 0;
+        }
+    } else {
+        // cppcheck hack
+        {
+            SHOULD_BE_TRUE("symbolTableFind() Resize ptr", s1);
+        }
+        combinedTest = 0;
+    }
+}
+
+for (uint32_t i = 0; i < ENTRIES_COUNT; i++) {
+    freeString(&keys[i]);
+}
+freeString(&key1);
+free(keys);
+
+if (combinedTest == 1) {
+    SHOULD_BE_TRUE("symbolTable 256 entries", combinedTest);
+}
+
+freeSymbolTable(&st);
 
 // stringSubstrSearch()
 String *ps1 = newStringS(CSTR_ARG("Abrakadabra Kadabra!"));
