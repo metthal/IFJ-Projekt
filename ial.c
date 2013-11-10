@@ -153,7 +153,7 @@ static inline void symbolTableCheckIncrease(SymbolTable *st)
     }
 }
 
-Symbol* symbolTableFind(SymbolTable *st, String *key)
+Symbol* symbolTableFind(SymbolTable *st, const String *key)
 {
     uint32_t index = st->table[symbolTableHash(st, key)];
     SymbolEntry *symbolEntry = NULL;
@@ -170,7 +170,7 @@ Symbol* symbolTableFind(SymbolTable *st, String *key)
     return (Symbol*)symbolEntry;
 }
 
-Symbol* symbolTableAdd(SymbolTable *st, String *key)
+Symbol* symbolTableAdd(SymbolTable *st, const String *key)
 {
     uint32_t fullHash = symbolTableHash(NULL, key),
         hash = fullHash % st->size,

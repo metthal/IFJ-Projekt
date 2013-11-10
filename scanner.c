@@ -159,7 +159,7 @@ FILE* scannerOpenFile(const char *fileName) // OPEN FILE AND RETURN POINTER ON I
         setError(ERR_LexFile);
         return NULL;
     }
-    else if ((lastChar = getc(source)) != '<') {4
+    else if ((lastChar = getc(source)) != '<') {
         // Syntax error according to forums
         setError(ERR_Syntax);
         return NULL;

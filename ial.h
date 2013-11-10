@@ -29,8 +29,8 @@ void freeSymbolTable(SymbolTable **st);
 void initSymbolTable(SymbolTable *st);
 void deleteSymbolTable(SymbolTable *st);
 
-Symbol* symbolTableFind(SymbolTable *st, String *key);
-Symbol* symbolTableAdd(SymbolTable *st, String *key);
+Symbol* symbolTableFind(SymbolTable *st, const String *key);
+Symbol* symbolTableAdd(SymbolTable *st, const String *key);
 
 uint32_t stringSubstrSearch(String *haystack, String *needle);
 uint32_t stringSubstrSearchO(String *haystack, String *needle, uint32_t offset);

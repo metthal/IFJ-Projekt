@@ -2,6 +2,7 @@
 #define SYMBOL_H
 
 #include "string.h"
+#include "context.h"
 
 typedef enum {
     VT_Integer,
@@ -27,13 +28,10 @@ typedef struct {
     Variable *def;
 } FunctionArgument;
 
-struct SymbolTable;
-
 typedef struct {
-    struct SymbolTable* symbolTable;
-    uint16_t localVariableCount;
-    uint16_t argumentCount;
-} Context;
+    int16_t relativeIndex;
+    // TODO default value
+} VariableSymbolData;
 
 typedef struct {
     uint32_t functionAddressIndex;
@@ -47,7 +45,7 @@ typedef enum {
 } SymbolType;
 
 typedef union {
-    Variable var;
+    VariableSymbolData var;
     Function func;
 } SymbolData;
 

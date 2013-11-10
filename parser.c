@@ -2,8 +2,6 @@
 #include "token_vector.h"
 #include "instruction_vector.h"
 #include "address_vector.h"
-#include "context.h"
-#include "symbol.h"
 #include "ial.h"
 #include "nierr.h"
 
@@ -17,20 +15,20 @@ void body();
 void func();
 void stmtList();
 void stmt();
-void elseifStmt();
-void elseStmt();
+uint8_t elseifStmt();
+uint8_t elseStmt();
 void paramList();
 void nparamList();
 void forStmt1();
-void forStmt2();
+uint32_t forStmt2();
 uint32_t expr();
 
 // Forward declaration of helper functions
-void condition();
+uint32_t condition();
 void stmtListBracketed();
-void assignment();
-Symbol* addLocalVariable();
-Symbol* addParameter();
+void assignment(ConstTokenVectorIterator varid);
+Symbol* addLocalVariable(ConstTokenVectorIterator varid);
+Symbol* addParameter(ConstTokenVectorIterator varid);
 
 static const Vector *tokens = NULL;
 // Safe to iterate without range checks because last and least
@@ -87,12 +85,16 @@ void parse(Vector* tokenVector)
         Instruction* firstReal = vectorBeginInstruction(functionsInstructions);
         for (InstructionPtrVectorIterator it = vectorBeginInstructionPtr(
                 addressTable); it != vectorEndInstructionPtr(addressTable);
-                it++)
-            (*it) += firstReal;
+                it++) {
+            // Items in address table were previously
+            // filled with relative index to function's
+            // first instruction inside functionsInstructions.
+            (*it) = firstReal + (size_t)(*it);
+        }
     }
 
     deleteContext(&mainContext);
-    freeSymboTable(&globalSymbolTable);
+    freeSymbolTable(&globalSymbolTable);
     freeTokenVector(&tokenVector);
 }
 
@@ -188,10 +190,10 @@ void func()
         return;
     }
 
-    Symbol symbol;
+    Symbol *symbol;
     if (!secondRun) {
         // Add new symbol with name of function to GST.
-        symbol = symbolTableAdd(globalSymbolTable, &tokensIt->str);
+        symbol = symbolTableAdd(globalSymbolTable, &(tokensIt->str));
 
         if (getError())
             return;
@@ -246,9 +248,10 @@ void func()
     if (secondRun) {
         // Switch place to where instructions for functions are generated
         instructions = functionsInstructions;
-        // Set address in address table to point to first function instruction
-        vectorAt(addressTable, symbol->data->func.functionAddressIndex) = vectorSize(
-                functionsInstructions);
+        // Set address in address table to point to index of first function's instruction
+        InstructionPtr* cipvi =
+                vectorAt(addressTable, symbol->data->func.functionAddressIndex);
+        (*cipvi) = (InstructionPtr)((size_t)vectorSize(functionsInstructions));
         // TODO add instruction that reserves space for local variables
     }
 
@@ -320,12 +323,15 @@ void stmtList()
 void stmt()
 {
     switch (tokensIt->type) {
-        case STT_Variable:
+        case STT_Variable: {
             // Rule 8
             printf("%s\n", "Rule 8");
+
+            ConstTokenVectorIterator varid = tokensIt;
+
             tokensIt++;
 
-            assignment();
+            assignment(varid);
             if (getError())
                 return;
 
@@ -338,6 +344,7 @@ void stmt()
             tokensIt++;
 
             break;
+        }
 
         case STT_Keyword:
             switch (tokensIt->keywordType) {
@@ -402,7 +409,7 @@ void stmt()
 
                     break;
 
-                case KTT_If:
+                case KTT_If: {
                     // Rule 12
                     printf("%s\n", "Rule 12");
                     tokensIt++;
@@ -429,8 +436,9 @@ void stmt()
                     // ptr2 = INSTR JMPZ cond, blockSize
 
                     break;
+                }
 
-                case KTT_While:
+                case KTT_While: {
                     // Rule 13 (almost same as Rule 12, missing just elseif call)
                     printf("%s\n", "Rule 13");
                     tokensIt++;
@@ -456,8 +464,9 @@ void stmt()
                     // ptr2 = INSTR JMPZ cond, [Top - ptr2 + 1]
 
                     break;
+                }
 
-                case KTT_For:
+                case KTT_For: {
                     // Rule 14
                     printf("%s\n", "Rule 14");
                     tokensIt++;
@@ -505,7 +514,7 @@ void stmt()
                     // statement list to minimize number of
                     // jumps during interpretation.
                     // Save token pointer to return here later.
-                    Token* beforeFor3 = tokensIt;
+                    ConstTokenVectorIterator beforeFor3 = tokensIt;
                     // Skip everything until brace ending for header.
                     { // Leave garbage in scope to prevent stack overflow.
                         uint8_t error = 0;
@@ -527,6 +536,9 @@ void stmt()
                                     break;
                                 case STT_LeftBracket:
                                     braceCounter++;
+                                    break;
+
+                                default:
                                     break;
                             }
                         }
@@ -558,7 +570,7 @@ void stmt()
                     // TODO repeat = Top
 
                     // Generate For's 3rd statement
-                    Token* afterForBlock = tokensIt;
+                    ConstTokenVectorIterator afterForBlock = tokensIt;
                     tokensIt = beforeFor3;
                     forStmt1();
                     if (getError())
@@ -575,8 +587,8 @@ void stmt()
 
                     // Finish everything by filling pre-generated
                     // break and and continue instructions
-                    int fillCount = 10; // number of break or continue stmts
-                    for (uint32_t i = 0; i < fillCount; i++) {
+                    uint16_t fillCount = 10; // number of break or continue stmts
+                    for (uint16_t i = 0; i < fillCount; i++) {
                         /*// topPtr is top in toBeModified Vector
                         if (continuestmt) {
                             // topPtr = INSTR JMP [repeat - topPtr + 1]
@@ -589,6 +601,7 @@ void stmt()
                     }
 
                     break;
+                }
 
                 default:
                     setError(ERR_Syntax);
@@ -751,11 +764,13 @@ void paramList()
             if (getError())
                 return;
 
+            ConstTokenVectorIterator token = tokensIt;
+
             nparamList();
             if (getError())
                 return;
 
-            addParameter();
+            addParameter(token);
             if (getError())
                return;
 
@@ -787,11 +802,13 @@ void nparamList()
             if (getError())
                 return;
 
+            ConstTokenVectorIterator token = tokensIt;
+
             nparamList();
             if (getError())
                 return;
 
-            addParameter();
+            addParameter(token);
             if (getError())
                return;
 
@@ -814,9 +831,12 @@ void forStmt1()
         case STT_Variable:
             // Rule 24 (almost same as the rule 8, missing just semicolon)
             printf("%s\n", "Rule 24");
+
+            ConstTokenVectorIterator varid = tokensIt;
+
             tokensIt++;
 
-            assignment();
+            assignment(varid);
             if (getError())
                 return;
 
@@ -924,7 +944,7 @@ void stmtListBracketed()
     tokensIt++;
 }
 
-void assignment(int leftSide)
+void assignment(ConstTokenVectorIterator varid)
 {
     if (tokensIt->type != STT_Assignment) {
         setError(ERR_Syntax);
@@ -933,13 +953,9 @@ void assignment(int leftSide)
 
     tokensIt++;
 
-    Symbol *symbol = addLocalVariable();
+    Symbol *symbol = addLocalVariable(varid);
     if (getError())
        return;
-
-    // Already in symbol table
-    if (symbol == NULL)
-        symbol = symbolTableFind();
 
     uint32_t exprRes = expr();
     if (getError())
@@ -948,33 +964,39 @@ void assignment(int leftSide)
     // INSTR MOV symbol->data->relativeIndex, exprRes
 }
 
-Symbol* addLocalVariable()
+// Adds local variable to symbol table.
+// If already present, returns the existing symbol.
+Symbol* addLocalVariable(ConstTokenVectorIterator varid)
 {
     // Space reserved at stack frame for Stack and Instruction Pointers
     uint32_t reserved = 2;
 
-    currentContext.localVariableCount++;
-    Symbol *symbol = symbolTableAdd(currentContext.localTable);
+    Symbol *symbol = symbolTableAdd(currentContext.localTable, &(varid->str));
     if (getError())
         return NULL;
 
-    symbol->type = ST_Variable;
-    symbol->data = newTableVariable();
-    symbol->data->var.relativeIndex = reserved + currentContext.localVariableCount;
-    // TODO default value
+    if (symbol == NULL)
+        symbol = symbolTableFind(currentContext.localTable, &(varid->str));
+    else {
+        symbol->type = ST_Variable;
+        //symbol->data = newVariableSymbolData();
+        currentContext.localVariableCount++;
+        symbol->data->var.relativeIndex = reserved + currentContext.localVariableCount;
+        // TODO default value
+    }
 
     return symbol;
 }
 
-Symbol* addParameter()
+Symbol* addParameter(ConstTokenVectorIterator varid)
 {
-    currentContext.argumentCount++;
-    Symbol *symbol = symbolTableAdd(currentContext.localTable);
+    Symbol *symbol = symbolTableAdd(currentContext.localTable, &(varid->str));
     if (getError())
         return NULL;
 
     symbol->type = ST_Variable;
-    symbol->data = newTableVariable();
+    //symbol->data = newVariableSymbolData();
+    currentContext.argumentCount++;
     symbol->data->var.relativeIndex = -currentContext.argumentCount;
     // TODO default value
 
