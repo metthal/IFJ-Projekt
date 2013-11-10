@@ -43,8 +43,8 @@ void stringAddS(String *dest, const char *src, uint32_t len);
 
 uint32_t stringLength(String *ps);
 
-int16_t stringCompare(String *a, String *b);
-int16_t stringCompareS(String *a, const char *b, uint32_t bLen);
+int16_t stringCompare(const String *a, const String *b);
+int16_t stringCompareS(const String *a, const char *b, uint32_t bLen);
 int16_t stringCompareSS(const char *a, uint32_t aLen, const char *b, uint32_t bLen);
 
 #endif

@@ -228,12 +228,12 @@ static inline int16_t _stringCompareSS(const char *a, uint32_t aLen, const char 
     return *s1 - *s2;
 }
 
-int16_t stringCompare(String *a, String *b)
+int16_t stringCompare(const String *a, const String *b)
 {
     return _stringCompareSS(a->data, a->length - 1, b->data, b->length - 1);
 }
 
-int16_t stringCompareS(String *a, const char *b, uint32_t bLen)
+int16_t stringCompareS(const String *a, const char *b, uint32_t bLen)
 {
     return _stringCompareSS(a->data, a->length - 1, b, bLen);
 }

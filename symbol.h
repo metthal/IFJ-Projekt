@@ -52,7 +52,7 @@ typedef union {
 typedef struct {
     SymbolData *data;
     SymbolType type;
-    String *key;
+    const String *key;
 } Symbol;
 
 void initSymbol(Symbol *symbol);

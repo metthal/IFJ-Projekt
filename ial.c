@@ -27,7 +27,7 @@ void copySymbolEntry(SymbolEntry *src, SymbolEntry *dest)
     return;
 }
 
-uint32_t symbolTableHash(SymbolTable *st, String *key)
+uint32_t symbolTableHash(SymbolTable *st, const String *key)
 {
     uint32_t i, hash = 0;
     for ( i = 0; i < key->length - 1; ++i ) {
