@@ -24,19 +24,21 @@ typedef struct {
     VariableType type;
 } Variable;
 
+/* TODO remove? should be already accessible by context->LST["name"]->defaultValue
 typedef struct {
     Variable *def;
 } FunctionArgument;
+*/
 
 typedef struct {
     int16_t relativeIndex;
-    // TODO default value
+    // TODO defaultValue
 } VariableSymbolData;
 
 typedef struct {
     uint32_t functionAddressIndex;
     Context context;
-    FunctionArgument *arguments;
+    //FunctionArgument *arguments;
 } Function;
 
 typedef enum {
@@ -58,5 +60,9 @@ typedef struct {
 void initSymbol(Symbol *symbol);
 void deleteSymbol(Symbol *symbol);
 void copySymbol(Symbol *src, Symbol *dest);
+VariableSymbolData* newVariableSymbolData();
+void freeVariableSymbolData(VariableSymbolData **ppt);
+Function* newFunction();
+void freeFunction(Function **ppt);
 
 #endif

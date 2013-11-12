@@ -89,7 +89,7 @@ for (size_t i = 0; i < ENTRIES_COUNT; i++) {
         SHOULD_BE_TRUE("symbolTableAdd() Resize ptr", s1);
         combinedTest = 0;
     } else {
-        s1->data = (void*)i;
+        s1->data = NULL;
     }
 }
 

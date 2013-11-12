@@ -8,9 +8,8 @@ while ($i){
     $i = $i - 1;
 }
 
-while (true){
-    $i = $i + 5;
-    if ($i > 10){
-        break;
+while ($i <= 10) {
+    if (true) {
+        $i = $i + 5;
     }
 }

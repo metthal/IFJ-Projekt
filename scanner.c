@@ -131,6 +131,9 @@ void scannerReset()
 Vector* scannerScanFile(const char *fileName)
 {
     scannerOpenFile(fileName);
+    if(getError())
+        return NULL;
+
     Vector* vec = newTokenVector();
     while (1) {
         vectorPushDefaultToken(vec);
@@ -149,6 +152,7 @@ Vector* scannerScanFile(const char *fileName)
             return vec;
         }
     }
+    return NULL;
 }
 
 FILE* scannerOpenFile(const char *fileName) // OPEN FILE AND RETURN POINTER ON IT
@@ -222,6 +226,8 @@ void scannerFillToken(Token *token)
                 }
                 else if (symbol == EOF) {
                     token->type = STT_EOF;
+                    fclose(source);
+                    source = NULL;
                     return;
                 }
                 else {
