@@ -57,6 +57,21 @@ if (s1 && s2) {
 freeString(&key1);
 freeString(&key2);
 
+// Existing test
+key1 = newStringS(CSTR_ARG("ABCD"));
+s1 = symbolTableAdd(st, key1);
+s2 = symbolTableAdd(st, key1);
+SHOULD_BE_TRUE("symbolTableAdd() Existing First Time", s1);
+if (s1) {
+    s1 = symbolTableFind(st, key1);
+    SHOULD_BE_TRUE("symbolTableFind() Existing ptr1", s1);
+    if (s1) {
+        SHOULD_EQUAL_STR("symbolTableFind() Existing", s1->key->data, key1->data);
+    }
+}
+SHOULD_BE_FALSE("symbolTableAdd() Existing Second Time", s2);
+freeString(&key1);
+
 deleteSymbolTable(st);
 
 uint32_t combinedTest = 1;
@@ -94,15 +109,15 @@ for (size_t i = 0; i < ENTRIES_COUNT; i++) {
     }
 }
 
+if (combinedTest == 1) {
+    SHOULD_BE_TRUE("symbolTable 256 entries", combinedTest);
+}
+
 for (uint32_t i = 0; i < ENTRIES_COUNT; i++) {
     freeString(&keys[i]);
 }
 freeString(&key1);
 free(keys);
-
-if (combinedTest == 1) {
-    SHOULD_BE_TRUE("symbolTable 256 entries", combinedTest);
-}
 
 freeSymbolTable(&st);
 

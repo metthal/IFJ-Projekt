@@ -167,6 +167,7 @@ Symbol* symbolTableAdd(SymbolTable *st, const String *key)
         hash = fullHash % st->size,
         nseIndex;
     SymbolEntry *newSymbolEntry;
+    Symbol *newSymbol;
 
     vectorPushDefaultSymbolEntry(st->vec);
     newSymbolEntry = vectorBack(st->vec);
@@ -176,6 +177,7 @@ Symbol* symbolTableAdd(SymbolTable *st, const String *key)
     nseIndex = newSymbolEntry - (SymbolEntry*)st->vec->data;
     newSymbolEntry->hash = fullHash;
     newSymbolEntry->symbol.key = key;
+    newSymbol = &(newSymbolEntry->symbol);
 
     if (st->table[hash]) {
         SymbolEntry *symbolEntry = vectorAt(st->vec, st->table[hash]);
@@ -186,14 +188,22 @@ Symbol* symbolTableAdd(SymbolTable *st, const String *key)
             }
             symbolEntry = vectorAt(st->vec, symbolEntry->next);
         }
+        if (symbolEntry->next != nseIndex) {
+            newSymbol = NULL;
+        }
     }
     else {
         st->table[hash] = nseIndex;
     }
 
-    st->count++;
-    symbolTableCheckIncrease(st);
-    return &(newSymbolEntry->symbol);
+    if (newSymbol) {
+        st->count++;
+        symbolTableCheckIncrease(st);
+    } else {
+        vectorPopSymbolEntry(st->vec);
+    }
+
+    return newSymbol;
 }
 
 uint32_t* stringSubstrSearchBuildTable(const char *str, uint32_t len)
