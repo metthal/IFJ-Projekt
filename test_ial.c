@@ -96,8 +96,8 @@ for (size_t i = 0; i < ENTRIES_COUNT; i++) {
 for (size_t i = 0; i < ENTRIES_COUNT; i++) {
     s1 = symbolTableFind(st, keys[i]);
     if (s1) {
-        if ((stringCompare(s1->key, keys[i])) || (s1->data != (void*)i)) {
-            SHOULD_BE_TRUE("symbolTableFind() Resize value", (stringCompare(s1->key, keys[i])) || (s1->data != (void*)i));
+        if (stringCompare(s1->key, keys[i]) != 0) {
+            SHOULD_BE_TRUE("symbolTableFind() Resize value", stringCompare(s1->key, keys[i]) == 0);
             combinedTest = 0;
         }
     } else {
