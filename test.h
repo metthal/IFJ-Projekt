@@ -74,7 +74,11 @@ static inline void testResult(uint8_t result, const char *testName, const char *
         printf("[ ");
         printfc(1, 31, "FAIL");
         printf(" ]\n");
-        printf("Test at %s:%u failed!\n\t%s\n\n", file, line, expr);
+        if (testFlags & OnlyFailed) {
+            printf("%s:%u %s\n", file, line, expr);
+        } else {
+            printf("Test at %s:%u failed!\n\t%s\n\n", file, line, expr);
+        }
         testCountFailed++;
     }
 }
