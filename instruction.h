@@ -52,7 +52,6 @@ typedef enum
     IST_Call,        //!< IST_Call
     IST_Return,      //!< IST_Return
     IST_Nullify,     //!< IST_Nullify
-    IST_Halt,        //!< IST_Halt
     // Built-in functions instructions
     IST_BoolVal,     //!< IST_BoolVal
     IST_DoubleVal,   //!< IST_DoubleVal

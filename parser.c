@@ -18,7 +18,7 @@ void stmt();
 uint8_t elseifStmt();
 uint8_t elseStmt();
 void paramList();
-void nparamList();
+void nparamList(uint8_t defarg);
 void forStmt1(uint8_t skip);
 uint8_t forStmt2(uint32_t *cond);
 uint32_t expr();
@@ -29,7 +29,7 @@ uint32_t condition();
 void stmtListBracketed();
 void assignment(ConstTokenVectorIterator varid, uint8_t skip);
 Symbol* addLocalVariable(ConstTokenVectorIterator varid);
-Symbol* addParameter(ConstTokenVectorIterator varid);
+Symbol* addParameter(ConstTokenVectorIterator varid, uint8_t defarg);
 
 static const Vector *tokens = NULL;
 // Safe to iterate without range checks because last and least
@@ -50,7 +50,12 @@ static Context *currentContext;
 
 static uint8_t secondRun = 0;
 
-// TODO !!!! Top is last item in vector
+// TODO Interpret creates stack frame for main
+// returnValue
+// stackPointer = NULL <- will know that it's program exit
+// instructionPointer = NULL <- will know that it's program exit
+
+// TODO !!!! Top is last item in vector - so that should be vectorBack?
 // TODO Test all jumping - if, elseif, else, for, while, break, continue...
 // TODO ptr1 in cycles might be called loop, ptr2 endJump
 
@@ -114,10 +119,6 @@ void prog()
             // Rule 1
             printf("%s\n", "Rule 1");
             tokensIt++;
-
-            if (secondRun) {
-                // TODO Create stack frame for "main" ?
-            }
 
             body();
             if (getError())
@@ -263,7 +264,8 @@ void func()
         InstructionPtr* cipvi =
                 vectorAt(addressTable, symbol->data->func.functionAddressIndex);
         (*cipvi) = (InstructionPtr)((size_t)vectorSize(functionsInstructions));
-        // TODO add instruction that reserves space for local variables
+        // Reserve space for local variables
+        generateInstruction(IST_Reserve, 0, currentContext->argumentCount, 0);
     }
 
     stmtListBracketed();
@@ -372,12 +374,6 @@ void stmt()
                     if (secondRun) {
                         // Move result of expression to reserved space for return value
                         generateInstruction(IST_Mov, -(currentContext->argumentCount+1), exprRes, 0);
-
-                        // TODO Create stack frame for main
-                        // returnValue
-                        // Vector* address for stack <-- Stack pointer
-                        // HALT instruction - return from interpret with returnValue
-
                         generateInstruction(IST_Return, 0, currentContext->argumentCount, 0);
                     }
 
@@ -449,15 +445,15 @@ void stmt()
                     if (getError())
                         return;
 
-                    // uint32_t blockSize = Top - ptr2
+                    uint32_t blockSize = (Instruction*)vectorBack(instructions) - ptr2;
 
-                    // blockSize += elseifStmt();
+                    blockSize += elseifStmt();
                     if (getError())
                         return;
 
                     if (secondRun) {
                         // Fills the reserved space with correct jump value
-                        // TODO fillInstruction(ptr2, IST_Jmpz, 0, blockSize, cond);
+                        fillInstruction(ptr2, IST_Jmpz, 0, blockSize, cond);
                     }
 
                     break;
@@ -469,7 +465,7 @@ void stmt()
                     tokensIt++;
 
                     Instruction *ptr1 = NULL, *ptr2 = NULL;
-                    // TODO ptr1 = Top
+                    ptr1 = (Instruction*)vectorBack(instructions);
 
                     uint32_t cond = condition();
                     if (getError())
@@ -487,10 +483,10 @@ void stmt()
 
                     if (secondRun) {
                         // Jump before condition for another iteration
-                        // TODO generateInstruction(IST_Jmp, 0, ptr1 - Top, 0);
+                        generateInstruction(IST_Jmp, 0, ptr1 - (Instruction*)vectorBack(instructions), 0);
 
                         // Fills the reserved space with correct jump value
-                        // TODO fillInstruction(ptr2, IST_Jmpz, 0, Top - ptr2, cond);
+                        fillInstruction(ptr2, IST_Jmpz, 0, (Instruction*)vectorBack(instructions) - ptr2, cond);
                     }
 
                     break;
@@ -522,7 +518,7 @@ void stmt()
 
                     Instruction *ptr1 = NULL, *ptr2 = NULL, *ptr3 = NULL;
 
-                    // TODO ptr1 = Top
+                    ptr1 = (Instruction*)vectorBack(instructions);
 
                     uint32_t cond;
                     // Check if 2nd statement weren't omitted.
@@ -561,7 +557,7 @@ void stmt()
                     if (getError())
                         return;
 
-                    // TODO ptr3 = Top
+                    ptr3 = (Instruction*)vectorBack(instructions);
 
                     // Generate For's 3rd statement
                     if (secondRun) {
@@ -573,11 +569,11 @@ void stmt()
                         tokensIt = afterForBlock;
 
                         // Jump before condition for another iteration
-                        // TODO generateInstruction(IST_Jmp, 0, ptr1 - Top, 0);
+                        generateInstruction(IST_Jmp, 0, ptr1 - (Instruction*)vectorBack(instructions), 0);
 
-                        if (cond != 0) {
+                        if (ptr2 != NULL) {
                             // Fills the reserved space with correct jump value
-                            // TODO fillInstruction(ptr2, IST_Jmpz, 0, Top - ptr2, cond);
+                            fillInstruction(ptr2, IST_Jmpz, 0, (Instruction*)vectorBack(instructions) - ptr2, cond);
                         }
 
                         // Finish everything by filling pre-generated
@@ -664,18 +660,18 @@ uint8_t elseifStmt()
                     if (getError())
                         return 0;
 
-                    // uint32_t blockSize = Top - ptr2
+                    uint32_t blockSize = (Instruction*)vectorBack(instructions) - ptr2;
 
-                    // blockSize += elseifStmt();
+                    blockSize += elseifStmt();
                     if (getError())
                         return 0;
 
                     if (secondRun) {
                         // Fills the reserved space with correct jump value
-                        // TODO fillInstruction(ptr1, IST_Jmp, 0, Top - ptr1, 0);
+                        fillInstruction(ptr1, IST_Jmp, 0, (Instruction*)vectorBack(instructions) - ptr1, 0);
 
                         // Fills the reserved space with correct jump value
-                        // TODO fillInstruction(ptr1, IST_Jmpz, 0, blockSize, cond);
+                        fillInstruction(ptr1, IST_Jmpz, 0, blockSize, cond);
                     }
 
                     return 1;
@@ -735,7 +731,7 @@ uint8_t elseStmt()
 
                     if (secondRun) {
                         // Fills the reserved space with correct jump value
-                        // TODO fillInstruction(ptr1, IST_Jmp, 0, Top - ptr1, 0);
+                        fillInstruction(ptr1, IST_Jmp, 0, (Instruction*)vectorBack(instructions) - ptr1, 0);
                     }
 
                     return 1;
@@ -763,17 +759,22 @@ void paramList()
             // Rule 20
             printf("%s\n", "Rule 20");
 
-            if (getError())
-                return;
-
             ConstTokenVectorIterator varid = tokensIt;
+            uint8_t defarg = 0;
 
-            nparamList();
+            tokensIt++;
+            // Test for default argument
+            if (tokensIt->type == STT_Assignment) {
+                tokensIt++;
+                defarg = 1;
+            }
+
+            nparamList(defarg);
             if (getError())
                 return;
 
             if (!secondRun) {
-                addParameter(varid);
+                addParameter(varid, defarg);
                 if (getError())
                    return;
             }
@@ -785,7 +786,7 @@ void paramList()
     }
 }
 
-void nparamList()
+void nparamList(uint8_t defarg)
 {
     switch (tokensIt->type) {
         case STT_RightBracket:
@@ -808,12 +809,23 @@ void nparamList()
 
             ConstTokenVectorIterator varid = tokensIt;
 
-            nparamList();
+            tokensIt++;
+            // Test for default argument
+            if (tokensIt->type == STT_Assignment) {
+                tokensIt++;
+                defarg = 1;
+            }
+            else if (defarg) {
+                setError(ERR_DefArgOrder);
+                return;
+            }
+
+            nparamList(defarg);
             if (getError())
                 return;
 
             if (!secondRun) {
-                addParameter(varid);
+                addParameter(varid, defarg);
                 if (getError())
                    return;
             }
@@ -905,7 +917,6 @@ uint32_t expr()
 
 uint32_t generalExpr(uint8_t skip)
 {
-    uint32_t exprRes = 0;
     if (secondRun && !skip) {
         return expr();
     }
@@ -1005,6 +1016,7 @@ void assignment(ConstTokenVectorIterator varid, uint8_t skip)
 
     tokensIt++;
 
+    // TODO Variable can become constant here
     uint32_t exprRes = generalExpr(skip);
 
     if (secondRun) {
@@ -1044,8 +1056,9 @@ Symbol* addLocalVariable(ConstTokenVectorIterator varid)
         symbol->data = (SymbolData*)newVariableSymbolData();
         symbol->data->var.relativeIndex = reserved + currentContext->localVariableCount;
         symbol->data->var.declared = 0;
+        symbol->data->var.constantIndex = 0;
+        symbol->data->var.constant = 0;
         currentContext->localVariableCount++;
-        // TODO default value
     }
 
     return symbol;
@@ -1053,7 +1066,7 @@ Symbol* addLocalVariable(ConstTokenVectorIterator varid)
 
 // Adds parameter to symbol table.
 // If already present, sets error.
-Symbol* addParameter(ConstTokenVectorIterator varid)
+Symbol* addParameter(ConstTokenVectorIterator varid, uint8_t defarg)
 {
     Symbol *symbol = symbolTableAdd(currentContext->localTable, &(varid->str));
     if (getError())
@@ -1068,8 +1081,22 @@ Symbol* addParameter(ConstTokenVectorIterator varid)
     symbol->data = (SymbolData*)newVariableSymbolData();
     currentContext->argumentCount++;
     symbol->data->var.relativeIndex = -currentContext->argumentCount;
+
     symbol->data->var.declared = 1;
-    // TODO default value
+
+
+    if (defarg) {
+        // TODO check if varid+2 is literal or null
+        // Add it to constant table and set symbol->data->var.constantIndex
+        symbol->data->var.constant = 1;
+        // Otherwise set this error
+        setError(ERR_BadDefArg);
+        return NULL;
+    }
+    else {
+        symbol->data->var.constantIndex = 0;
+        symbol->data->var.constant = 0;
+    }
 
     return symbol;
 }

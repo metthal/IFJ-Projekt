@@ -62,7 +62,12 @@ static inline ResultCode getRcFromError()
             return RC_VarError;
 
         case ERR_BadParamCount:
+        case ERR_DefArgOrder:
             return RC_FuncParamError;
+
+            // TODO check this one
+        case ERR_BadDefArg:
+            return RC_UnkError;
 
         default:
             return RC_Unknown;

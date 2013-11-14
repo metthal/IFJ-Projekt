@@ -24,22 +24,16 @@ typedef struct {
     VariableType type;
 } Variable;
 
-/* TODO remove? should be already accessible by context->LST["name"]->defaultValue
-typedef struct {
-    Variable *def;
-} FunctionArgument;
-*/
-
 typedef struct {
     int32_t relativeIndex;
+    uint32_t constantIndex;
     uint8_t declared;
-    // TODO defaultValue
+    uint8_t constant;
 } VariableSymbolData;
 
 typedef struct {
     uint32_t functionAddressIndex;
     Context context;
-    //FunctionArgument *arguments;
 } Function;
 
 typedef enum {
