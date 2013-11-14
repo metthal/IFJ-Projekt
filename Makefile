@@ -83,7 +83,7 @@ test:
 	@-echo -e "\n\033[1;34mStarting static analysis...\033[00m" && \
 		$(MAKE) analyzeAll ANALYZE_FLAGS="$(ANALYZE_FLAGS)" >/dev/null &&\
 		echo -e "\n\033[1;34mStarting tests...\033[00m" && \
-		./$(PROJECT_TEST) -f
+		./$(PROJECT_TEST) -ff
 
 ctags:
 	@ctags $(SRC_FILES) $(TEST_SRC_FILES) $(HEADER_FILES) $(TEST_HEADER_FILES)
