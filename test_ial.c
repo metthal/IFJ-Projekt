@@ -145,4 +145,22 @@ SHOULD_EQUAL("stringSubstrSearchSSO() 3", stringSubstrSearchSSO(CSTR_ARG("Mama m
 SHOULD_EQUAL("stringSubstrSearchSSO() 4", stringSubstrSearchSSO(CSTR_ARG("Mama ma emu. Ema ma mamu."), CSTR_ARG("ma"), 15), 17);
 SHOULD_EQUAL("stringSubstrSearchSSO() 5", stringSubstrSearchSSO(CSTR_ARG("Mama ma emu. Ema ma mamu."), CSTR_ARG("ma"), 18), 20);
 
+// stringCharSort() Basic
+ps = newStringS(CSTR_ARG("DCBA"));
+stringCharSort(ps);
+SHOULD_EQUAL_STR("stringCharSort() Basic", ps->data, "ABCD");
+freeString(&ps);
+
+// stringCharSort() Normal
+ps = newStringS(CSTR_ARG("dcbaEDCBA"));
+stringCharSort(ps);
+SHOULD_EQUAL_STR("stringCharSort() Normal", ps->data, "ABCDEabcd");
+freeString(&ps);
+
+// stringCharSort() Random
+ps = newStringS(CSTR_ARG("gpMWkslFI"));
+stringCharSort(ps);
+SHOULD_EQUAL_STR("stringCharSort() Random", ps->data, "FIMWgklps");
+freeString(&ps);
+
 TEST_SUITE_END

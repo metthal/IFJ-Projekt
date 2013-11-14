@@ -44,4 +44,6 @@ uint32_t stringSubstrSearchSO(String *haystack, const char *needle, uint32_t nee
 uint32_t stringSubstrSearchSS(const char *haystack, uint32_t haystackLen, const char *needle, uint32_t needleLen);
 uint32_t stringSubstrSearchSSO(const char *haystack, uint32_t haystackLen, const char *needle, uint32_t needleLen, uint32_t offset);
 
+void stringCharSort(String *s);
+
 #endif

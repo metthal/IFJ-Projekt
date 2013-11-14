@@ -289,3 +289,55 @@ uint32_t stringSubstrSearchSSO(const char *haystack, uint32_t haystackLen, const
 {
     return _stringSubstrSearchSSO(haystack, haystackLen, needle, needleLen, offset);
 }
+
+void stringCharSortMerge(char arr[], char temp[], uint32_t length)
+{
+    uint32_t leftIndex = 0,
+        leftMax = length / 2,
+        rightIndex = length / 2,
+        rightMax = length;
+
+    while ((leftIndex < leftMax) && (rightIndex < rightMax)) {
+        if (temp[leftIndex] < temp[rightIndex]) {
+            *arr = temp[leftIndex++];
+            arr++;
+        }
+        else {
+            *arr = temp[rightIndex++];
+            arr++;
+        }
+    }
+
+    while(leftIndex < leftMax) {
+        *arr = temp[leftIndex++];
+        arr++;
+    }
+
+    while(rightIndex < rightMax) {
+        *arr = temp[rightIndex++];
+        arr++;
+    }
+}
+
+void stringCharSortDivide(char arr[], char temp[], uint32_t length)
+{
+    uint32_t offset = length / 2;
+    if (offset != 0) {
+        stringCharSortDivide(temp, arr, offset);
+        stringCharSortDivide(temp + offset, arr + offset, length - offset);
+    }
+
+    stringCharSortMerge(arr, temp, length);
+}
+
+void stringCharSort(String *s)
+{
+    char *temp = malloc(sizeof(char) * (s->length - 1));
+    if (!temp) {
+        setError(ERR_NewFailed);
+        return;
+    }
+    memcpy(temp, s->data, s->length - 1);
+    stringCharSortDivide(s->data, temp, s->length - 1);
+    free(temp);
+}
