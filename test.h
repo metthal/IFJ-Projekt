@@ -23,8 +23,9 @@ typedef enum
 typedef enum
 {
     None        = 0,
-    OnlyFailed  = 1,
-    VerboseOut  = 2
+    NotPassed  = 1,
+    VerboseOut  = 2,
+    OnlyFailed  = 4
 } TestFlags;
 
 static inline void printfc(uint8_t color, uint8_t style, const char *fmt, ...)
@@ -52,7 +53,7 @@ static inline void testResult(uint8_t result, const char *testName, const char *
         testName = buffer;
     }
 
-    if (!(testFlags & OnlyFailed) || result == TestFailed) {
+    if (!(testFlags & NotPassed) || result == TestFailed) {
         printf("%s", testName);
 
         uint8_t spaceCount = TestResultPos - strlen(testName);
@@ -61,7 +62,7 @@ static inline void testResult(uint8_t result, const char *testName, const char *
     }
 
     if (result == TestOk) {
-        if (!(testFlags & OnlyFailed)) {
+        if (!(testFlags & NotPassed)) {
             printf("[ ");
             printfc(1, 32, "PASS");
             printf(" ]\n");
@@ -84,15 +85,19 @@ static inline void testResult(uint8_t result, const char *testName, const char *
 
 #define TEST_SUITE_START(testSuiteName)             \
     void testSuiteName() {                          \
-        printfc(1, 33, "\n%s:\n", #testSuiteName);  \
-        printf("Starting test suite in %s...\n", __FILE__); \
+        if (!(testFlags & OnlyFailed)) {            \
+            printfc(1, 33, "\n%s:\n", #testSuiteName); \
+            printf("Starting test suite in %s...\n", __FILE__); \
+        }                                           \
         uint32_t testCountOkStart = testCountOk, testCountFailedStart = testCountFailed;
 
 #define TEST_SUITE_END                              \
-        printf("Suite tests passed: ");             \
-        printfc(1, 32, "%38u\n", testCountOk - testCountOkStart); \
-        printf("Suite tests failed: ");             \
-        printfc(1, 31, "%38u\n", testCountFailed - testCountFailedStart); \
+        if (!(testFlags & OnlyFailed)) {            \
+            printf("Suite tests passed: ");         \
+            printfc(1, 32, "%38u\n", testCountOk - testCountOkStart); \
+            printf("Suite tests failed: ");         \
+            printfc(1, 31, "%38u\n", testCountFailed - testCountFailedStart); \
+        }                                           \
     }
 
 #define SHOULD_EQUAL(TestName, val1, val2)      \

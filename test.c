@@ -23,11 +23,16 @@ int main(int argc, char **argv)
                 printf("Usage:\n");
                 printf("    ini-test [-h] | [[-f] [-v]]\n\n");
                 printf("    -h                     Print help\n");
-                printf("    -f                     Show only failed tests\n");
+                printf("    -f                     Don't show passed tests\n");
+                printf("    -ff                    Show only failed tests\n");
                 printf("    -v                     Verbose output\n");
                 return 0;
             case 'f':
-                testFlags |= OnlyFailed;
+                if (testFlags & NotPassed) {
+                    testFlags |= OnlyFailed;
+                } else {
+                    testFlags |= NotPassed;
+                }
                 break;
             case 'v':
                 testFlags |= VerboseOut;
@@ -49,12 +54,14 @@ int main(int argc, char **argv)
 
     RUN_TEST_SUITES
 
-    printfc(1, 33, "\nResult:\n");
-    printf("Total tests passed: ");
-    printfc(1, 32, "%38u\n", testCountOk);
+    if (!(testFlags & OnlyFailed)) {
+        printfc(1, 33, "\nResult:\n");
+        printf("Total tests passed: ");
+        printfc(1, 32, "%38u\n", testCountOk);
 
-    printf("Total tests failed: ");
-    printfc(1, 31, "%38u\n", testCountFailed);
+        printf("Total tests failed: ");
+        printfc(1, 31, "%38u\n", testCountFailed);
+    }
 
     return (testCountFailed > 0);
 }
