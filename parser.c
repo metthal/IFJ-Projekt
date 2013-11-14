@@ -55,7 +55,6 @@ static uint8_t secondRun = 0;
 // stackPointer = NULL <- will know that it's program exit
 // instructionPointer = NULL <- will know that it's program exit
 
-// TODO !!!! Top is last item in vector - so that should be vectorBack?
 // TODO Test all jumping - if, elseif, else, for, while, break, continue...
 // TODO ptr1 in cycles might be called loop, ptr2 endJump
 
@@ -445,7 +444,9 @@ void stmt()
                     if (getError())
                         return;
 
-                    uint32_t blockSize = (Instruction*)vectorBack(instructions) - ptr2;
+                    uint32_t blockSize = 0;
+                    if (secondRun)
+                        blockSize = (Instruction*)vectorBack(instructions) - ptr2;
 
                     blockSize += elseifStmt();
                     if (getError())
@@ -465,7 +466,8 @@ void stmt()
                     tokensIt++;
 
                     Instruction *ptr1 = NULL, *ptr2 = NULL;
-                    ptr1 = (Instruction*)vectorBack(instructions);
+                    if (secondRun)
+                        ptr1 = (Instruction*)vectorBack(instructions);
 
                     uint32_t cond = condition();
                     if (getError())
@@ -518,7 +520,8 @@ void stmt()
 
                     Instruction *ptr1 = NULL, *ptr2 = NULL, *ptr3 = NULL;
 
-                    ptr1 = (Instruction*)vectorBack(instructions);
+                    if (secondRun)
+                        ptr1 = (Instruction*)vectorBack(instructions);
 
                     uint32_t cond;
                     // Check if 2nd statement weren't omitted.
@@ -557,10 +560,9 @@ void stmt()
                     if (getError())
                         return;
 
-                    ptr3 = (Instruction*)vectorBack(instructions);
-
                     // Generate For's 3rd statement
                     if (secondRun) {
+                        ptr3 = (Instruction*)vectorBack(instructions);
                         ConstTokenVectorIterator afterForBlock = tokensIt;
                         tokensIt = beforeFor3;
                         forStmt1(0);
@@ -660,7 +662,9 @@ uint8_t elseifStmt()
                     if (getError())
                         return 0;
 
-                    uint32_t blockSize = (Instruction*)vectorBack(instructions) - ptr2;
+                    uint32_t blockSize = 0;
+                    if (secondRun)
+                        blockSize = (Instruction*)vectorBack(instructions) - ptr2;
 
                     blockSize += elseifStmt();
                     if (getError())
