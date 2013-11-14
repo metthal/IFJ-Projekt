@@ -19,7 +19,12 @@ typedef enum
     ERR_Allocation,
     ERR_Range,
     ERR_Convert,
-    ERR_Syntax
+    ERR_Syntax,
+    ERR_UndefFunction,
+    ERR_RedefFunction,
+    ERR_UndefVariable,
+    ERR_RedefParameter,
+    ERR_BadParamCount
 } NiErrorType;
 
 typedef struct

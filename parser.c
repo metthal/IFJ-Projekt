@@ -20,7 +20,7 @@ uint8_t elseStmt();
 void paramList();
 void nparamList();
 void forStmt1(uint8_t skip);
-uint32_t forStmt2();
+uint8_t forStmt2(uint32_t *cond);
 uint32_t expr();
 
 // Forward declaration of helper functions
@@ -37,13 +37,13 @@ static const Vector *tokens = NULL;
 // by grammar rules.
 static ConstTokenVectorIterator tokensIt = NULL;
 
-static SymbolTable *globalSymbolTable = NULL;
+SymbolTable *globalSymbolTable = NULL;
 
 static Vector *addressTable = NULL;
 static Vector *constantsTable = NULL;
 static Vector *mainInstructions = NULL;
 static Vector *functionsInstructions = NULL;
-static Vector *instructions = NULL;
+Vector *instructions = NULL;
 
 static Context mainContext;
 static Context *currentContext;
@@ -53,9 +53,6 @@ static uint8_t secondRun = 0;
 // TODO !!!! Top is last item in vector
 // TODO Test all jumping - if, elseif, else, for, while, break, continue...
 // TODO ptr1 in cycles might be called loop, ptr2 endJump
-// TODO INSTR JMP [ptr1 - Top] can be read as jump to ptr1 from Top
-// TODO work with second run - rework everything except func (check that one).
-// TODO !!!! fix leaks from hash tables by freeing data.
 
 void parse(Vector* tokenVector)
 {
@@ -117,6 +114,10 @@ void prog()
             // Rule 1
             printf("%s\n", "Rule 1");
             tokensIt++;
+
+            if (secondRun) {
+                // TODO Create stack frame for "main" ?
+            }
 
             body();
             if (getError())
@@ -210,7 +211,7 @@ void func()
             return;
 
         if (symbol == NULL) {
-            setError(ERR_Syntax);
+            setError(ERR_RedefFunction);
             return;
         }
 
@@ -270,7 +271,9 @@ void func()
         return;
 
     if (secondRun) {
-        // INSTR RETURN NULL
+        // Create instruction that will return null at the end of each function
+        generateInstruction(IST_Nullify, 0, -(currentContext->argumentCount+1), 0);
+        generateInstruction(IST_Return, 0, currentContext->argumentCount, 0);
         instructions = mainInstructions;
     }
 
@@ -367,14 +370,15 @@ void stmt()
                         return;
 
                     if (secondRun) {
-                        // INSTR MOV RETURN_LOC, expr-result
+                        // Move result of expression to reserved space for return value
+                        generateInstruction(IST_Mov, -(currentContext->argumentCount+1), exprRes, 0);
 
                         // TODO Create stack frame for main
                         // returnValue
                         // Vector* address for stack <-- Stack pointer
                         // HALT instruction - return from interpret with returnValue
 
-                        // INSTR RETURN paramCount (from context)
+                        generateInstruction(IST_Return, 0, currentContext->argumentCount, 0);
                     }
 
                     // Semicolon loaded by expr
@@ -434,17 +438,18 @@ void stmt()
                     if (getError())
                         return;
 
+                    Instruction *ptr2 = NULL;
                     if (secondRun) {
                         // Reserves space for instruction that jumps
                         // to the end of this condition block
-                        // INSTR DEFAULT (save pointer = ptr2)
+                        ptr2 = generateEmptyInstruction();
                     }
 
                     stmtListBracketed();
                     if (getError())
                         return;
 
-                    // uint32_t blockSize = Top - ptr2 + 1
+                    // uint32_t blockSize = Top - ptr2
 
                     // blockSize += elseifStmt();
                     if (getError())
@@ -452,7 +457,7 @@ void stmt()
 
                     if (secondRun) {
                         // Fills the reserved space with correct jump value
-                        // ptr2 = INSTR JMPZ cond, blockSize
+                        // TODO fillInstruction(ptr2, IST_Jmpz, 0, blockSize, cond);
                     }
 
                     break;
@@ -463,6 +468,7 @@ void stmt()
                     printf("%s\n", "Rule 13");
                     tokensIt++;
 
+                    Instruction *ptr1 = NULL, *ptr2 = NULL;
                     // TODO ptr1 = Top
 
                     uint32_t cond = condition();
@@ -472,7 +478,7 @@ void stmt()
                     if (secondRun) {
                         // Reserves space for instruction that jumps
                         // behind while block
-                        // INSTR DEFAULT (save pointer = ptr2)
+                        ptr2 = generateEmptyInstruction();
                     }
 
                     stmtListBracketed();
@@ -481,10 +487,10 @@ void stmt()
 
                     if (secondRun) {
                         // Jump before condition for another iteration
-                        // INSTR JMP [ptr1 - Top + 1]
+                        // TODO generateInstruction(IST_Jmp, 0, ptr1 - Top, 0);
 
                         // Fills the reserved space with correct jump value
-                        // ptr2 = INSTR JMPZ cond, [Top - ptr2 + 1]
+                        // TODO fillInstruction(ptr2, IST_Jmpz, 0, Top - ptr2, cond);
                     }
 
                     break;
@@ -514,19 +520,19 @@ void stmt()
 
                     tokensIt++;
 
+                    Instruction *ptr1 = NULL, *ptr2 = NULL, *ptr3 = NULL;
+
                     // TODO ptr1 = Top
 
-                    uint32_t cond = forStmt2();
-                    if (getError())
-                        return;
-
-                    // Check if 2nd statement weren't omitted. Condition
-                    // result can't be at 0, as there's program return value.
-                    if (secondRun && cond != 0) {
+                    uint32_t cond;
+                    // Check if 2nd statement weren't omitted.
+                    if (secondRun && forStmt2(&cond)) {
                         // Reserves space for instruction that jumps
                         // behind for block
-                        // INSTR DEFAULT (save pointer = ptr2)
+                        ptr2 = generateEmptyInstruction();
                     }
+                    if (getError())
+                        return;
 
                     // Semicolon loaded by forStmt2
                     if (tokensIt->type != STT_Semicolon) {
@@ -555,7 +561,7 @@ void stmt()
                     if (getError())
                         return;
 
-                    // TODO repeat = Top
+                    // TODO ptr3 = Top
 
                     // Generate For's 3rd statement
                     if (secondRun) {
@@ -567,23 +573,24 @@ void stmt()
                         tokensIt = afterForBlock;
 
                         // Jump before condition for another iteration
-                        // INSTR JMP [ptr1 - Top + 1]
+                        // TODO generateInstruction(IST_Jmp, 0, ptr1 - Top, 0);
 
                         if (cond != 0) {
                             // Fills the reserved space with correct jump value
-                            // ptr2 = INSTR JMPZ cond, [Top - ptr2 + 1]
+                            // TODO fillInstruction(ptr2, IST_Jmpz, 0, Top - ptr2, cond);
                         }
 
                         // Finish everything by filling pre-generated
                         // break and and continue instructions
                         uint16_t fillCount = 10; // number of break or continue stmts
                         for (uint16_t i = 0; i < fillCount; i++) {
+                            // TODO
                             /*// topPtr is top in toBeModified Vector
                             if (continuestmt) {
-                                // topPtr = INSTR JMP [repeat - topPtr + 1]
+                                // topPtr = INSTR JMP [ptr3 - topPtr]
                             }
                             else if (breakstmt) {
-                                // topPtr = INSTR JMP [Top - topPtr + 1]
+                                // topPtr = INSTR JMP [Top - topPtr]
                             }
 
                             pop;*/
@@ -635,10 +642,12 @@ uint8_t elseifStmt()
                     printf("%s\n", "Rule 16");
                     tokensIt++;
 
+                    Instruction *ptr1 = NULL, *ptr2 = NULL;
+
                     if (secondRun) {
                         // Reserves space for instruction that jumps
                         // to the end of whole if-else block
-                        // INSTR DEFAULT (save pointer = ptr1)
+                        ptr1 = generateEmptyInstruction();
                     }
 
                     uint32_t cond = condition();
@@ -648,14 +657,14 @@ uint8_t elseifStmt()
                     if (secondRun) {
                         // Reserves space for instruction that jumps
                         // to the end of this condition block
-                        // INSTR DEFAULT (save pointer = ptr2)
+                        ptr2 = generateEmptyInstruction();
                     }
 
                     stmtListBracketed();
                     if (getError())
                         return 0;
 
-                    // uint32_t blockSize = Top - ptr2 + 1
+                    // uint32_t blockSize = Top - ptr2
 
                     // blockSize += elseifStmt();
                     if (getError())
@@ -663,10 +672,10 @@ uint8_t elseifStmt()
 
                     if (secondRun) {
                         // Fills the reserved space with correct jump value
-                        // ptr1 = INSTR JMP [Top - ptr1 + 1]
+                        // TODO fillInstruction(ptr1, IST_Jmp, 0, Top - ptr1, 0);
 
                         // Fills the reserved space with correct jump value
-                        // ptr2 = INSTR JMPZ cond, blockSize
+                        // TODO fillInstruction(ptr1, IST_Jmpz, 0, blockSize, cond);
                     }
 
                     return 1;
@@ -711,10 +720,11 @@ uint8_t elseStmt()
                     // Rule 18
                     printf("%s\n", "Rule 18");
 
+                    Instruction *ptr1 = NULL;
                     if (secondRun) {
                         // Reserves space for instruction that jumps
                         // to the end of whole if-else block
-                        // INSTR DEFAULT (save pointer = ptr1)
+                        ptr1 = generateEmptyInstruction();
                     }
 
                     tokensIt++;
@@ -725,7 +735,7 @@ uint8_t elseStmt()
 
                     if (secondRun) {
                         // Fills the reserved space with correct jump value
-                        // ptr1 = INSTR JMP [Top - ptr1 + 1]
+                        // TODO fillInstruction(ptr1, IST_Jmp, 0, Top - ptr1, 0);
                     }
 
                     return 1;
@@ -843,7 +853,7 @@ void forStmt1(uint8_t skip)
     }
 }
 
-uint32_t forStmt2()
+uint8_t forStmt2(uint32_t *cond)
 {
     switch (tokensIt->type) {
         case STT_Semicolon:
@@ -852,12 +862,13 @@ uint32_t forStmt2()
             break;
 
         default:
-            // @TODO Tokens for top down parsing doesn't have
-            // to be send as it will be certainly syntax error.
-            // Need predict(EXPR) to determine which.
             printf("%s\n", "Rule 26");
 
-            return generalExpr(0);
+            *cond = generalExpr(0);
+            if(getError())
+                break;
+
+            return 1;
     }
 
     return 0;
@@ -892,15 +903,15 @@ uint32_t expr()
     return 0;
 }
 
-// Skips expresion
-// If error occured, it won't change token iterator.
 uint32_t generalExpr(uint8_t skip)
 {
     uint32_t exprRes = 0;
     if (secondRun && !skip) {
         return expr();
     }
-    else { // Skip expression
+    else {
+        // Skips expression.
+        // If error occured, it won't change token iterator.
         ConstTokenVectorIterator backup = tokensIt;
         int leftBrackets = 0;
         while (1) {
@@ -997,10 +1008,19 @@ void assignment(ConstTokenVectorIterator varid, uint8_t skip)
     uint32_t exprRes = generalExpr(skip);
 
     if (secondRun) {
-        // INSTR MOV symbol->data->relativeIndex, exprRes
+        // Symbol should be already in table after first run
+        Symbol *symbol = symbolTableFind(currentContext->localTable, &(varid->str));
+        if (getError())
+           return;
+
+        // Variable is declared after assignment and can be used
+        symbol->data->var.declared = 1;
+
+        // Move result of expression to variable
+        generateInstruction(IST_Mov, symbol->data->var.relativeIndex, exprRes, 0);
     }
     else {
-        Symbol *symbol = addLocalVariable(varid);
+        addLocalVariable(varid);
         if (getError())
            return;
     }
@@ -1023,6 +1043,7 @@ Symbol* addLocalVariable(ConstTokenVectorIterator varid)
         symbol->type = ST_Variable;
         symbol->data = (SymbolData*)newVariableSymbolData();
         symbol->data->var.relativeIndex = reserved + currentContext->localVariableCount;
+        symbol->data->var.declared = 0;
         currentContext->localVariableCount++;
         // TODO default value
     }
@@ -1031,7 +1052,7 @@ Symbol* addLocalVariable(ConstTokenVectorIterator varid)
 }
 
 // Adds parameter to symbol table.
-// If already present, sets error to ERR_Syntax
+// If already present, sets error.
 Symbol* addParameter(ConstTokenVectorIterator varid)
 {
     Symbol *symbol = symbolTableAdd(currentContext->localTable, &(varid->str));
@@ -1039,7 +1060,7 @@ Symbol* addParameter(ConstTokenVectorIterator varid)
         return NULL;
 
     if (symbol == NULL) {
-        setError(ERR_Syntax);
+        setError(ERR_RedefParameter);
         return NULL;
     }
 
@@ -1047,6 +1068,7 @@ Symbol* addParameter(ConstTokenVectorIterator varid)
     symbol->data = (SymbolData*)newVariableSymbolData();
     currentContext->argumentCount++;
     symbol->data->var.relativeIndex = -currentContext->argumentCount;
+    symbol->data->var.declared = 1;
     // TODO default value
 
     return symbol;

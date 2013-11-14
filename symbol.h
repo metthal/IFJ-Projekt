@@ -31,7 +31,8 @@ typedef struct {
 */
 
 typedef struct {
-    int16_t relativeIndex;
+    int32_t relativeIndex;
+    uint8_t declared;
     // TODO defaultValue
 } VariableSymbolData;
 

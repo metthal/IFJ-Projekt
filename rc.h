@@ -42,12 +42,28 @@ static inline ResultCode getRcFromError()
     switch (niErr.type) {
         case ERR_None:
             return RC_Ok;
+
         case ERR_LexFile:
             return RC_LexError;
+
         case ERR_NewFailed:
             return RC_FatalError;
+
         case ERR_Convert:
             return RC_NumCastError;
+
+        case ERR_UndefFunction:
+        case ERR_RedefFunction:
+            return RC_FuncDefError;
+
+        case ERR_UndefVariable:
+            // TODO check this one
+        case ERR_RedefParameter:
+            return RC_VarError;
+
+        case ERR_BadParamCount:
+            return RC_FuncParamError;
+
         default:
             return RC_Unknown;
     }
