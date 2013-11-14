@@ -13,11 +13,12 @@ typedef enum
     KTT_Break,
     KTT_While,
     KTT_For,
-    KTT_True,
-    KTT_False,
     KTT_Return,
     KTT_Function,
-    KTT_Null,
+    // Helper keywords that gets converted to value
+    KTT_True,
+    KTT_False,
+    KTT_Null
 } KeywordTokenType;
 
 typedef enum
@@ -44,6 +45,8 @@ typedef enum
     STT_Equal,
     STT_EOF,
     STT_Double,
+    STT_Bool,
+    STT_Null,
     STT_Divide,
     STT_NotEqual,
     STT_String,

@@ -317,15 +317,17 @@ SHOULD_EQUAL("GetToken - keywordType - While", token->keywordType, KTT_While);
 token = nextToken();
 SHOULD_EQUAL("GetToken - keywordType - For", token->keywordType, KTT_For);
 token = nextToken();
-SHOULD_EQUAL("GetToken - keywordType - True", token->keywordType, KTT_True);
+SHOULD_EQUAL("GetToken - type - True", token->type, STT_Bool);
+SHOULD_EQUAL("GetToken - value - True", token->n, 1);
 token = nextToken();
-SHOULD_EQUAL("GetToken - keywordType - False", token->keywordType, KTT_False);
+SHOULD_EQUAL("GetToken - type - False", token->type, STT_Bool);
+SHOULD_EQUAL("GetToken - value - False", token->n, 0);
 token = nextToken();
 SHOULD_EQUAL("GetToken - keywordType - Return", token->keywordType, KTT_Return);
 token = nextToken();
 SHOULD_EQUAL("GetToken - keywordType - Function", token->keywordType, KTT_Function);
 token = nextToken();
-SHOULD_EQUAL("GetToken - keywordType - Null", token->keywordType, KTT_Null);
+SHOULD_EQUAL("GetToken - keywordType - Null", token->type, STT_Null);
 
 // @todo need tests for symbol table.
 

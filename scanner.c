@@ -434,10 +434,24 @@ void scannerFillToken(Token *token)
                     if (keywordType == KTT_None) {
                         token->type = STT_Identifier;
                         return;
-                    } else {
+                    }
+                    else {
                         deleteString(tokenStr);
-                        token->type = STT_Keyword;
-                        token->keywordType = keywordType;
+                        if (keywordType == KTT_True) {
+                            token->type = STT_Bool;
+                            token->n = 1;
+                        }
+                        else if (keywordType == KTT_False) {
+                            token->type = STT_Bool;
+                            token->n = 0;
+                        }
+                        else if (keywordType == KTT_Null) {
+                            token->type = STT_Null;
+                        }
+                        else {
+                            token->type = STT_Keyword;
+                            token->keywordType = keywordType;
+                        }
                         return;
                     }
                 }
