@@ -16,8 +16,18 @@ double stringToDouble(const String *str)
 {
     char *endptr = NULL;
     double tmp = strtod(str->data, &endptr);
-    if (endptr == str->data)
-        setError(ERR_Convert);
+
+    // error code is set only if it found as first non-digit character
+    // in case *endptr == 0, we had just string full of whitespaces or empty one what means 0.0
+    if (endptr == str->data) {
+        // skip whitespaces at the beginning
+        while (isspace(*endptr))
+            endptr++;
+
+        if (*endptr != '\0')
+            setError(ERR_Convert);
+    }
+
     return tmp;
 }
 
