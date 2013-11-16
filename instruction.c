@@ -7,6 +7,7 @@
 
 extern SymbolTable *globalSymbolTable;
 extern Vector *instructions;
+extern Context *currentContext;
 
 Instruction* newInstruction()
 {
@@ -46,6 +47,7 @@ void copyInstruction(const Instruction *src, Instruction *dest)
     dest->b = src->b;
 }
 
+// TODO bottom up parser still needs to reserve space for return value
 void generateCall(const Token *id, uint32_t paramCount)
 {
     Instruction inst;
@@ -141,13 +143,27 @@ void generateCall(const Token *id, uint32_t paramCount)
         }
     }
     else {
-        // TODO default parameters
-        if (symbol->data->func.context.argumentCount == paramCount) {
-            inst.code = IST_Call;
-            inst.a = symbol->data->func.functionAddressIndex;
+        // Test for too many arguments
+        if (symbol->data->func.context.argumentCount >= paramCount) {
+            // Default parameters
+            uint16_t missingCount = symbol->data->func.context.argumentCount - paramCount;
+            if (missingCount > 0 && missingCount <= symbol->data->func.context.defaultCount) {
+                generateInstruction(IST_Reserve, 0, missingCount, 0);
+                // TODO check later how parameters are ordered from bottom-up
+                paramCount += missingCount;
+            }
+
+            // Test for too few arguments
+            if (symbol->data->func.context.argumentCount == paramCount) {
+                inst.code = IST_Call;
+                inst.a = symbol->data->func.functionAddressIndex;
+            }
+            else
+                badParamCount = 1;
         }
         else
             badParamCount = 1;
+
         undef = 0;
     }
 
@@ -162,6 +178,27 @@ void generateCall(const Token *id, uint32_t paramCount)
 void generateInstruction(InstructionCode code, int32_t res, int32_t a, int32_t b)
 {
     Instruction inst;
+    switch (code) {
+        case IST_Push:
+            currentContext->stackTop++;
+            break;
+
+        case IST_Reserve:
+            currentContext->stackTop += a;
+            break;
+
+        case IST_Pop:
+            currentContext->stackTop -= a;
+            break;
+
+        case IST_Call:
+            setError(ERR_ISTGenerator);
+            return;
+
+        default:
+            break;
+    }
+
     inst.code = code;
     inst.res = res;
     inst.a = a;
@@ -169,16 +206,29 @@ void generateInstruction(InstructionCode code, int32_t res, int32_t a, int32_t b
     vectorPushInstruction(instructions, &inst);
 }
 
-Instruction* generateEmptyInstruction()
+uint32_t generateEmptyInstruction()
 {
+    uint32_t ret = vectorSize(instructions);
     vectorPushDefaultInstruction(instructions);
-    return vectorBack(instructions);
+    return ret;
 }
 
-void fillInstruction(Instruction *pt, InstructionCode code, int32_t res, int32_t a, int32_t b)
+void fillInstruction(uint32_t index, InstructionCode code, int32_t res, int32_t a, int32_t b)
 {
-    pt->code = code;
-    pt->res = res;
-    pt->a = a;
-    pt->b = b;
+    switch (code) {
+        case IST_Push:
+        case IST_Pop:
+        case IST_Reserve:
+        case IST_Call:
+            setError(ERR_ISTGenerator);
+            break;
+
+        default: {
+            Instruction *pt = vectorAt(instructions, index);
+            pt->code = code;
+            pt->res = res;
+            pt->a = a;
+            pt->b = b;
+        }
+    }
 }

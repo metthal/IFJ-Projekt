@@ -46,7 +46,7 @@ static Vector *functionsInstructions = NULL;
 Vector *instructions = NULL;
 
 static Context mainContext;
-static Context *currentContext;
+Context *currentContext;
 
 static uint8_t secondRun = 0;
 
@@ -433,7 +433,7 @@ void stmt()
                     if (getError())
                         return;
 
-                    Instruction *ptr2 = NULL;
+                    uint32_t ptr2 = 0;
                     if (secondRun) {
                         // Reserves space for instruction that jumps
                         // to the end of this condition block
@@ -446,7 +446,7 @@ void stmt()
 
                     uint32_t blockSize = 0;
                     if (secondRun)
-                        blockSize = (Instruction*)vectorBack(instructions) - ptr2;
+                        blockSize = vectorSize(instructions) - ptr2;
 
                     blockSize += elseifStmt();
                     if (getError())
@@ -465,9 +465,9 @@ void stmt()
                     printf("%s\n", "Rule 13");
                     tokensIt++;
 
-                    Instruction *ptr1 = NULL, *ptr2 = NULL;
+                    uint32_t ptr1 = 0, ptr2 = 0;
                     if (secondRun)
-                        ptr1 = (Instruction*)vectorBack(instructions);
+                        ptr1 = vectorSize(instructions);
 
                     uint32_t cond = condition();
                     if (getError())
@@ -485,10 +485,10 @@ void stmt()
 
                     if (secondRun) {
                         // Jump before condition for another iteration
-                        generateInstruction(IST_Jmp, 0, ptr1 - (Instruction*)vectorBack(instructions), 0);
+                        generateInstruction(IST_Jmp, 0, ptr1 - vectorSize(instructions), 0);
 
                         // Fills the reserved space with correct jump value
-                        fillInstruction(ptr2, IST_Jmpz, 0, (Instruction*)vectorBack(instructions) - ptr2, cond);
+                        fillInstruction(ptr2, IST_Jmpz, 0, vectorSize(instructions) - ptr2, cond);
                     }
 
                     break;
@@ -518,14 +518,15 @@ void stmt()
 
                     tokensIt++;
 
-                    Instruction *ptr1 = NULL, *ptr2 = NULL, *ptr3 = NULL;
+                    uint32_t ptr1 = 0, ptr2 = 0, ptr3 = 0;
 
                     if (secondRun)
-                        ptr1 = (Instruction*)vectorBack(instructions);
+                        ptr1 = vectorSize(instructions);
 
+                    uint8_t for2Used;
                     uint32_t cond;
                     // Check if 2nd statement weren't omitted.
-                    if (secondRun && forStmt2(&cond)) {
+                    if (secondRun && (for2Used = forStmt2(&cond))) {
                         // Reserves space for instruction that jumps
                         // behind for block
                         ptr2 = generateEmptyInstruction();
@@ -562,7 +563,7 @@ void stmt()
 
                     // Generate For's 3rd statement
                     if (secondRun) {
-                        ptr3 = (Instruction*)vectorBack(instructions);
+                        ptr3 = vectorSize(instructions);
                         ConstTokenVectorIterator afterForBlock = tokensIt;
                         tokensIt = beforeFor3;
                         forStmt1(0);
@@ -571,11 +572,11 @@ void stmt()
                         tokensIt = afterForBlock;
 
                         // Jump before condition for another iteration
-                        generateInstruction(IST_Jmp, 0, ptr1 - (Instruction*)vectorBack(instructions), 0);
+                        generateInstruction(IST_Jmp, 0, ptr1 - vectorSize(instructions), 0);
 
-                        if (ptr2 != NULL) {
+                        if (for2Used) {
                             // Fills the reserved space with correct jump value
-                            fillInstruction(ptr2, IST_Jmpz, 0, (Instruction*)vectorBack(instructions) - ptr2, cond);
+                            fillInstruction(ptr2, IST_Jmpz, 0, vectorSize(instructions) - ptr2, cond);
                         }
 
                         // Finish everything by filling pre-generated
@@ -640,7 +641,7 @@ uint8_t elseifStmt()
                     printf("%s\n", "Rule 16");
                     tokensIt++;
 
-                    Instruction *ptr1 = NULL, *ptr2 = NULL;
+                    uint32_t ptr1 = 0, ptr2 = 0;
 
                     if (secondRun) {
                         // Reserves space for instruction that jumps
@@ -664,7 +665,7 @@ uint8_t elseifStmt()
 
                     uint32_t blockSize = 0;
                     if (secondRun)
-                        blockSize = (Instruction*)vectorBack(instructions) - ptr2;
+                        blockSize = vectorSize(instructions) - ptr2;
 
                     blockSize += elseifStmt();
                     if (getError())
@@ -672,7 +673,7 @@ uint8_t elseifStmt()
 
                     if (secondRun) {
                         // Fills the reserved space with correct jump value
-                        fillInstruction(ptr1, IST_Jmp, 0, (Instruction*)vectorBack(instructions) - ptr1, 0);
+                        fillInstruction(ptr1, IST_Jmp, 0, vectorSize(instructions) - ptr1, 0);
 
                         // Fills the reserved space with correct jump value
                         fillInstruction(ptr1, IST_Jmpz, 0, blockSize, cond);
@@ -720,7 +721,7 @@ uint8_t elseStmt()
                     // Rule 18
                     printf("%s\n", "Rule 18");
 
-                    Instruction *ptr1 = NULL;
+                    uint32_t ptr1 = 0;
                     if (secondRun) {
                         // Reserves space for instruction that jumps
                         // to the end of whole if-else block
@@ -735,7 +736,7 @@ uint8_t elseStmt()
 
                     if (secondRun) {
                         // Fills the reserved space with correct jump value
-                        fillInstruction(ptr1, IST_Jmp, 0, (Instruction*)vectorBack(instructions) - ptr1, 0);
+                        fillInstruction(ptr1, IST_Jmp, 0, vectorSize(instructions) - ptr1, 0);
                     }
 
                     return 1;
@@ -1063,6 +1064,8 @@ Symbol* addLocalVariable(ConstTokenVectorIterator varid)
         symbol->data->var.constantIndex = 0;
         symbol->data->var.constant = 0;
         currentContext->localVariableCount++;
+        // Actualize
+        currentContext->stackTop = currentContext->localVariableCount + 1;
     }
 
     return symbol;
@@ -1085,14 +1088,14 @@ Symbol* addParameter(ConstTokenVectorIterator varid, uint8_t defarg)
     symbol->data = (SymbolData*)newVariableSymbolData();
     currentContext->argumentCount++;
     symbol->data->var.relativeIndex = -currentContext->argumentCount;
-
     symbol->data->var.declared = 1;
 
 
     if (defarg) {
-        // TODO check if varid+2 is literal or null
+        // TODO check if varid+2 is literal or null, wait for bottom up to see how this can be done
         // Add it to constant table and set symbol->data->var.constantIndex
         symbol->data->var.constant = 1;
+        currentContext->defaultCount++;
         // Otherwise set this error
         setError(ERR_BadDefArg);
         return NULL;

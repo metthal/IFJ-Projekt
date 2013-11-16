@@ -87,8 +87,8 @@ void generateCall(const Token *id, uint32_t paramCount);
 
 void generateInstruction(InstructionCode code, int32_t res, int32_t a, int32_t b);
 
-Instruction* generateEmptyInstruction();
+uint32_t generateEmptyInstruction();
 
-void fillInstruction(Instruction *pt, InstructionCode code, int32_t res, int32_t a, int32_t b);
+void fillInstruction(uint32_t index, InstructionCode code, int32_t res, int32_t a, int32_t b);
 
 #endif

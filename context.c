@@ -1,11 +1,11 @@
 #include "context.h"
 #include "ial.h"
 #include <stdlib.h>
+#include <string.h>
 
 void initContext(Context *pt)
 {
-    pt->argumentCount = 0;
-    pt->localVariableCount = 0;
+    memset(pt, 0, sizeof(Context));
     pt->localTable = newSymbolTable();
 }
 

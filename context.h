@@ -7,9 +7,10 @@ struct SymbolTable;
 
 typedef struct{
     struct SymbolTable *localTable;
+    uint32_t stackTop;
     uint16_t argumentCount;
     uint16_t localVariableCount;
-    // TODO Stack Top for generating correct expression operands
+    uint16_t defaultCount;
 } Context;
 
 void initContext(Context *pt);

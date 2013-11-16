@@ -26,7 +26,8 @@ typedef enum
     ERR_RedefParameter,
     ERR_BadParamCount,
     ERR_DefArgOrder,
-    ERR_BadDefArg
+    ERR_BadDefArg,
+    ERR_ISTGenerator
 } NiErrorType;
 
 typedef struct
