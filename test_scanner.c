@@ -333,5 +333,6 @@ SHOULD_EQUAL("GetToken - keywordType - Null", token->type, STT_Null);
 
 if (token)
     freeToken(&token);
+scannerReset();
 
 TEST_SUITE_END

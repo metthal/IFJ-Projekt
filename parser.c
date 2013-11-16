@@ -102,6 +102,7 @@ void parse(Vector* tokenVector)
     instructions = NULL;
     currentContext = NULL;
 
+    scannerReset();
     deleteContext(&mainContext);
     freeSymbolTable(&globalSymbolTable);
     freeTokenVector(&tokenVector);

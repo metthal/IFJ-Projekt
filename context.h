@@ -5,7 +5,7 @@
 
 struct SymbolTable;
 
-typedef struct{
+typedef struct {
     struct SymbolTable *localTable;
     uint16_t argumentCount;
     uint16_t localVariableCount;
