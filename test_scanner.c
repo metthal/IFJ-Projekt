@@ -68,9 +68,9 @@ SHOULD_EQUAL("GetToken - left curly bracket - EOF", token->type, STT_EOF);
 
 overwriteFile(filePath, "*");
 token = nextToken();
-SHOULD_EQUAL("GetToken - asterisk", token->type, STT_Asterisk);
+SHOULD_EQUAL("GetToken - multiply", token->type, STT_Multiply);
 token = nextToken();
-SHOULD_EQUAL("GetToken - asterisk - EOF", token->type, STT_EOF);
+SHOULD_EQUAL("GetToken - multiply - EOF", token->type, STT_EOF);
 
 overwriteFile(filePath, "}");
 token = nextToken();

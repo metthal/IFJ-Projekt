@@ -5,6 +5,7 @@
 #include "address_vector.h"
 #include "ial.h"
 #include "nierr.h"
+#include "expr.h"
 
 #include <stdlib.h>
 #include <stdint.h>
@@ -22,7 +23,6 @@ void paramList();
 void nparamList(uint8_t defarg);
 void forStmt1(uint8_t skip);
 uint8_t forStmt2(uint32_t *cond);
-uint32_t expr();
 
 // Forward declaration of helper functions
 uint32_t generalExpr(uint8_t skip);
@@ -36,7 +36,7 @@ static const Vector *tokens = NULL;
 // Safe to iterate without range checks because last and least
 // one token will be EOF, therefore range is ensured implicitly
 // by grammar rules.
-static ConstTokenVectorIterator tokensIt = NULL;
+ConstTokenVectorIterator tokensIt = NULL;
 
 SymbolTable *globalSymbolTable = NULL;
 
@@ -79,6 +79,7 @@ void parse(Vector* tokenVector)
     functionsInstructions = newInstructionVector();
     toBeModifiedIST = newUint32Vector();
     tokensIt = vectorBeginToken(tokenVector);
+    initExpr();
 
     if (!getError()) {
         currentContext = &mainContext;
@@ -104,6 +105,7 @@ void parse(Vector* tokenVector)
     instructions = NULL;
     currentContext = NULL;
 
+    deinitExpr();
     deleteContext(&mainContext);
     freeSymbolTable(&globalSymbolTable);
     freeTokenVector(&tokenVector);
@@ -893,35 +895,6 @@ uint8_t forStmt2(uint32_t *cond)
             return 1;
     }
 
-    return 0;
-}
-
-// @TODO implement bottom up parser for expression
-uint32_t expr()
-{
-    int leftBrackets = 0;
-    while (1) {
-        switch (tokensIt->type) {
-            case STT_Semicolon:
-            case STT_EOF:
-                return 0;
-
-            case STT_LeftBracket:
-                leftBrackets++;
-                break;
-
-            case STT_RightBracket:
-                if (leftBrackets == 0)
-                    return 0;
-                leftBrackets--;
-                break;
-
-            default:
-                break;
-        }
-
-        tokensIt++;
-    }
     return 0;
 }
 

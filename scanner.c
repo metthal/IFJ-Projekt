@@ -263,7 +263,7 @@ void scannerFillToken(Token *token)
                             token->type = STT_RightCurlyBracket;
                             return;
                         case '*':
-                            token->type = STT_Asterisk;
+                            token->type = STT_Multiply;
                             return;
                         case '+':
                             token->type = STT_Plus;
