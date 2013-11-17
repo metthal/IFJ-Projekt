@@ -16,6 +16,13 @@ typedef enum
     Error
 } TokenPrecedence;
 
+typedef enum
+{
+    FuncReduceNoParam,
+    FuncReduceSingleParam,
+    FuncReduceMultipleParam
+} FunctionReduceVariant;
+
 static uint8_t precedenceTable[STT_Semicolon][STT_Semicolon] =
 {
 //      +       -       *       /       .       <       >       <=      >=      ===     !==     (       )       func    ,       $       var
@@ -156,35 +163,60 @@ else if (topTerm->token->type == STT_GreaterEqual)
             break;
         }
         case STT_RightBracket: {
-puts("Rule: E -> (E)");
-
             uint32_t stackSize = vectorSize(exprVector);
             if (stackSize < 3) {
                 setError(ERR_Syntax);
                 return 0;
             }
 
-            ExprTokenVectorIterator rightBracket = vectorAt(exprVector, stackSize - 1);
-            if (rightBracket != topTerm) {
-                setError(ERR_Syntax);
-                return 0;
-            }
+            ExprTokenVectorIterator nextTerm = vectorAt(exprVector, stackSize - 1);
+            if (nextTerm == topTerm) { // at top must be )
+                nextTerm = vectorAt(exprVector, stackSize - 2);
 
-            ExprTokenVectorIterator expr = vectorAt(exprVector, stackSize - 2);
-            if (expr->type != NonTerminal) {
-                setError(ERR_Syntax);
-                return 0;
-            }
+                if (nextTerm->type == Terminal && nextTerm->token->type == STT_LeftBracket) { // it's function if there is ()
+puts("Rule: E -> func()");
+                    nextTerm = vectorAt(exprVector, stackSize - 3);
 
-            ExprTokenVectorIterator leftBracket = vectorAt(exprVector, stackSize - 3);
-            if (leftBracket->type != Terminal && leftBracket->token->type != STT_LeftBracket) {
-                setError(ERR_Syntax);
-                return 0;
-            }
+                    if (nextTerm->type == Terminal && nextTerm->token->type == STT_Identifier) {
+                        vectorPopExprToken(exprVector);
+                        vectorPopExprToken(exprVector);
+                        nextTerm->type = NonTerminal;
+                    }
+                }
+                else if (nextTerm->type == NonTerminal) { // we have E) and are not sure what it is
+                    nextTerm = vectorAt(exprVector, stackSize - 3);
 
-            vectorPopExprToken(exprVector);
-            vectorPopExprToken(exprVector);
-            leftBracket->type = NonTerminal;
+                    if (nextTerm->type == Terminal && nextTerm->token->type == STT_Comma) { // we have ,E) and it's function
+;
+                    }
+                    else if (nextTerm->type == Terminal && nextTerm->token->type == STT_LeftBracket) { // it's (E) and we don't know if it is single param func or just (E)
+                        if (stackSize >= 4) {
+                            ExprTokenVectorIterator backupTerm = nextTerm; // we need to backup current token for (E) case
+                            nextTerm = vectorAt(exprVector, stackSize - 4);
+
+                            if (nextTerm->type == Terminal && nextTerm->token->type == STT_Identifier) { // we have id(E) and it's function
+puts("Rule: E -> func(E)");
+                                vectorPopExprToken(exprVector);
+                                vectorPopExprToken(exprVector);
+                                vectorPopExprToken(exprVector);
+                                nextTerm->type = NonTerminal;
+                            }
+                            else { // it's just (E)
+puts("Rule: E -> (E)");
+                                vectorPopExprToken(exprVector);
+                                vectorPopExprToken(exprVector);
+                                backupTerm->type = NonTerminal;
+                            }
+                        }
+                        else { // it can only be (E) if we have just 3 items on the stack
+puts("Rule: E -> (E)");
+                            vectorPopExprToken(exprVector);
+                            vectorPopExprToken(exprVector);
+                            nextTerm->type = NonTerminal;
+                        }
+                    }
+                }
+            }
             break;
         }
         default:
