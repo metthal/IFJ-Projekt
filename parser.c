@@ -1,5 +1,6 @@
 #include "parser.h"
 #include "token_vector.h"
+#include "uint32_vector.h"
 #include "instruction_vector.h"
 #include "address_vector.h"
 #include "ial.h"
@@ -43,6 +44,7 @@ static Vector *addressTable = NULL;
 static Vector *constantsTable = NULL;
 static Vector *mainInstructions = NULL;
 static Vector *functionsInstructions = NULL;
+static Vector *toBeModifiedIST = NULL;
 Vector *instructions = NULL;
 
 static Context mainContext;
@@ -75,6 +77,7 @@ void parse(Vector* tokenVector)
 
     mainInstructions = newInstructionVector();
     functionsInstructions = newInstructionVector();
+    toBeModifiedIST = newUint32Vector();
     tokensIt = vectorBeginToken(tokenVector);
 
     if (!getError()) {
@@ -101,12 +104,12 @@ void parse(Vector* tokenVector)
     instructions = NULL;
     currentContext = NULL;
 
-    scannerReset();
     deleteContext(&mainContext);
     freeSymbolTable(&globalSymbolTable);
     freeTokenVector(&tokenVector);
+    freeUint32Vector(&toBeModifiedIST);
 
-    // TODO Move to interpreter cleanup
+    // TODO Move to interpreter cleanup or call interpret here
     freeInstructionPtrVector(&addressTable);
     freeInstructionVector(&mainInstructions);
     freeInstructionVector(&functionsInstructions);
@@ -135,6 +138,8 @@ void body()
         case STT_EOF:
             // Rule 4
             printf("%s\n", "Rule 4");
+            if (secondRun)
+                generateInstruction(IST_Halt, 0, 0, 0);
             break;
 
         case STT_Variable:
@@ -398,8 +403,8 @@ void stmt()
                     }
 
                     if (secondRun) {
-                        // TODO add to toBeModified Vector and
-                        // reserve instruction
+                        vectorPushUint32(toBeModifiedIST, vectorSize(instructions));
+                        generateInstruction(IST_Break, 0, 0, 0);
                     }
 
                     tokensIt++;
@@ -417,8 +422,8 @@ void stmt()
                     }
 
                     if (secondRun) {
-                        // TODO add to toBeModified Vector and
-                        // reserve instruction
+                        vectorPushUint32(toBeModifiedIST, vectorSize(instructions));
+                        generateInstruction(IST_Continue, 0, 0, 0);
                     }
 
                     tokensIt++;
@@ -519,6 +524,8 @@ void stmt()
 
                     tokensIt++;
 
+                    // Break / continue counter
+                    uint32_t bcCounter = vectorSize(toBeModifiedIST);
                     uint32_t ptr1 = 0, ptr2 = 0, ptr3 = 0;
 
                     if (secondRun)
@@ -582,18 +589,15 @@ void stmt()
 
                         // Finish everything by filling pre-generated
                         // break and and continue instructions
-                        uint16_t fillCount = 10; // number of break or continue stmts
-                        for (uint16_t i = 0; i < fillCount; i++) {
-                            // TODO
-                            /*// topPtr is top in toBeModified Vector
-                            if (continuestmt) {
-                                // topPtr = INSTR JMP [ptr3 - topPtr]
-                            }
-                            else if (breakstmt) {
-                                // topPtr = INSTR JMP [Top - topPtr]
-                            }
+                        for (; bcCounter < vectorSize(toBeModifiedIST); bcCounter++) {
+                            Uint32 index = *((Uint32*)vectorBack(toBeModifiedIST));
+                            Instruction* pt = vectorAt(instructions, index);
+                            if (pt->code == IST_Continue)
+                                fillInstruction(index, IST_Jmp, 0, ptr3 - index, 0);
+                            else if (pt->code == IST_Break)
+                                fillInstruction(index, IST_Jmp, 0, vectorSize(instructions) - index, 0);
 
-                            pop;*/
+                            vectorPopUint32(toBeModifiedIST);
                         }
                     }
 

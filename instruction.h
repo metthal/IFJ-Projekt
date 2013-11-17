@@ -52,6 +52,7 @@ typedef enum
     IST_Call,        //!< IST_Call
     IST_Return,      //!< IST_Return
     IST_Nullify,     //!< IST_Nullify
+    IST_Halt,        //!< IST_Halt
     // Built-in functions instructions
     IST_BoolVal,     //!< IST_BoolVal
     IST_DoubleVal,   //!< IST_DoubleVal
@@ -62,7 +63,10 @@ typedef enum
     IST_PutString,   //!< IST_PutString
     IST_SortString,  //!< IST_SortString
     IST_StrLen,      //!< IST_StrLen
-    IST_StrVal       //!< IST_StrVal
+    IST_StrVal,      //!< IST_StrVal
+    // Helper instructions that aren't interpreted
+    IST_Break,       //!< IST_Break
+    IST_Continue     //!< IST_Continue
 } InstructionCode;
 
 typedef struct

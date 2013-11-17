@@ -262,7 +262,8 @@ clearError();
 
 overwriteFile(filePath, ":");
 token = nextToken();
-SHOULD_EQUAL("GetToken - Colon", token, NULL);
+SHOULD_EQUAL("GetToken - lex error Colon", token, NULL);
+clearError();
 
 overwriteFile(filePath, "$");
 token = nextToken();

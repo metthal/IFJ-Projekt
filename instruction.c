@@ -225,10 +225,14 @@ void fillInstruction(uint32_t index, InstructionCode code, int32_t res, int32_t 
 
         default: {
             Instruction *pt = vectorAt(instructions, index);
-            pt->code = code;
-            pt->res = res;
-            pt->a = a;
-            pt->b = b;
+            if (pt->code == IST_Noop || pt->code == IST_Break || pt->code == IST_Continue) {
+                pt->code = code;
+                pt->res = res;
+                pt->a = a;
+                pt->b = b;
+            }
+            else
+                setError(ERR_ISTGenerator);
         }
     }
 }

@@ -143,11 +143,15 @@ Vector* scannerScanFile(const char *fileName)
 
         if (getError()) {
             freeTokenVector(&vec);
+            fclose(source);
+            source = NULL;
             return NULL;
         }
 
         if (token->type == STT_EOF)
         {
+            fclose(source);
+            source = NULL;
             vectorShrinkToFit(vec);
             return vec;
         }
@@ -170,6 +174,8 @@ FILE* scannerOpenFile(const char *fileName) // OPEN FILE AND RETURN POINTER ON I
     else if ((lastChar = getc(source)) != '<') {
         // Syntax error according to forums
         setError(ERR_Syntax);
+        fclose(source);
+        source = NULL;
         return NULL;
     }
 
@@ -184,7 +190,14 @@ Token* scannerGetToken() // FUNCTION, WHICH RETURNS POINTER ON TOKEN STRUCTURE
     scannerFillToken(token);
     if (getError()) {
         freeToken(&token);
+        fclose(source);
+        source = NULL;
         return NULL;
+    }
+
+    if (token->type == STT_EOF) {
+        fclose(source);
+        source = NULL;
     }
 
     return token;
@@ -226,8 +239,6 @@ void scannerFillToken(Token *token)
                 }
                 else if (symbol == EOF) {
                     token->type = STT_EOF;
-                    fclose(source);
-                    source = NULL;
                     return;
                 }
                 else {
