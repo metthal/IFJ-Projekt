@@ -16,13 +16,6 @@ typedef enum
     Error
 } TokenPrecedence;
 
-typedef enum
-{
-    FuncReduceNoParam,
-    FuncReduceSingleParam,
-    FuncReduceMultipleParam
-} FunctionReduceVariant;
-
 static uint8_t precedenceTable[STT_Semicolon][STT_Semicolon] =
 {
 //      +       -       *       /       .       <       >       <=      >=      ===     !==     (       )       func    ,       $       var
@@ -82,6 +75,45 @@ static inline uint8_t tokenTypeToExprType(uint8_t tokenType)
         return STT_Variable;
 
     return tokenType;
+}
+
+uint8_t reduceMultiparamFunc(uint32_t stackPos)
+{
+    if (stackPos == 0)
+        return 0;
+
+    ExprTokenVectorIterator first = vectorAt(exprVector, stackPos);
+    ExprTokenVectorIterator second = vectorAt(exprVector, stackPos - 1);
+    if (first->type == NonTerminal) { // got E,E..) expect , or (
+        if (second->type == Terminal && second->token->type == STT_Comma) { // we got ,E,E..), enter recursion
+            if (!reduceMultiparamFunc(stackPos - 2))
+                return 0;
+printf(",E");
+        }
+        else if (second->type == Terminal && second->token->type == STT_LeftBracket) { // got (E,..,E), expect id
+            if (stackPos < 2)
+                return 0;
+
+            ExprTokenVectorIterator id = vectorAt(exprVector, stackPos - 2);
+            if (id->type != Terminal)
+                return 0;
+
+            if (id->token->type != STT_Identifier)
+                return 0;
+
+            // TODO generate instructions
+printf("func(E");
+            id->type = NonTerminal;
+            vectorPopExprToken(exprVector);
+            vectorPopExprToken(exprVector);
+            return 1;
+        }
+    }
+
+    // TODO generate instructions
+    vectorPopExprToken(exprVector);
+    vectorPopExprToken(exprVector);
+    return 1;
 }
 
 uint8_t reduce(ExprToken *topTerm)
@@ -187,7 +219,21 @@ puts("Rule: E -> func()");
                     nextTerm = vectorAt(exprVector, stackSize - 3);
 
                     if (nextTerm->type == Terminal && nextTerm->token->type == STT_Comma) { // we have ,E) and it's function
-;
+                        uint32_t stackPos = stackSize - 2;
+
+                        if (stackPos < 4) { // not enough space for best case func(E,E)
+                            setError(ERR_Syntax);
+                            return 0;
+                        }
+
+printf("Rule: E -> ");
+                        if (!reduceMultiparamFunc(stackPos)) {
+                            setError(ERR_Syntax);
+                            return 0;
+                        }
+
+                        vectorPopExprToken(exprVector);
+puts(")");
                     }
                     else if (nextTerm->type == Terminal && nextTerm->token->type == STT_LeftBracket) { // it's (E) and we don't know if it is single param func or just (E)
                         if (stackSize >= 4) {

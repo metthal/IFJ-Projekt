@@ -15,3 +15,6 @@ $k = (($a + $b) * $a + $b - $c) <= 190; // True
 $l = foo();
 $m = foo($a + $b);
 $n = foo(bar($lol / $wtf));
+$o = foo(1, 2, 3);
+$p = foo(bar(1, 2), $a + $b, boo($c <= $d, $c !== $d), 17.5);
+
