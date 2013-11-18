@@ -313,6 +313,11 @@ int32_t expr()
             if (endOfInput && vectorSize(exprVector) == 1 && ((ExprToken*)vectorBack(exprVector))->type == NonTerminal)
                 return 1;
 
+            // if there is no topmost terminal and input is right bracket, end successfuly
+            // top-down parser will take care of bad input, since he will assume I loaded first token after expression
+            if (currentToken->type == STT_RightBracket)
+                return 1;
+
             topToken = &endToken;
         }
 
