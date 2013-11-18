@@ -1,9 +1,14 @@
 #include "expr.h"
 #include "nierr.h"
 #include "token_vector.h"
+#include "context.h"
+#include "ial.h"
 
 // definitions from parser which need to be present also in expression parser
 extern ConstTokenVectorIterator tokensIt;
+extern SymbolTable *globalSymbolTable;
+extern Context *currentContext;
+extern Vector *constantsTable;
 
 static Vector *exprVector = NULL;
 static ExprToken endToken;
