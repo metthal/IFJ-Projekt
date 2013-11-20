@@ -47,6 +47,17 @@ void copyInstruction(const Instruction *src, Instruction *dest)
     dest->b = src->b;
 }
 
+void processDefaultArg(Context *context, uint32_t *paramCount)
+{
+    uint32_t missingCount = context->argumentCount - *paramCount;
+    if (missingCount > 0 && missingCount <= context->defaultCount) {
+        // First argument is first on stack, just append defaults
+        // which are in constant table in opposite order (last is first)
+        // TODO Use IST_PushC in cycle
+        *paramCount += missingCount;
+    }
+}
+
 // TODO bottom up parser still needs to reserve space for return value
 void generateCall(const Token *id, uint32_t paramCount)
 {
@@ -146,12 +157,7 @@ void generateCall(const Token *id, uint32_t paramCount)
         // Test for too many arguments
         if (symbol->data->func.context.argumentCount >= paramCount) {
             // Default parameters
-            uint16_t missingCount = symbol->data->func.context.argumentCount - paramCount;
-            if (missingCount > 0 && missingCount <= symbol->data->func.context.defaultCount) {
-                generateInstruction(IST_Reserve, 0, missingCount, 0);
-                // TODO check later how parameters are ordered from bottom-up
-                paramCount += missingCount;
-            }
+            processDefaultArg(&(symbol->data->func.context), &paramCount);
 
             // Test for too few arguments
             if (symbol->data->func.context.argumentCount == paramCount) {

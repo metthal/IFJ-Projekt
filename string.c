@@ -165,7 +165,7 @@ char stringPop(String *ps)
     return c;
 }
 
-void stringCopy(String *src, String *dest)
+void stringCopy(const String *src, String *dest)
 {
     STRING_RESIZE_RAW(dest, src->length);
     memcpy(dest->data, src->data, src->length);

@@ -65,6 +65,8 @@ static inline ResultCode getRcFromError()
         case ERR_BadDefArg:
             return RC_UnkError;
 
+            // TODO add ERR_CycleControl and check in parser
+
         default:
             return RC_FatalError;
     }

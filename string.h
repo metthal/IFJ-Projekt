@@ -35,7 +35,7 @@ String* stringSubstr(String *ps, uint32_t offset, uint32_t length);
 void stringEmpty(String *ps);
 void stringPush(String *ps, char c);
 char stringPop(String *ps);
-void stringCopy(String *src, String *dest);
+void stringCopy(const String *src, String *dest);
 void stringSet(String *dest, String *src);
 void stringSetS(String *dest, const char *src, uint32_t len);
 void stringAdd(String *dest, String *src);
