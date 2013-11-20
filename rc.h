@@ -28,8 +28,7 @@ typedef enum
     RC_NumCastError     = 11,   ///< Semantic/runtime error - error in casting to number (function doubleval)
     RC_ArithmError      = 12,   ///< Semantic/runtime error - type compatibility in arithmetic expressions
     RC_UnkError         = 13,   ///< Semantic/runtime error - Other errors
-    RC_FatalError       = 99,   ///< Error not related to interpreter (bad allocation etc)
-    RC_Unknown          = 100   ///< Temporary internal result code
+    RC_FatalError       = 99    ///< Error not related to interpreter (bad allocation etc)
 } ResultCode;
 
 /**
@@ -45,9 +44,6 @@ static inline ResultCode getRcFromError()
 
         case ERR_LexFile:
             return RC_LexError;
-
-        case ERR_NewFailed:
-            return RC_FatalError;
 
         case ERR_Convert:
             return RC_NumCastError;
@@ -70,7 +66,7 @@ static inline ResultCode getRcFromError()
             return RC_UnkError;
 
         default:
-            return RC_Unknown;
+            return RC_FatalError;
     }
 }
 

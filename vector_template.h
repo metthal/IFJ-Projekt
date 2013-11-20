@@ -41,7 +41,7 @@ static Vector* CONSTRUCT(new, Vector)()
     Vector* vec = malloc(sizeof(Vector));
 
     if (vec == NULL) {
-        setError(ERR_NewFailed);
+        setError(ERR_Allocation);
         return NULL;
     }
 
@@ -51,7 +51,7 @@ static Vector* CONSTRUCT(new, Vector)()
     vec->data = malloc(VectorDefaultCapacity * vec->itemSize);
 
     if (vec->data == NULL) {
-        setError(ERR_NewFailed);
+        setError(ERR_Allocation);
         free(vec);
         return NULL;
     }

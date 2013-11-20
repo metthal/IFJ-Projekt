@@ -45,7 +45,7 @@ static inline void* _initSymbolTable(SymbolTable *st)
 {
     st->table = malloc(sizeof(*(st->table)) * SYMBOL_TABLE_DEFAULT_SIZE);
     if (!st->table) {
-        setError(ERR_NewFailed);
+        setError(ERR_Allocation);
         return NULL;
     }
     memset(st->table, 0, sizeof(*(st->table)) * SYMBOL_TABLE_DEFAULT_SIZE);
@@ -66,7 +66,7 @@ SymbolTable* newSymbolTable()
 {
     SymbolTable *st = malloc(sizeof(SymbolTable));
     if (!st) {
-        setError(ERR_NewFailed);
+        setError(ERR_Allocation);
         return NULL;
     }
     if (!_initSymbolTable(st)) {
@@ -133,7 +133,7 @@ void symbolTableResize(SymbolTable *st, uint32_t size)
         }
     }
     else {
-        setError(ERR_NewFailed);
+        setError(ERR_Allocation);
     }
 }
 
@@ -210,7 +210,7 @@ uint32_t* stringSubstrSearchBuildTable(const char *str, uint32_t len)
 {
     uint32_t *table = malloc(sizeof(uint32_t) * len);
     if (!table) {
-        setError(ERR_NewFailed);
+        setError(ERR_Allocation);
         return table;
     }
     uint32_t tableIndex = 2, jumpIndex = 0;
@@ -334,7 +334,7 @@ void stringCharSort(String *s)
 {
     char *temp = malloc(sizeof(char) * (s->length - 1));
     if (!temp) {
-        setError(ERR_NewFailed);
+        setError(ERR_Allocation);
         return;
     }
     memcpy(temp, s->data, s->length - 1);
