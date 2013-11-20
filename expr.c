@@ -6,7 +6,6 @@
 
 // definitions from parser which need to be present also in expression parser
 extern ConstTokenVectorIterator tokensIt;
-extern SymbolTable *globalSymbolTable;
 extern Context *currentContext;
 extern Vector *constantsTable;
 
@@ -109,15 +108,13 @@ printf(",E");
             // TODO generate instructions
 printf("func(E");
             id->type = NonTerminal;
-            vectorPopExprToken(exprVector);
-            vectorPopExprToken(exprVector);
+            vectorPopNExprToken(exprVector, 2);
             return 1;
         }
     }
 
     // TODO generate instructions
-    vectorPopExprToken(exprVector);
-    vectorPopExprToken(exprVector);
+    vectorPopNExprToken(exprVector, 2);
     return 1;
 }
 
@@ -195,8 +192,7 @@ else if (topTerm->token->type == STT_GreaterEqual)
                 return 0;
             }
 
-            vectorPopExprToken(exprVector);
-            vectorPopExprToken(exprVector);
+            vectorPopNExprToken(exprVector, 2);
             break;
         }
         case STT_RightBracket: {
@@ -215,8 +211,7 @@ puts("Rule: E -> func()");
                     nextTerm = vectorAt(exprVector, stackSize - 3);
 
                     if (nextTerm->type == Terminal && nextTerm->token->type == STT_Identifier) {
-                        vectorPopExprToken(exprVector);
-                        vectorPopExprToken(exprVector);
+                        vectorPopNExprToken(exprVector, 2);
                         nextTerm->type = NonTerminal;
                     }
                 }
@@ -247,22 +242,18 @@ puts(")");
 
                             if (nextTerm->type == Terminal && nextTerm->token->type == STT_Identifier) { // we have id(E) and it's function
 puts("Rule: E -> func(E)");
-                                vectorPopExprToken(exprVector);
-                                vectorPopExprToken(exprVector);
-                                vectorPopExprToken(exprVector);
+                                vectorPopNExprToken(exprVector, 3);
                                 nextTerm->type = NonTerminal;
                             }
                             else { // it's just (E)
 puts("Rule: E -> (E)");
-                                vectorPopExprToken(exprVector);
-                                vectorPopExprToken(exprVector);
+                                vectorPopNExprToken(exprVector, 2);
                                 backupTerm->type = NonTerminal;
                             }
                         }
                         else { // it can only be (E) if we have just 3 items on the stack
 puts("Rule: E -> (E)");
-                            vectorPopExprToken(exprVector);
-                            vectorPopExprToken(exprVector);
+                            vectorPopNExprToken(exprVector, 2);
                             nextTerm->type = NonTerminal;
                         }
                     }
