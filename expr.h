@@ -13,13 +13,17 @@ typedef enum
 
 typedef struct
 {
-    Token *token;
+    union
+    {
+        Token *token;
+        uint32_t stackOffset;
+    };
     uint8_t type;
 } ExprToken;
 
 void initExpr();
 void deinitExpr();
-int32_t expr();
+uint32_t expr();
 
 void initExprToken(ExprToken *token);
 void deleteExprToken(ExprToken *token);
