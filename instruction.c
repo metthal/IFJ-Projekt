@@ -183,28 +183,12 @@ void generateCall(const Token *id, uint32_t paramCount)
 
 void generateInstruction(InstructionCode code, int32_t res, int32_t a, int32_t b)
 {
-    Instruction inst;
-    switch (code) {
-        case IST_Push:
-            currentContext->stackTop++;
-            break;
-
-        case IST_Reserve:
-            currentContext->stackTop += a;
-            break;
-
-        case IST_Pop:
-            currentContext->stackTop -= a;
-            break;
-
-        case IST_Call:
-            setError(ERR_ISTGenerator);
-            return;
-
-        default:
-            break;
+    if (code == IST_Call) {
+        setError(ERR_ISTGenerator);
+        return;
     }
 
+    Instruction inst;
     inst.code = code;
     inst.res = res;
     inst.a = a;
@@ -221,24 +205,16 @@ uint32_t generateEmptyInstruction()
 
 void fillInstruction(uint32_t index, InstructionCode code, int32_t res, int32_t a, int32_t b)
 {
-    switch (code) {
-        case IST_Push:
-        case IST_Pop:
-        case IST_Reserve:
-        case IST_Call:
-            setError(ERR_ISTGenerator);
-            break;
+    if (code == IST_Call) {
+        setError(ERR_ISTGenerator);
+        return;
+    }
 
-        default: {
-            Instruction *pt = vectorAt(instructions, index);
-            if (pt->code == IST_Noop || pt->code == IST_Break || pt->code == IST_Continue) {
-                pt->code = code;
-                pt->res = res;
-                pt->a = a;
-                pt->b = b;
-            }
-            else
-                setError(ERR_ISTGenerator);
-        }
+    Instruction *pt = vectorAt(instructions, index);
+    if (pt->code == IST_Noop || pt->code == IST_Break || pt->code == IST_Continue) {
+        pt->code = code;
+        pt->res = res;
+        pt->a = a;
+        pt->b = b;
     }
 }

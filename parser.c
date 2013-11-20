@@ -41,12 +41,12 @@ ConstTokenVectorIterator tokensIt = NULL;
 
 SymbolTable *globalSymbolTable = NULL;
 
+Vector *instructions = NULL;
+Vector *constantsTable = NULL;
 static Vector *addressTable = NULL;
-static Vector *constantsTable = NULL;
 static Vector *mainInstructions = NULL;
 static Vector *functionsInstructions = NULL;
 static Vector *toBeModifiedIST = NULL;
-Vector *instructions = NULL;
 
 static Context mainContext;
 Context *currentContext;
@@ -1061,8 +1061,6 @@ Symbol* addLocalVariable(ConstTokenVectorIterator varid)
         symbol->data = (SymbolData*)newVariable();
         symbol->data->var.relativeIndex = reserved + currentContext->localVariableCount;
         currentContext->localVariableCount++;
-        // Actualize
-        currentContext->stackTop = currentContext->localVariableCount + 1;
     }
 
     return symbol;

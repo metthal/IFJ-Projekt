@@ -1,9 +1,14 @@
 #include "expr.h"
 #include "nierr.h"
 #include "token_vector.h"
+#include "context.h"
+#include "ial.h"
 
 // definitions from parser which need to be present also in expression parser
 extern ConstTokenVectorIterator tokensIt;
+extern SymbolTable *globalSymbolTable;
+extern Context *currentContext;
+extern Vector *constantsTable;
 
 static Vector *exprVector = NULL;
 static ExprToken endToken;
@@ -75,6 +80,45 @@ static inline uint8_t tokenTypeToExprType(uint8_t tokenType)
         return STT_Variable;
 
     return tokenType;
+}
+
+uint8_t reduceMultiparamFunc(uint32_t stackPos)
+{
+    if (stackPos == 0)
+        return 0;
+
+    ExprTokenVectorIterator first = vectorAt(exprVector, stackPos);
+    ExprTokenVectorIterator second = vectorAt(exprVector, stackPos - 1);
+    if (first->type == NonTerminal) { // got E,E..) expect , or (
+        if (second->type == Terminal && second->token->type == STT_Comma) { // we got ,E,E..), enter recursion
+            if (!reduceMultiparamFunc(stackPos - 2))
+                return 0;
+printf(",E");
+        }
+        else if (second->type == Terminal && second->token->type == STT_LeftBracket) { // got (E,..,E), expect id
+            if (stackPos < 2)
+                return 0;
+
+            ExprTokenVectorIterator id = vectorAt(exprVector, stackPos - 2);
+            if (id->type != Terminal)
+                return 0;
+
+            if (id->token->type != STT_Identifier)
+                return 0;
+
+            // TODO generate instructions
+printf("func(E");
+            id->type = NonTerminal;
+            vectorPopExprToken(exprVector);
+            vectorPopExprToken(exprVector);
+            return 1;
+        }
+    }
+
+    // TODO generate instructions
+    vectorPopExprToken(exprVector);
+    vectorPopExprToken(exprVector);
+    return 1;
 }
 
 uint8_t reduce(ExprToken *topTerm)
@@ -156,35 +200,74 @@ else if (topTerm->token->type == STT_GreaterEqual)
             break;
         }
         case STT_RightBracket: {
-puts("Rule: E -> (E)");
-
             uint32_t stackSize = vectorSize(exprVector);
             if (stackSize < 3) {
                 setError(ERR_Syntax);
                 return 0;
             }
 
-            ExprTokenVectorIterator rightBracket = vectorAt(exprVector, stackSize - 1);
-            if (rightBracket != topTerm) {
-                setError(ERR_Syntax);
-                return 0;
-            }
+            ExprTokenVectorIterator nextTerm = vectorAt(exprVector, stackSize - 1);
+            if (nextTerm == topTerm) { // at top must be )
+                nextTerm = vectorAt(exprVector, stackSize - 2);
 
-            ExprTokenVectorIterator expr = vectorAt(exprVector, stackSize - 2);
-            if (expr->type != NonTerminal) {
-                setError(ERR_Syntax);
-                return 0;
-            }
+                if (nextTerm->type == Terminal && nextTerm->token->type == STT_LeftBracket) { // it's function if there is ()
+puts("Rule: E -> func()");
+                    nextTerm = vectorAt(exprVector, stackSize - 3);
 
-            ExprTokenVectorIterator leftBracket = vectorAt(exprVector, stackSize - 3);
-            if (leftBracket->type != Terminal && leftBracket->token->type != STT_LeftBracket) {
-                setError(ERR_Syntax);
-                return 0;
-            }
+                    if (nextTerm->type == Terminal && nextTerm->token->type == STT_Identifier) {
+                        vectorPopExprToken(exprVector);
+                        vectorPopExprToken(exprVector);
+                        nextTerm->type = NonTerminal;
+                    }
+                }
+                else if (nextTerm->type == NonTerminal) { // we have E) and are not sure what it is
+                    nextTerm = vectorAt(exprVector, stackSize - 3);
 
-            vectorPopExprToken(exprVector);
-            vectorPopExprToken(exprVector);
-            leftBracket->type = NonTerminal;
+                    if (nextTerm->type == Terminal && nextTerm->token->type == STT_Comma) { // we have ,E) and it's function
+                        uint32_t stackPos = stackSize - 2;
+
+                        if (stackPos < 4) { // not enough space for best case func(E,E)
+                            setError(ERR_Syntax);
+                            return 0;
+                        }
+
+printf("Rule: E -> ");
+                        if (!reduceMultiparamFunc(stackPos)) {
+                            setError(ERR_Syntax);
+                            return 0;
+                        }
+
+                        vectorPopExprToken(exprVector);
+puts(")");
+                    }
+                    else if (nextTerm->type == Terminal && nextTerm->token->type == STT_LeftBracket) { // it's (E) and we don't know if it is single param func or just (E)
+                        if (stackSize >= 4) {
+                            ExprTokenVectorIterator backupTerm = nextTerm; // we need to backup current token for (E) case
+                            nextTerm = vectorAt(exprVector, stackSize - 4);
+
+                            if (nextTerm->type == Terminal && nextTerm->token->type == STT_Identifier) { // we have id(E) and it's function
+puts("Rule: E -> func(E)");
+                                vectorPopExprToken(exprVector);
+                                vectorPopExprToken(exprVector);
+                                vectorPopExprToken(exprVector);
+                                nextTerm->type = NonTerminal;
+                            }
+                            else { // it's just (E)
+puts("Rule: E -> (E)");
+                                vectorPopExprToken(exprVector);
+                                vectorPopExprToken(exprVector);
+                                backupTerm->type = NonTerminal;
+                            }
+                        }
+                        else { // it can only be (E) if we have just 3 items on the stack
+puts("Rule: E -> (E)");
+                            vectorPopExprToken(exprVector);
+                            vectorPopExprToken(exprVector);
+                            nextTerm->type = NonTerminal;
+                        }
+                    }
+                }
+            }
             break;
         }
         default:
@@ -233,6 +316,11 @@ int32_t expr()
         if (!topToken) {
             // there is just one non-terminal on the stack, we succeeded
             if (endOfInput && vectorSize(exprVector) == 1 && ((ExprToken*)vectorBack(exprVector))->type == NonTerminal)
+                return 1;
+
+            // if there is no topmost terminal and input is right bracket, end successfuly
+            // top-down parser will take care of bad input, since he will assume I loaded first token after expression
+            if (currentToken->type == STT_RightBracket)
                 return 1;
 
             topToken = &endToken;

@@ -7,8 +7,8 @@ struct SymbolTable;
 
 typedef struct {
     struct SymbolTable *localTable;
-    uint32_t stackTop;
     uint32_t defaultStart; //!< Starting index in Constants Table
+    uint32_t maxStackCount;
     uint16_t argumentCount;
     uint16_t localVariableCount;
     uint16_t defaultCount;
