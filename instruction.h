@@ -21,6 +21,9 @@
  * Push:
  * a   - item
  *
+ * PushC:
+ * a   - constants table index
+ *
  * Reserve:
  * a   - count
  *
@@ -47,6 +50,7 @@ typedef enum
     IST_Jmp,         //!< IST_Jmp
     IST_Jmpz,        //!< IST_Jmpz
     IST_Push,        //!< IST_Push
+    IST_PushC,       //!< IST_PushC
     IST_Reserve,     //!< IST_Reserve
     IST_Pop,         //!< IST_Pop
     IST_Call,        //!< IST_Call

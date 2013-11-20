@@ -3,6 +3,7 @@
 #include "uint32_vector.h"
 #include "instruction_vector.h"
 #include "address_vector.h"
+#include "value_vector.h"
 #include "ial.h"
 #include "nierr.h"
 #include "expr.h"
@@ -51,6 +52,7 @@ static Context mainContext;
 Context *currentContext;
 
 static uint8_t secondRun = 0;
+static uint8_t cycleScope = 0;
 
 // TODO Interpret creates stack frame for main
 // returnValue
@@ -78,6 +80,7 @@ void parse(Vector* tokenVector)
     mainInstructions = newInstructionVector();
     functionsInstructions = newInstructionVector();
     toBeModifiedIST = newUint32Vector();
+    constantsTable = newValueVector();
     tokensIt = vectorBeginToken(tokenVector);
     initExpr();
 
@@ -112,6 +115,7 @@ void parse(Vector* tokenVector)
     freeUint32Vector(&toBeModifiedIST);
 
     // TODO Move to interpreter cleanup or call interpret here
+    freeValueVector(&constantsTable);
     freeInstructionPtrVector(&addressTable);
     freeInstructionVector(&mainInstructions);
     freeInstructionVector(&functionsInstructions);
@@ -147,7 +151,7 @@ void body()
         case STT_Variable:
             // Rule 2
             printf("%s\n", "Rule 2");
-            stmt();
+            stmt(0);
             if (getError())
                 return;
 
@@ -180,7 +184,7 @@ void body()
                 case KTT_For:
                     // Rule 2
                     printf("%s\n", "Rule 2");
-                    stmt();
+                    stmt(0);
                     if (getError())
                         return;
 
@@ -272,7 +276,8 @@ void func()
                 vectorAt(addressTable, symbol->data->func.functionAddressIndex);
         (*cipvi) = (InstructionPtr)((size_t)vectorSize(functionsInstructions));
         // Reserve space for local variables
-        generateInstruction(IST_Reserve, 0, currentContext->argumentCount, 0);
+        // TODO reserve MaxStackTop
+        generateInstruction(IST_Reserve, 0, currentContext->localVariableCount, 0);
     }
 
     stmtListBracketed();
@@ -399,6 +404,11 @@ void stmt()
                     printf("%s\n", "Rule 10");
                     tokensIt++;
 
+                    if (!cycleScope) {
+                        setError(ERR_CycleControl);
+                        return;
+                    }
+
                     if (tokensIt->type != STT_Semicolon) {
                         setError(ERR_Syntax);
                         return;
@@ -417,6 +427,11 @@ void stmt()
                     // Rule 11
                     printf("%s\n", "Rule 11");
                     tokensIt++;
+
+                    if (!cycleScope) {
+                        setError(ERR_CycleControl);
+                        return;
+                    }
 
                     if (tokensIt->type != STT_Semicolon) {
                         setError(ERR_Syntax);
@@ -567,9 +582,20 @@ void stmt()
 
                     tokensIt++;
 
-                    stmtListBracketed();
-                    if (getError())
-                        return;
+                    {
+                        // Set cycle scope if not set
+                        uint8_t highestCycle = 0;
+                        if (!cycleScope)
+                            cycleScope = highestCycle = 1;
+
+                        stmtListBracketed();
+                        if (getError())
+                            return;
+
+                        // Unset cycle scope if set by this statement
+                        if (highestCycle)
+                            cycleScope = 0;
+                    }
 
                     // Generate For's 3rd statement
                     if (secondRun) {
@@ -999,7 +1025,6 @@ void assignment(ConstTokenVectorIterator varid, uint8_t skip)
 
     tokensIt++;
 
-    // TODO Variable can become constant here
     uint32_t exprRes = generalExpr(skip);
 
     if (secondRun) {
@@ -1007,9 +1032,6 @@ void assignment(ConstTokenVectorIterator varid, uint8_t skip)
         Symbol *symbol = symbolTableFind(currentContext->localTable, &(varid->str));
         if (getError())
            return;
-
-        // Variable is declared after assignment and can be used
-        symbol->data->var.declared = 1;
 
         // Move result of expression to variable
         generateInstruction(IST_Mov, symbol->data->var.relativeIndex, exprRes, 0);
@@ -1036,11 +1058,8 @@ Symbol* addLocalVariable(ConstTokenVectorIterator varid)
         symbol = symbolTableFind(currentContext->localTable, &(varid->str));
     else {
         symbol->type = ST_Variable;
-        symbol->data = (SymbolData*)newVariableSymbolData();
+        symbol->data = (SymbolData*)newVariable();
         symbol->data->var.relativeIndex = reserved + currentContext->localVariableCount;
-        symbol->data->var.declared = 0;
-        symbol->data->var.constantIndex = 0;
-        symbol->data->var.constant = 0;
         currentContext->localVariableCount++;
         // Actualize
         currentContext->stackTop = currentContext->localVariableCount + 1;
@@ -1063,24 +1082,22 @@ Symbol* addParameter(ConstTokenVectorIterator varid, uint8_t defarg)
     }
 
     symbol->type = ST_Variable;
-    symbol->data = (SymbolData*)newVariableSymbolData();
+    symbol->data = (SymbolData*)newVariable();
     currentContext->argumentCount++;
     symbol->data->var.relativeIndex = -currentContext->argumentCount;
-    symbol->data->var.declared = 1;
-
 
     if (defarg) {
-        // TODO check if varid+2 is literal or null, wait for bottom up to see how this can be done
-        // Add it to constant table and set symbol->data->var.constantIndex
-        symbol->data->var.constant = 1;
+        // Add varid+2 to constant table if literal, else set error
+        vectorPushDefaultValue(constantsTable);
+        tokenToValue(varid+2, vectorBack(constantsTable));
+
+        if(getError()) {
+            // Convert error for better description
+            setError(ERR_BadDefArg);
+            return NULL;
+        }
+
         currentContext->defaultCount++;
-        // Otherwise set this error
-        setError(ERR_BadDefArg);
-        return NULL;
-    }
-    else {
-        symbol->data->var.constantIndex = 0;
-        symbol->data->var.constant = 0;
     }
 
     return symbol;

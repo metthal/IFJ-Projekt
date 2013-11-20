@@ -1,6 +1,68 @@
 #include "symbol.h"
+#include "nierr.h"
 #include <stdlib.h>
 #include <string.h>
+
+void initValue(Value *value)
+{
+    memset(value, 0, sizeof(Value));
+}
+
+void deleteValue(Value *value)
+{
+    if (value->type == VT_String)
+        deleteString(&(value->data.s));
+}
+
+void copyValue(Value *src, Value *dest)
+{
+    dest->type = src->type;
+    switch(src->type) {
+        case VT_Null:
+        case VT_Undefined:
+            return;
+
+        case VT_String:
+            stringCopy(&(src->data.s), &(dest->data.s));
+            break;
+
+        default:
+            dest->data = src->data;
+    }
+}
+
+void tokenToValue(const Token *src, Value *dest)
+{
+    switch (src->type) {
+        case STT_Number:
+            dest->type = VT_Integer;
+            dest->data.i = src->n;
+            break;
+
+        case STT_Double:
+            dest->type = VT_Double;
+            dest->data.d = src->d;
+            break;
+
+        case STT_String:
+            dest->type = VT_String;
+            stringCopy(&(src->str), &(dest->data.s));
+            break;
+
+        case STT_Bool:
+            dest->type = VT_Bool;
+            dest->data.b = src->n;
+            break;
+
+        case STT_Null:
+            dest->type = VT_Null;
+            break;
+
+        default:
+            setError(ERR_Convert);
+            return;
+    }
+}
 
 void initSymbol(Symbol *symbol)
 {
@@ -12,22 +74,23 @@ void deleteSymbol(Symbol *symbol)
     if (symbol->type == ST_Function)
         freeFunction((Function**)&symbol->data);
     else
-        freeVariableSymbolData((VariableSymbolData**)&symbol->data);
+        freeVariable((Variable**)&symbol->data);
 }
 
 void copySymbol(Symbol *src, Symbol *dest)
 {
+    // TODO make this shit!
     while(1);
 }
 
-VariableSymbolData* newVariableSymbolData()
+Variable* newVariable()
 {
-    VariableSymbolData *tmp = malloc(sizeof(VariableSymbolData));
-    memset(tmp, 0, sizeof(VariableSymbolData));
+    Variable *tmp = malloc(sizeof(Variable));
+    memset(tmp, 0, sizeof(Variable));
     return tmp;
 }
 
-void freeVariableSymbolData(VariableSymbolData **ppt)
+void freeVariable(Variable **ppt)
 {
     if (ppt != NULL) {
         free(*ppt);

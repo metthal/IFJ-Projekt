@@ -2,6 +2,7 @@
 #define TOKEN_H
 
 #include "string.h"
+#include <stdint.h>
 
 typedef enum
 {
@@ -60,7 +61,7 @@ typedef struct
     union
     {
         double d;
-        int n;
+        int32_t n;
         KeywordTokenType keywordType;
         String str;
     };
