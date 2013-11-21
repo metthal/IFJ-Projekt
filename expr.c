@@ -4,6 +4,7 @@
 #include "context.h"
 #include "ial.h"
 #include "instruction.h"
+#include "value_vector.h"
 
 // definitions from parser which need to be present also in expression parser
 extern ConstTokenVectorIterator tokensIt;
@@ -147,14 +148,18 @@ printf(",E");
 
             if (id->token->type != STT_Identifier)
                 return 0;
-
 printf("func(E");
-            (*paramCount)++;
-            return 1;
         }
     }
 
-    // TODO generate push instruction with first->stackOffset
+    uint32_t paramStackPos = currentStackPos + *paramCount;
+    generateInstruction(IST_Mov, paramStackPos, first->stackOffset, 0);
+    if (getError())
+        return 0;
+
+    if (paramStackPos + 1 > currentContext->maxStackCount)
+        currentContext->maxStackCount = paramStackPos + 1; // we need to reserve maximum used space on stack
+
     (*paramCount)++;
     return 1;
 }
@@ -168,14 +173,29 @@ uint8_t reduce(ExprToken *topTerm)
         case STT_Bool:
         case STT_String:
             // TODO generate new constant into constants table and generate push instruction
+            vectorPushDefaultValue(constantsTable);
+            tokenToValue(topTerm->token, vectorBack(constantsTable));
+            if (getError())
+                return 0;
+
+            generateInstruction(IST_MovC, currentStackPos, vectorSize(constantsTable) - 1, 0);
+            if (getError())
+                return 0;
+
             topTerm->type = NonTerminal;
             topTerm->stackOffset = currentStackPos++;
             break;
-        case STT_Variable:
-            // TODO find variable in the symbol table, error if not present otherwise generate push instruction
+        case STT_Variable: {
+            Symbol *symbol = symbolTableFind(currentContext->localTable, &(topTerm->token->str));
+            if (symbol == NULL) {
+                setError(ERR_UndefVariable);
+                return 0;
+            }
+
             topTerm->type = NonTerminal;
-            topTerm->stackOffset = currentStackPos++;
+            topTerm->stackOffset = symbol->data->var.relativeIndex;
             break;
+        }
         case STT_Equal:
         case STT_NotEqual:
         case STT_Less:
@@ -258,13 +278,13 @@ puts("Rule: E -> func()");
                     nextTerm = vectorAt(exprVector, stackSize - 3);
 
                     if (nextTerm->type == Terminal && nextTerm->token->type == STT_Identifier) {
-                        // TODO push where to store ret val
-                        generateCall(nextTerm->token, 0);
+                        uint32_t retValStackPos = currentStackPos++;
+                        generateCall(nextTerm->token, 0, currentStackPos + 1);
                         if (getError())
                             return 0;
 
                         nextTerm->type = NonTerminal;
-                        nextTerm->stackOffset = currentStackPos++;
+                        nextTerm->stackOffset = retValStackPos;
                         vectorPopNExprToken(exprVector, 2);
                     }
                 }
@@ -282,8 +302,6 @@ puts("Rule: E -> func()");
 
 printf("Rule: E -> ");
                         uint32_t retValStackPos = currentStackPos++;
-                        // TODO push where to store ret val
-
                         uint32_t paramCount = 0;
                         if (!reduceMultiparamFunc(stackPos, &paramCount)) {
                             setError(ERR_Syntax);
@@ -293,7 +311,7 @@ printf("Rule: E -> ");
                         vectorPopNExprToken(exprVector, (paramCount << 1) + 1); // paramCount * 2 + 1 (every E has one terminal in front of it and there is one ending ')')
                         nextTerm = vectorBack(exprVector);
 
-                        generateCall(nextTerm->token, paramCount);
+                        generateCall(nextTerm->token, paramCount, currentStackPos + paramCount);
                         if (getError())
                             return 0;
 
@@ -308,14 +326,20 @@ puts(")");
 
                             if (nextTerm->type == Terminal && nextTerm->token->type == STT_Identifier) { // we have id(E) and it's function
 puts("Rule: E -> func(E)");
-                                // TODO push where to store ret val
-                                // TODO push parameter
-                                generateCall(nextTerm->token, 1);
+                                uint32_t retValStackPos = currentStackPos++;
+                                generateInstruction(IST_Mov, currentStackPos, exprBackup->stackOffset, 0);
+                                if (getError())
+                                    return 0;
+
+                                if (currentStackPos > currentContext->maxStackCount)
+                                    currentContext->maxStackCount = currentStackPos;
+
+                                generateCall(nextTerm->token, 1, currentStackPos + 1);
                                 if (getError())
                                     return 0;
 
                                 nextTerm->type = NonTerminal;
-                                nextTerm->stackOffset = currentStackPos++;
+                                nextTerm->stackOffset = retValStackPos;
                                 vectorPopNExprToken(exprVector, 3);
                             }
                             else { // it's just (E)
@@ -365,7 +389,7 @@ uint32_t expr()
     uint8_t endOfInput = 0;
     const Token *currentToken = NULL;
     vectorClearExprToken(exprVector);
-    currentStackPos = currentContext->localVariableCount;
+    currentStackPos = 2 + currentContext->localVariableCount; // 2 stands for stack pointer and instruction pointer
 
     while (1) {
         if (!endOfInput) {
