@@ -7,7 +7,6 @@
 
 extern SymbolTable *globalSymbolTable;
 extern Vector *instructions;
-extern Context *currentContext;
 
 Instruction* newInstruction()
 {
@@ -53,7 +52,9 @@ void processDefaultArg(Context *context, uint32_t *paramCount)
     if (missingCount > 0 && missingCount <= context->defaultCount) {
         // First argument is first on stack, just append defaults
         // which are in constant table in opposite order (last is first)
-        // TODO Use IST_PushC in cycle
+        uint32_t index = context->defaultStart + missingCount - 1;
+        for (; index >= context->defaultStart; index--)
+            generateInstruction(IST_PushC, 0, index, 0);
         *paramCount += missingCount;
     }
 }

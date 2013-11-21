@@ -62,6 +62,16 @@ uint32_t vectorSize(Vector *vec);
 void* vectorAt(Vector *vec, uint32_t index);
 
 /**
+ * Returns constant pointer to item at specified index.
+ * When index is out of vector range, ERR_Range
+ * error is set.
+ * @param vec Constant vector to operate on.
+ * @param index Index of item in vector.
+ * @return Constant pointer to indexed item.
+ */
+const void* vectorAtConst(const Vector *vec, uint32_t index);
+
+/**
  * Returns pointer to first item in vector.
  * When vector is empty, ERR_Range error is set.
  * @param vec Vector to operate on.

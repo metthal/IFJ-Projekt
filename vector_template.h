@@ -97,7 +97,7 @@ static void TEMPLATE(vectorClear)(Vector *vec)
  * @param vec Vector to operate on.
  * @param item Item to append.
  */
-static void TEMPLATE(vectorPush)(Vector *vec, PUSH_BACK_ITEM item)
+static void TEMPLATE(vectorPush)(Vector *vec, const PUSH_BACK_ITEM item)
 {
     if (vec->size == vec->capacity) {
         vectorReserve(vec, vec->capacity * VectorResizeIncRate);

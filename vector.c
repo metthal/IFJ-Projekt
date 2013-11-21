@@ -52,6 +52,15 @@ void* vectorAt(Vector *vec, uint32_t index)
     return vec->data + vec->itemSize * index;
 }
 
+const void* vectorAtConst(const Vector *vec, uint32_t index)
+{
+    if (vec->size <= index) {
+        setError(ERR_Range);
+        return NULL;
+    }
+    return vec->data + vec->itemSize * index;
+}
+
 void* vectorFront(Vector *vec)
 {
     if (vec->size == 0) {

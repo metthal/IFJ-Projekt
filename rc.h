@@ -46,6 +46,10 @@ static inline ResultCode getRcFromError()
         case ERR_LexFile:
             return RC_LexError;
 
+        case ERR_Syntax:
+        case ERR_CycleControl:
+            return RC_SynError;
+
         case ERR_NewFailed:
             return RC_FatalError;
 
@@ -68,8 +72,6 @@ static inline ResultCode getRcFromError()
             // TODO check this one
         case ERR_BadDefArg:
             return RC_UnkError;
-
-            // TODO add ERR_CycleControl and check in parser
 
         default:
             return RC_Unknown;

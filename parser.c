@@ -1,4 +1,5 @@
 #include "parser.h"
+#include "interpreter.h"
 #include "token_vector.h"
 #include "uint32_vector.h"
 #include "instruction_vector.h"
@@ -91,6 +92,24 @@ void parse(Vector* tokenVector)
         prog();
     }
 
+    tokensIt = NULL;
+    instructions = NULL;
+    currentContext = NULL;
+
+    deinitExpr();
+    deleteContext(&mainContext);
+    freeSymbolTable(&globalSymbolTable);
+    freeTokenVector(&tokenVector);
+    freeUint32Vector(&toBeModifiedIST);
+
+    // Shrink vectors to save space
+    vectorShrinkToFit(constantsTable);
+    vectorShrinkToFit(addressTable);
+    vectorShrinkToFit(mainInstructions);
+    vectorShrinkToFit(functionsInstructions);
+
+    // Here we can end, save necessary structures and interpret later
+
     if (!getError()) {
         // Recalculate items in address table to real addresses
         Instruction* firstReal = vectorBeginInstruction(functionsInstructions);
@@ -104,17 +123,9 @@ void parse(Vector* tokenVector)
         }
     }
 
-    tokensIt = NULL;
-    instructions = NULL;
-    currentContext = NULL;
+    interpret(vectorBeginInstruction(mainInstructions), constantsTable, addressTable);
 
-    deinitExpr();
-    deleteContext(&mainContext);
-    freeSymbolTable(&globalSymbolTable);
-    freeTokenVector(&tokenVector);
-    freeUint32Vector(&toBeModifiedIST);
-
-    // TODO Move to interpreter cleanup or call interpret here
+    // Cleanup after interpretation
     freeValueVector(&constantsTable);
     freeInstructionPtrVector(&addressTable);
     freeInstructionVector(&mainInstructions);
@@ -144,14 +155,16 @@ void body()
         case STT_EOF:
             // Rule 4
             printf("%s\n", "Rule 4");
-            if (secondRun)
-                generateInstruction(IST_Halt, 0, 0, 0);
+            if (secondRun) {
+                generateInstruction(IST_Nullify, 0, -1, 0);
+                generateInstruction(IST_Return, 0, 0, 0);
+            }
             break;
 
         case STT_Variable:
             // Rule 2
             printf("%s\n", "Rule 2");
-            stmt(0);
+            stmt();
             if (getError())
                 return;
 
@@ -184,7 +197,7 @@ void body()
                 case KTT_For:
                     // Rule 2
                     printf("%s\n", "Rule 2");
-                    stmt(0);
+                    stmt();
                     if (getError())
                         return;
 
@@ -1095,6 +1108,10 @@ Symbol* addParameter(ConstTokenVectorIterator varid, uint8_t defarg)
             return NULL;
         }
 
+        if (currentContext->defaultCount == 0) {
+            // Remember first defarg index to constant table
+            currentContext->defaultStart = vectorSize(constantsTable) - 1;
+        }
         currentContext->defaultCount++;
     }
 

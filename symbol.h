@@ -7,12 +7,12 @@
 #include "token.h"
 
 typedef enum {
+    VT_Undefined = 0,
     VT_Integer,
     VT_Double,
     VT_String,
     VT_Bool,
     VT_Null,
-    VT_Undefined,
     VT_InstructionPtr,
     VT_StackPtr
 } ValueType;
