@@ -46,16 +46,20 @@ void copyInstruction(const Instruction *src, Instruction *dest)
     dest->b = src->b;
 }
 
-void processDefaultArg(Context *context, uint32_t *paramCount)
+void processDefaultArg(Context *context, uint32_t *paramCount, uint32_t lastParamIdx)
 {
     uint32_t missingCount = context->argumentCount - *paramCount;
     if (missingCount > 0 && missingCount <= context->defaultCount) {
         // First argument is first on stack, just append defaults
         // which are in constant table in opposite order (last is first)
-        uint32_t index = context->defaultStart + missingCount - 1;
-        for (; index >= context->defaultStart; index--)
-            // TODO PushC should be MovC a bottom-up should pass where to begin moving
-            generateInstruction(IST_PushC, 0, index, 0);
+        int64_t index = context->defaultStart + missingCount - 1;
+        for (; index >= context->defaultStart; index--, lastParamIdx++)
+            generateInstruction(IST_MovC, lastParamIdx, index, 0);
+
+        // For leaves lastParamIdx to point behind last parameter
+        if (lastParamIdx > context->maxStackCount)
+            context->maxStackCount = lastParamIdx;
+
         *paramCount += missingCount;
     }
 }

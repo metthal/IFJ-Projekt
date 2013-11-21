@@ -27,7 +27,7 @@ uint32_t expr();
 
 void initExprToken(ExprToken *token);
 void deleteExprToken(ExprToken *token);
-void copyExprToken(ExprToken *src, ExprToken *dest);
+void copyExprToken(const ExprToken *src, ExprToken *dest);
 
 typedef ExprToken* ExprTokenVectorIterator;
 typedef const ExprToken* ConstExprTokenVectorIterator;
