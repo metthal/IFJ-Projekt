@@ -1,5 +1,6 @@
 #include "interpreter.h"
 #include "value_vector.h"
+#include "builtin.h"
 #include "nierr.h"
 
 #include <stdint.h>
@@ -37,6 +38,7 @@ void interpret(const Instruction *firstInstruction, const Vector *constTable, co
             case IST_Mov:
                 resVal = vectorAt(stack, stackPtr + instructionPtr->res);
                 aVal = vectorAt(stack, stackPtr + instructionPtr->a);
+                deleteValue(resVal);
                 copyValue(aVal, resVal);
                 break;
 

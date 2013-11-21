@@ -54,12 +54,12 @@ void processDefaultArg(Context *context, uint32_t *paramCount)
         // which are in constant table in opposite order (last is first)
         uint32_t index = context->defaultStart + missingCount - 1;
         for (; index >= context->defaultStart; index--)
+            // TODO PushC should be MovC a bottom-up should pass where to begin moving
             generateInstruction(IST_PushC, 0, index, 0);
         *paramCount += missingCount;
     }
 }
 
-// TODO bottom up parser still needs to reserve space for return value
 void generateCall(const Token *id, uint32_t paramCount)
 {
     Instruction inst;

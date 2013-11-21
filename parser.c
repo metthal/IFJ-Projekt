@@ -55,11 +55,6 @@ Context *currentContext;
 static uint8_t secondRun = 0;
 static uint8_t cycleScope = 0;
 
-// TODO Interpret creates stack frame for main
-// returnValue
-// stackPointer = NULL <- will know that it's program exit
-// instructionPointer = NULL <- will know that it's program exit
-
 // TODO Test all jumping - if, elseif, else, for, while, break, continue...
 // TODO ptr1 in cycles might be called loop, ptr2 endJump
 
@@ -140,6 +135,11 @@ void prog()
             printf("%s\n", "Rule 1");
             tokensIt++;
 
+            if (secondRun) {
+                // First instruction should reserve space on stack
+                generateEmptyInstruction();
+            }
+
             body();
             if (getError())
                 return;
@@ -156,6 +156,8 @@ void body()
             // Rule 4
             printf("%s\n", "Rule 4");
             if (secondRun) {
+                // Fill first instruction with correct value
+                fillInstruction(0, IST_Reserve, 0, mainContext.maxStackCount, 0);
                 generateInstruction(IST_Nullify, 0, -1, 0);
                 generateInstruction(IST_Return, 0, 0, 0);
             }
@@ -281,6 +283,7 @@ void func()
 
     tokensIt++;
 
+    uint32_t reserveIst = 0;
     if (secondRun) {
         // Switch place to where instructions for functions are generated
         instructions = functionsInstructions;
@@ -288,9 +291,7 @@ void func()
         InstructionPtr* cipvi =
                 vectorAt(addressTable, symbol->data->func.functionAddressIndex);
         (*cipvi) = (InstructionPtr)((size_t)vectorSize(functionsInstructions));
-        // Reserve space for local variables
-        // TODO reserve MaxStackTop
-        generateInstruction(IST_Reserve, 0, currentContext->localVariableCount, 0);
+        reserveIst = generateEmptyInstruction();
     }
 
     stmtListBracketed();
@@ -298,6 +299,8 @@ void func()
         return;
 
     if (secondRun) {
+        // Reserve stack space for largest expression in function and locals
+        fillInstruction(reserveIst, IST_Reserve, 0, currentContext->maxStackCount, 0);
         // Create instruction that will return null at the end of each function
         generateInstruction(IST_Nullify, 0, -(currentContext->argumentCount+1), 0);
         generateInstruction(IST_Return, 0, currentContext->argumentCount, 0);
