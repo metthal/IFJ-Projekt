@@ -66,7 +66,19 @@ typedef enum
     IST_StrVal,      //!< IST_StrVal
     // Helper instructions that aren't interpreted
     IST_Break,       //!< IST_Break
-    IST_Continue     //!< IST_Continue
+    IST_Continue,    //!< IST_Continue
+    // Expression related instructions
+    IST_Add,         //!< IST_Add
+    IST_Subtract,    //!< IST_Subtract
+    IST_Multiply,    //!< IST_Multiply
+    IST_Divide,      //!< IST_Divide
+    IST_Concat,      //!< IST_Concat
+    IST_Equal,       //!< IST_Equal
+    IST_NotEqual,    //!< IST_NotEqual
+    IST_Less,        //!< IST_Less
+    IST_LessEq,      //!< IST_LessEq
+    IST_Greater,     //!< IST_Greater
+    IST_GreaterEq    //!< IST_GreaterEq
 } InstructionCode;
 
 typedef struct

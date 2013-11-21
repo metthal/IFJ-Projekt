@@ -1,5 +1,9 @@
 <?php
 
+function foo($a = 1, $b = 2, $c = 3, $d = 4) { }
+function bar($a = 1, $b = 2) { }
+function boo($a = 1, $b = 2) { }
+
 // Checks expression evaluation
 $a = 10;
 $a = 10;
