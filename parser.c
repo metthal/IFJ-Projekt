@@ -69,6 +69,7 @@ void parse(Vector* tokenVector)
     tokensIt = vectorBeginToken(tokenVector);
 
     globalSymbolTable = newSymbolTable();
+    constantsTable = newValueVector();
     addressTable = newInstructionPtrVector();
     initContext(&mainContext);
 
@@ -81,7 +82,6 @@ void parse(Vector* tokenVector)
     mainInstructions = newInstructionVector();
     functionsInstructions = newInstructionVector();
     toBeModifiedIST = newUint32Vector();
-    constantsTable = newValueVector();
     tokensIt = vectorBeginToken(tokenVector);
     initExpr();
 
@@ -816,7 +816,7 @@ void paramList()
             tokensIt++;
             // Test for default argument
             if (tokensIt->type == STT_Assignment) {
-                tokensIt++;
+                tokensIt += 2; // skip also default value handled in addParameter
                 defarg = 1;
             }
 
@@ -863,7 +863,7 @@ void nparamList(uint8_t defarg)
             tokensIt++;
             // Test for default argument
             if (tokensIt->type == STT_Assignment) {
-                tokensIt++;
+                tokensIt += 2; // skip also default value handled in addParameter
                 defarg = 1;
             }
             else if (defarg) {
