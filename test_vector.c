@@ -62,6 +62,14 @@ SHOULD_EQUAL("vectorPop() Size", vectorSize(vec), 1);
 SHOULD_EQUAL("vectorPop() End", (vec->end - vec->data) / vec->itemSize, 1);
 clearError();
 
+// vectorPopN()
+vectorPushDefaultToken(vec);
+vectorPushDefaultToken(vec);
+vectorPopNToken(vec, 2);
+SHOULD_EQUAL("vectorPopN() Size", vectorSize(vec), 1);
+SHOULD_EQUAL("vectorPopN() End", (vec->end - vec->data) / vec->itemSize, 1);
+clearError();
+
 // vectorReserve()
 vectorReserve(vec, 60);
 SHOULD_EQUAL("vectorReserve() Capacity", vectorCapacity(vec), 60);

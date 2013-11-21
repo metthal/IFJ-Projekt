@@ -104,6 +104,6 @@ void freeToken(Token **ppt);
  * @param src Source token that will be copied.
  * @param dest Destination token that will be copy.
  */
-void copyToken(Token *src, Token *dest);
+void copyToken(const Token *src, Token *dest);
 
 #endif

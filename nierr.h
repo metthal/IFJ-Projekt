@@ -15,7 +15,6 @@ typedef enum
     ERR_None = 0,
     ERR_Unknown,
     ERR_LexFile,
-    ERR_NewFailed,
     ERR_Allocation,
     ERR_Range,
     ERR_Convert,

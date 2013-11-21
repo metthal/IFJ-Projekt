@@ -6,12 +6,12 @@
 
 // definitions from parser which need to be present also in expression parser
 extern ConstTokenVectorIterator tokensIt;
-extern SymbolTable *globalSymbolTable;
 extern Context *currentContext;
 extern Vector *constantsTable;
 
 static Vector *exprVector = NULL;
 static ExprToken endToken;
+static uint32_t currentStackPos;
 
 typedef enum
 {
@@ -82,16 +82,16 @@ static inline uint8_t tokenTypeToExprType(uint8_t tokenType)
     return tokenType;
 }
 
-uint8_t reduceMultiparamFunc(uint32_t stackPos)
+uint8_t reduceMultiparamFunc(uint32_t stackPos, uint32_t *paramCount)
 {
-    if (stackPos == 0)
+    if (stackPos == 0 || paramCount == NULL)
         return 0;
 
     ExprTokenVectorIterator first = vectorAt(exprVector, stackPos);
     ExprTokenVectorIterator second = vectorAt(exprVector, stackPos - 1);
     if (first->type == NonTerminal) { // got E,E..) expect , or (
         if (second->type == Terminal && second->token->type == STT_Comma) { // we got ,E,E..), enter recursion
-            if (!reduceMultiparamFunc(stackPos - 2))
+            if (!reduceMultiparamFunc(stackPos - 2, paramCount))
                 return 0;
 printf(",E");
         }
@@ -106,36 +106,33 @@ printf(",E");
             if (id->token->type != STT_Identifier)
                 return 0;
 
-            // TODO generate instructions
 printf("func(E");
-            id->type = NonTerminal;
-            vectorPopExprToken(exprVector);
-            vectorPopExprToken(exprVector);
+            (*paramCount)++;
             return 1;
         }
     }
 
-    // TODO generate instructions
-    vectorPopExprToken(exprVector);
-    vectorPopExprToken(exprVector);
+    // TODO generate push instruction with first->stackOffset
+    (*paramCount)++;
     return 1;
 }
 
 uint8_t reduce(ExprToken *topTerm)
 {
     switch (topTerm->token->type) {
-        case STT_Variable:
-            // todo: generate instruction
-puts("Rule: E -> var");
-            topTerm->type = NonTerminal;
-            break;
         case STT_Number:
-puts("Rule: E -> int");
-            topTerm->type = NonTerminal;
-            break;
         case STT_Double:
-puts("Rule: E -> double");
+        case STT_Null:
+        case STT_Bool:
+        case STT_String:
+            // TODO generate new constant into constants table and generate push instruction
             topTerm->type = NonTerminal;
+            topTerm->stackOffset = currentStackPos++;
+            break;
+        case STT_Variable:
+            // TODO find variable in the symbol table, error if not present otherwise generate push instruction
+            topTerm->type = NonTerminal;
+            topTerm->stackOffset = currentStackPos++;
             break;
         case STT_Equal:
         case STT_NotEqual:
@@ -195,8 +192,10 @@ else if (topTerm->token->type == STT_GreaterEqual)
                 return 0;
             }
 
-            vectorPopExprToken(exprVector);
-            vectorPopExprToken(exprVector);
+            // TODO here generate corresponding instruction with offsets, store result in currentStackPos
+
+            operand1->stackOffset = currentStackPos++;
+            vectorPopNExprToken(exprVector, 2);
             break;
         }
         case STT_RightBracket: {
@@ -215,12 +214,14 @@ puts("Rule: E -> func()");
                     nextTerm = vectorAt(exprVector, stackSize - 3);
 
                     if (nextTerm->type == Terminal && nextTerm->token->type == STT_Identifier) {
-                        vectorPopExprToken(exprVector);
-                        vectorPopExprToken(exprVector);
+                        // TODO generate call instruction and store result in currentStackPos
                         nextTerm->type = NonTerminal;
+                        nextTerm->stackOffset = currentStackPos++;
+                        vectorPopNExprToken(exprVector, 2);
                     }
                 }
                 else if (nextTerm->type == NonTerminal) { // we have E) and are not sure what it is
+                    ExprTokenVectorIterator exprBackup = nextTerm;
                     nextTerm = vectorAt(exprVector, stackSize - 3);
 
                     if (nextTerm->type == Terminal && nextTerm->token->type == STT_Comma) { // we have ,E) and it's function
@@ -232,38 +233,44 @@ puts("Rule: E -> func()");
                         }
 
 printf("Rule: E -> ");
-                        if (!reduceMultiparamFunc(stackPos)) {
+                        uint32_t paramCount = 0;
+                        if (!reduceMultiparamFunc(stackPos, &paramCount)) {
                             setError(ERR_Syntax);
                             return 0;
                         }
 
-                        vectorPopExprToken(exprVector);
+                        // TODO here generate call instruction with number of parameters returned from reduceMultiparamFunc
+
+                        vectorPopNExprToken(exprVector, (paramCount << 1) + 1); // paramCount * 2 + 1 (every E has one terminal in front of it and there is one ending ')')
+                        nextTerm = vectorBack(exprVector);
+                        nextTerm->type = NonTerminal;
+                        nextTerm->stackOffset = currentStackPos++;
 puts(")");
                     }
                     else if (nextTerm->type == Terminal && nextTerm->token->type == STT_LeftBracket) { // it's (E) and we don't know if it is single param func or just (E)
                         if (stackSize >= 4) {
-                            ExprTokenVectorIterator backupTerm = nextTerm; // we need to backup current token for (E) case
+                            ExprTokenVectorIterator leftBracketBackup = nextTerm; // we need to backup current token for (E) case
                             nextTerm = vectorAt(exprVector, stackSize - 4);
 
                             if (nextTerm->type == Terminal && nextTerm->token->type == STT_Identifier) { // we have id(E) and it's function
 puts("Rule: E -> func(E)");
-                                vectorPopExprToken(exprVector);
-                                vectorPopExprToken(exprVector);
-                                vectorPopExprToken(exprVector);
+                                // TODO generate call instruction and store result in currentStackPos
                                 nextTerm->type = NonTerminal;
+                                nextTerm->stackOffset = currentStackPos++;
+                                vectorPopNExprToken(exprVector, 3);
                             }
                             else { // it's just (E)
 puts("Rule: E -> (E)");
-                                vectorPopExprToken(exprVector);
-                                vectorPopExprToken(exprVector);
-                                backupTerm->type = NonTerminal;
+                                leftBracketBackup->type = NonTerminal;
+                                leftBracketBackup->stackOffset = exprBackup->stackOffset;
+                                vectorPopNExprToken(exprVector, 2);
                             }
                         }
                         else { // it can only be (E) if we have just 3 items on the stack
 puts("Rule: E -> (E)");
-                            vectorPopExprToken(exprVector);
-                            vectorPopExprToken(exprVector);
                             nextTerm->type = NonTerminal;
+                            nextTerm->stackOffset = exprBackup->stackOffset;
+                            vectorPopNExprToken(exprVector, 2);
                         }
                     }
                 }
@@ -293,12 +300,13 @@ void copyExprToken(ExprToken *src, ExprToken *dest)
     dest->token = src->token;
 }
 
-int32_t expr()
+uint32_t expr()
 {
     // insert bottom of the stack (special kind of token) to the stack
     uint8_t endOfInput = 0;
     const Token *currentToken = NULL;
     vectorClearExprToken(exprVector);
+    currentStackPos = currentContext->localVariableCount;
 
     while (1) {
         if (!endOfInput) {
@@ -315,13 +323,13 @@ int32_t expr()
         // no terminal found
         if (!topToken) {
             // there is just one non-terminal on the stack, we succeeded
-            if (endOfInput && vectorSize(exprVector) == 1 && ((ExprToken*)vectorBack(exprVector))->type == NonTerminal)
-                return 1;
+            if (endOfInput && vectorSize(exprVector) == 1)
+                return ((ExprToken*)vectorBack(exprVector))->stackOffset;
 
             // if there is no topmost terminal and input is right bracket, end successfuly
             // top-down parser will take care of bad input, since he will assume I loaded first token after expression
-            if (currentToken->type == STT_RightBracket)
-                return 1;
+            if (currentToken->type == STT_RightBracket && vectorSize(exprVector) == 1)
+                return ((ExprToken*)vectorBack(exprVector))->stackOffset;
 
             topToken = &endToken;
         }

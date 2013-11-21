@@ -41,7 +41,7 @@ static Vector* CONSTRUCT(new, Vector)()
     Vector* vec = malloc(sizeof(Vector));
 
     if (vec == NULL) {
-        setError(ERR_NewFailed);
+        setError(ERR_Allocation);
         return NULL;
     }
 
@@ -51,7 +51,7 @@ static Vector* CONSTRUCT(new, Vector)()
     vec->data = malloc(VectorDefaultCapacity * vec->itemSize);
 
     if (vec->data == NULL) {
-        setError(ERR_NewFailed);
+        setError(ERR_Allocation);
         free(vec);
         return NULL;
     }
@@ -142,6 +142,23 @@ static void TEMPLATE(vectorPop)(Vector *vec)
 }
 
 /**
+ * Removes N last items from vector.
+ * @param vec Vector to operate on.
+ * @param amount Number of items to pop
+ */
+static void TEMPLATE(vectorPopN)(Vector *vec, uint32_t amount)
+{
+    if (amount > vec->size)
+        amount = vec->size;
+
+    for (uint32_t i = 0; i < amount; ++i) {
+        vec->size--;
+        vec->end -= vec->itemSize;
+        DELETE_ITEM(vec->end);
+    }
+}
+
+/**
  * Resizes vector to specified size.
  * Sets ERR_Allocation on error and preserves
  * previous capacity and data content.
@@ -150,7 +167,7 @@ static void TEMPLATE(vectorPop)(Vector *vec)
  */
 static void TEMPLATE(vectorResize)(Vector *vec, uint32_t size)
 {
-    uint8_t* newEnd = NULL;
+    uint8_t *newEnd = NULL;
     if (size == vec->size)
         return;
     else if (size > vec->size) {
@@ -165,7 +182,7 @@ static void TEMPLATE(vectorResize)(Vector *vec, uint32_t size)
         }
 
         newEnd = vec->data + size * vec->itemSize;
-        for (uint8_t* it = vec->end; it != newEnd; it += vec->itemSize)
+        for (uint8_t *it = vec->end; it != newEnd; it += vec->itemSize)
             INIT_ITEM(it);
     }
     else {

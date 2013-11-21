@@ -17,4 +17,6 @@ $m = foo($a + $b);
 $n = foo(bar($lol / $wtf));
 $o = foo(1, 2, 3);
 $p = foo(bar(1, 2), $a + $b, boo($c <= $d, $c !== $d), 17.5);
-
+$q = $abc . "lol string wtf";
+$r = true === false;
+$s = foo($xyz, null);

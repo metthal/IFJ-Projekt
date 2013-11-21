@@ -42,7 +42,7 @@ void freeToken(Token **ppt)
     }
 }
 
-void copyToken(Token *src, Token *dest)
+void copyToken(const Token *src, Token *dest)
 {
     memset(dest, 0, sizeof(Token));
     dest->type = src->type;
