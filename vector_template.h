@@ -100,7 +100,10 @@ static void TEMPLATE(vectorClear)(Vector *vec)
 static void TEMPLATE(vectorPush)(Vector *vec, const PUSH_BACK_ITEM item)
 {
     if (vec->size == vec->capacity) {
-        vectorReserve(vec, vec->capacity * VectorResizeIncRate);
+        if (vec->capacity == 0)
+            vectorReserve(vec, VectorDefaultCapacity);
+        else
+            vectorReserve(vec, vec->capacity * VectorResizeIncRate);
         if (getError())
             return;
     }
@@ -120,7 +123,10 @@ static void TEMPLATE(vectorPush)(Vector *vec, const PUSH_BACK_ITEM item)
 static void TEMPLATE(vectorPushDefault)(Vector *vec)
 {
     if (vec->size == vec->capacity) {
-        vectorReserve(vec, vec->capacity * VectorResizeIncRate);
+        if (vec->capacity == 0)
+            vectorReserve(vec, VectorDefaultCapacity);
+        else
+            vectorReserve(vec, vec->capacity * VectorResizeIncRate);
         if (getError())
             return;
     }
@@ -136,9 +142,11 @@ static void TEMPLATE(vectorPushDefault)(Vector *vec)
  */
 static void TEMPLATE(vectorPop)(Vector *vec)
 {
-    vec->size--;
-    vec->end -= vec->itemSize;
-    DELETE_ITEM(vec->end);
+    if (vec->size > 0) {
+        vec->size--;
+        vec->end -= vec->itemSize;
+        DELETE_ITEM(vec->end);
+    }
 }
 
 /**
@@ -172,6 +180,10 @@ static void TEMPLATE(vectorResize)(Vector *vec, uint32_t size)
         return;
     else if (size > vec->size) {
         uint32_t newCapacity = vec->capacity;
+
+        if (vec->capacity == 0)
+            vec->capacity = VectorDefaultCapacity;
+
         while (size > newCapacity)
             newCapacity *= VectorResizeIncRate;
 
