@@ -137,7 +137,7 @@ void prog()
 
             if (secondRun) {
                 // First instruction should reserve space on stack
-                generateEmptyInstruction();
+                generateInstruction(IST_Reserve, 0, currentContext->exprStart, 0);
             }
 
             body();
@@ -156,8 +156,6 @@ void body()
             // Rule 4
             printf("%s\n", "Rule 4");
             if (secondRun) {
-                // Fill first instruction with correct value
-                fillInstruction(0, IST_Reserve, 0, mainContext.maxStackCount, 0);
                 generateInstruction(IST_Nullify, 0, -1, 0);
                 generateInstruction(IST_Return, 0, 0, 0);
             }
@@ -283,7 +281,6 @@ void func()
 
     tokensIt++;
 
-    uint32_t reserveIst = 0;
     if (secondRun) {
         // Switch place to where instructions for functions are generated
         instructions = functionsInstructions;
@@ -291,7 +288,8 @@ void func()
         InstructionPtr* cipvi =
                 vectorAt(addressTable, symbol->data->func.functionAddressIndex);
         (*cipvi) = (InstructionPtr)((size_t)vectorSize(functionsInstructions));
-        reserveIst = generateEmptyInstruction();
+        // Reserve stack space for locals
+        generateInstruction(IST_Reserve, 0, currentContext->exprStart, 0);
     }
 
     stmtListBracketed();
@@ -299,8 +297,6 @@ void func()
         return;
 
     if (secondRun) {
-        // Reserve stack space for largest expression in function and locals
-        fillInstruction(reserveIst, IST_Reserve, 0, currentContext->maxStackCount, 0);
         // Create instruction that will return null at the end of each function
         generateInstruction(IST_Nullify, 0, -(currentContext->argumentCount+1), 0);
         generateInstruction(IST_Return, 0, currentContext->argumentCount, 0);
@@ -493,7 +489,7 @@ void stmt()
 
                     if (secondRun) {
                         // Fills the reserved space with correct jump value
-                        fillInstruction(ptr2, IST_Jmpz, 0, blockSize, cond);
+                        fillInstruction(ptr2, IST_Jmpz, currentContext->exprStart, blockSize, cond);
                     }
 
                     break;
@@ -527,7 +523,7 @@ void stmt()
                         generateInstruction(IST_Jmp, 0, ptr1 - vectorSize(instructions), 0);
 
                         // Fills the reserved space with correct jump value
-                        fillInstruction(ptr2, IST_Jmpz, 0, vectorSize(instructions) - ptr2, cond);
+                        fillInstruction(ptr2, IST_Jmpz, currentContext->exprStart, vectorSize(instructions) - ptr2, cond);
                     }
 
                     break;
@@ -628,7 +624,7 @@ void stmt()
 
                         if (for2Used) {
                             // Fills the reserved space with correct jump value
-                            fillInstruction(ptr2, IST_Jmpz, 0, vectorSize(instructions) - ptr2, cond);
+                            fillInstruction(ptr2, IST_Jmpz, currentContext->exprStart, vectorSize(instructions) - ptr2, cond);
                         }
 
                         // Finish everything by filling pre-generated
@@ -725,7 +721,7 @@ uint8_t elseifStmt()
                         fillInstruction(ptr1, IST_Jmp, 0, vectorSize(instructions) - ptr1, 0);
 
                         // Fills the reserved space with correct jump value
-                        fillInstruction(ptr1, IST_Jmpz, 0, blockSize, cond);
+                        fillInstruction(ptr1, IST_Jmpz, currentContext->exprStart, blockSize, cond);
                     }
 
                     return 1;
@@ -1051,6 +1047,9 @@ void assignment(ConstTokenVectorIterator varid, uint8_t skip)
 
         // Move result of expression to variable
         generateInstruction(IST_Mov, symbol->data->var.relativeIndex, exprRes, 0);
+
+        // Clear generated expression space
+        generateInstruction(IST_ClearExpr, 0, currentContext->exprStart, 0);
     }
     else {
         addLocalVariable(varid);
@@ -1077,6 +1076,7 @@ Symbol* addLocalVariable(ConstTokenVectorIterator varid)
         symbol->data = (SymbolData*)newVariable();
         symbol->data->var.relativeIndex = reserved + currentContext->localVariableCount;
         currentContext->localVariableCount++;
+        currentContext->exprStart = reserved + currentContext->localVariableCount;
     }
 
     return symbol;

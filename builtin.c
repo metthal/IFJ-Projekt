@@ -6,38 +6,69 @@
 
 #define READ_BUFFER_SIZE 64
 
-void boolval(const Value *val, Value *ret)
+uint8_t valueToBool(const Value *val)
 {
     switch (val->type) {
         case VT_Null:
-            ret->data.b = 0;
-            break;
+            return 0;
 
         case VT_Bool:
-            ret->data.b = val->data.b;
-            break;
+            return val->data.b;
 
         case VT_Integer:
-            ret->data.b = val->data.i != 0;
-            break;
+            return val->data.i != 0;
 
         case VT_Double:
-            ret->data.b = val->data.d != 0.0;
-            break;
+            return val->data.d != 0.0;
 
         case VT_String:
-            ret->data.b = stringLength(&(ret->data.s)) != 0;
-            break;
+            return stringLength(&(val->data.s)) != 0;
 
         case VT_Undefined:
             setError(ERR_UndefVariable);
-            return;
+            return 0;
 
         case VT_StackPtr:
         case VT_InstructionPtr:
             setError(ERR_Internal);
-            return;
+            return 0;
     }
+    return 0;
+}
+
+int valueToInt(const Value *val)
+{
+    switch (val->type) {
+        case VT_Null:
+            return 0;
+
+        case VT_Bool:
+            return (int32_t)val->data.b;
+
+        case VT_Integer:
+            return val->data.i;
+
+        case VT_Double:
+            return (int32_t)val->data.d;
+
+        case VT_String:
+            return stringToInt(&(val->data.s));
+
+        case VT_Undefined:
+            setError(ERR_UndefVariable);
+            return 0;
+
+        case VT_StackPtr:
+        case VT_InstructionPtr:
+            setError(ERR_Internal);
+            return 0;
+    }
+    return 0;
+}
+
+void boolval(const Value *val, Value *ret)
+{
+    ret->data.b = valueToBool(val);
     ret->type = VT_Bool;
 }
 
@@ -181,7 +212,6 @@ void getString(Value *ret)
     char buffer[READ_BUFFER_SIZE];
     String *workingStr = &(ret->data.s);
     initString(workingStr);
-    int idx;
 
     // Buffered read until EOL or EOF
     int i = 0;
@@ -272,36 +302,7 @@ void getSubstring(const Value *val, Value *ret, int start, int end)
 
 void intval(const Value *val, Value *ret)
 {
-    switch (val->type) {
-        case VT_Null:
-            ret->data.i = 0;
-            break;
-
-        case VT_Bool:
-            ret->data.i = (int32_t)val->data.b;
-            break;
-
-        case VT_Integer:
-            ret->data.i = val->data.i;
-            break;
-
-        case VT_Double:
-            ret->data.i = (int32_t)val->data.d;
-            break;
-
-        case VT_String:
-            ret->data.i = stringToInt(&(val->data.s));
-            break;
-
-        case VT_Undefined:
-            setError(ERR_UndefVariable);
-            return;
-
-        case VT_StackPtr:
-        case VT_InstructionPtr:
-            setError(ERR_Internal);
-            return;
-    }
+    ret->data.i = valueToInt(val);
     ret->type = VT_Integer;
 }
 
@@ -347,38 +348,38 @@ void putString(Value *ret, Value *firstVal, int count)
     fflush(stdout);
 }
 
-void sortString(Value *val)
+void sortString(const Value *val, Value *ret)
 {
     switch (val->type) {
         case VT_Null:
-            initString(&(val->data.s));
+            initString(&(ret->data.s));
             break;
 
         case VT_Bool:
             if (val->data.b)
-                initStringS(&(val->data.s), "1", 1);
+                initStringS(&(ret->data.s), "1", 1);
             else
-                initString(&(val->data.s));
+                initString(&(ret->data.s));
             break;
 
-        case VT_Integer:
-            int i = val->data.i;
-            initValue(val);
-            initString(&(val->data.s));
-            intToStringE(i, &(val->data.s));
+        case VT_Integer: {
+            initString(&(ret->data.s));
+            intToStringE(val->data.i, &(ret->data.s));
             stringCharSort(&(val->data.s));
             break;
+        }
 
-        case VT_Double:
-            double d = val->data.d;
-            initValue(val);
-            initString(&(val->data.s));
-            doubleToStringE(d, &(val->data.s));
+        case VT_Double: {
+            initString(&(ret->data.s));
+            doubleToStringE(val->data.d, &(ret->data.s));
             stringCharSort(&(val->data.s));
             break;
+        }
 
         case VT_String:
-            stringCharSort(&(val->data.s));
+            initString(&(ret->data.s));
+            stringCopy(&(val->data.s), &(ret->data.s));
+            stringCharSort(&(ret->data.s));
             break;
 
         case VT_Undefined:
@@ -390,38 +391,43 @@ void sortString(Value *val)
             setError(ERR_Internal);
             return;
     }
-    val->type = VT_String;
+    ret->type = VT_String;
 }
 
-int strLen(const Value *val)
+void strLen(const Value *val, Value *ret)
 {
     switch (val->type) {
         case VT_Null:
-            return 0;
+            ret->data.i = 0;
+            break;
 
         case VT_Bool:
             // True => "1", False => ""
-            return val->data.b ? 1 : 0;
+            ret->data.i = val->data.b ? 1 : 0;
+            break;
 
         case VT_Integer:
-            return intToStringE(val->data.i, NULL);
+            ret->data.i = intToStringE(val->data.i, NULL);
+            break;
 
         case VT_Double:
-            return doubleToStringE(val->data.d, NULL);
+            ret->data.i = doubleToStringE(val->data.d, NULL);
+            break;
 
         case VT_String:
-            return stringLength(&(val->data.s));
+            ret->data.i = stringLength(&(val->data.s));
+            break;
 
         case VT_Undefined:
             setError(ERR_UndefVariable);
-            return 0;
+            return;
 
         case VT_StackPtr:
         case VT_InstructionPtr:
             setError(ERR_Internal);
-            return 0;
+            return;
     }
-    return 0;
+    ret->type = VT_Integer;
 }
 
 void strval(const Value *val, Value *ret)

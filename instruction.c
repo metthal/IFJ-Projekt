@@ -46,25 +46,21 @@ void copyInstruction(const Instruction *src, Instruction *dest)
     dest->b = src->b;
 }
 
-void processDefaultArg(Context *context, uint32_t *paramCount, uint32_t lastParamIdx)
+void processDefaultArg(Context *context, uint32_t *paramCount)
 {
     uint32_t missingCount = context->argumentCount - *paramCount;
     if (missingCount > 0 && missingCount <= context->defaultCount) {
         // First argument is first on stack, just append defaults
         // which are in constant table in opposite order (last is first)
         int64_t index = context->defaultStart + missingCount - 1;
-        for (; index >= context->defaultStart; index--, lastParamIdx++)
-            generateInstruction(IST_MovC, lastParamIdx, index, 0);
-
-        // For leaves lastParamIdx to point behind last parameter
-        if (lastParamIdx > context->maxStackCount)
-            context->maxStackCount = lastParamIdx;
+        for (; index >= context->defaultStart; index--)
+            generateInstruction(IST_PushC, 0, index, 0);
 
         *paramCount += missingCount;
     }
 }
 
-void generateCall(const Token *id, uint32_t paramCount, uint32_t lastParamIdx)
+void generateCall(const Token *id, uint32_t paramCount)
 {
     Instruction inst;
     initInstruction(&inst);
@@ -162,7 +158,7 @@ void generateCall(const Token *id, uint32_t paramCount, uint32_t lastParamIdx)
         // Test for too many arguments
         if (symbol->data->func.context.argumentCount >= paramCount) {
             // Default parameters
-            processDefaultArg(&(symbol->data->func.context), &paramCount, lastParamIdx);
+            processDefaultArg(&(symbol->data->func.context), &paramCount);
 
             // Test for too few arguments
             if (symbol->data->func.context.argumentCount == paramCount) {

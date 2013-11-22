@@ -21,7 +21,7 @@ typedef union {
     String s;
     double d;
     int i;
-    Instruction* ip;
+    const Instruction* ip;
     uint32_t sp;
     int8_t b;
 } ValueData;
@@ -60,7 +60,7 @@ void initValue(Value *value);
 void deleteValue(Value *value);
 void copyValue(Value *src, Value *dest);
 
-/// Value must be in "after-initialization" state
+/// Value must be in initialized state
 void tokenToValue(const Token *src, Value *dest);
 
 void initSymbol(Symbol *symbol);

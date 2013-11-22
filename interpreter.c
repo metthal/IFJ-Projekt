@@ -5,26 +5,10 @@
 
 #include <stdint.h>
 
-void interpret(const Instruction *firstInstruction, const Vector *constTable, const Vector *addressTable)
+void interpretationLoop(const Instruction *firstInstruction, const Vector *constTable, const Vector *addressTable, Vector *stack)
 {
     // 3 value pointers used during interpretation
     Value *resVal, *aVal, *bVal;
-    Vector *stack = newValueVector();
-
-    // Create global stack frame
-    // Reserve space for return value
-    vectorPushDefaultValue(stack);
-    // Null old stack pointer
-    vectorPushDefaultValue(stack);
-    resVal = vectorBack(stack);
-    resVal->type = VT_InstructionPtr;
-    resVal->data.ip = NULL;
-    // Null old instruction pointer
-    vectorPushDefaultValue(stack);
-    resVal = vectorBack(stack);
-    resVal->type = VT_StackPtr;
-    resVal->data.sp = 0;
-
 
     // Stack pointer have to be index because of possibility of stack
     // vector reallocation
@@ -55,9 +39,14 @@ void interpret(const Instruction *firstInstruction, const Vector *constTable, co
             case IST_Jmpz:
                 bVal = vectorAt(stack, stackPtr + instructionPtr->b);
 
-                // TODO convert bVal to boolean
-                if (bVal)
+                if (valueToBool(bVal))
                     instructionPtr += instructionPtr->a;
+                else
+                    instructionPtr++;
+
+                // Clear space hold by condition's expression
+                vectorResizeValue(stack, stackPtr + instructionPtr->res);
+
                 continue;
 
             case IST_Push:
@@ -80,10 +69,31 @@ void interpret(const Instruction *firstInstruction, const Vector *constTable, co
                 }
                 break;
 
-            case IST_Call:
-                // TODO create stack frame
+            case IST_ClearExpr:
+                vectorResizeValue(stack, stackPtr + instructionPtr->a);
+                break;
+
+            case IST_Call: {
+                // Save stack and instruction pointers
+                Value val;
+                initValue(&val);
+
+                // Stack pointer
+                val.type = VT_StackPtr;
+                val.data.sp = stackPtr;
+                stackPtr = vectorSize(stack);
+                vectorPushValue(stack, &val);
+
+                // Instruction pointer
+                val.type = VT_InstructionPtr;
+                val.data.ip = instructionPtr;
+                vectorPushValue(stack, &val);
+
+                deleteValue(&val);
+
                 instructionPtr = vectorAtConst(addressTable, instructionPtr->a);
                 continue;
+            }
 
             case IST_Return:
                 // Load old instruction pointer
@@ -93,15 +103,15 @@ void interpret(const Instruction *firstInstruction, const Vector *constTable, co
 
                 }
                 else {
-                    // TODO end interpretation
-                    return;
+                    // End interpretation
+                    running = 0;
                 }
 
                 // Load old stack pointer
                 aVal = vectorAt(stack, stackPtr);
                 stackPtr = aVal->data.sp;
 
-                // TODO resize to clear stack
+                vectorResizeValue(stack, stackPtr - instructionPtr->a);
                 continue;
 
             case IST_Nullify:
@@ -111,13 +121,110 @@ void interpret(const Instruction *firstInstruction, const Vector *constTable, co
                 aVal->type = VT_Null;
                 break;
 
-                // TODO built-in functions
+            case IST_BoolVal:
+                aVal = vectorAt(stack, stackPtr - 1);
+                resVal = vectorAt(stack, stackPtr - 2);
+                boolval(aVal, resVal);
+                break;
+
+            case IST_DoubleVal:
+                aVal = vectorAt(stack, stackPtr - 1);
+                resVal = vectorAt(stack, stackPtr - 2);
+                doubleval(aVal, resVal);
+                break;
+
+            case IST_FindString:
+                bVal = vectorAt(stack, stackPtr - 1);
+                aVal = vectorAt(stack, stackPtr - 2);
+                resVal = vectorAt(stack, stackPtr - 3);
+                findString(resVal, aVal, bVal);
+                break;
+
+            case IST_GetString:
+                resVal = vectorAt(stack, stackPtr - 1);
+                getString(resVal);
+                break;
+
+            case IST_GetSubstring: {
+                aVal = vectorAt(stack, stackPtr - 1);
+                int end = valueToInt(aVal);
+
+                aVal = vectorAt(stack, stackPtr - 2);
+                int start = valueToInt(aVal);
+
+                if (getError)
+                    return;
+
+                aVal = vectorAt(stack, stackPtr - 3);
+                resVal = vectorAt(stack, stackPtr - 4);
+
+                getSubstring(aVal, resVal, start, end);
+                break;
+            }
+
+            case IST_IntVal:
+                aVal = vectorAr(stack, stackPtr - 1);
+                resVal = vectorAt(stack, stackPtr - 2);
+                intval(aVal, resVal);
+                break;
+
+            case IST_PutString:
+                aVal = vectorAt(stack, stackPtr - instructionPtr->a);
+                resVal = vectorAt(stack, stackPtr - instructionPtr->a - 1);
+                putString(resVal, aVal, instructionPtr->a);
+                break;
+
+            case IST_SortString:
+                aVal = vectorAt(stack, stackPtr - 1);
+                resVal = vectorAt(stack, stackPtr - 2);
+                sortString(aVal, resVal);
+                break;
+
+            case IST_StrLen:
+                aVal = vectorAt(stack, stackPtr - 1);
+                resVal = vectorAt(stack, stackPtr - 2);
+                strLen(aVal, resVal);
+                break;
+
+            case IST_StrVal:
+                aVal = vectorAt(stack, stackPtr - 1);
+                resVal = vectorAt(stack, stackPtr - 2);
+                strval(aVal, resVal);
+                break;
 
             default:
                 break;
         }
 
+        if(getError())
+            return;
+
         // Move to next instruction
         instructionPtr++;
     }
+}
+
+void interpret(const Instruction *firstInstruction, const Vector *constTable, const Vector *addressTable)
+{
+    Vector *stack = newValueVector();
+
+    // Create global stack frame
+    {
+        // Reserve space for return value
+        vectorPushDefaultValue(stack);
+        // Null old stack pointer
+        vectorPushDefaultValue(stack);
+        Value *tmp = vectorBack(stack);
+        tmp->type = VT_InstructionPtr;
+        tmp->data.ip = NULL;
+        // Null old instruction pointer
+        vectorPushDefaultValue(stack);
+        tmp = vectorBack(stack);
+        tmp->type = VT_StackPtr;
+        tmp->data.sp = 0;
+    }
+
+    interpretationLoop(firstInstruction, constTable, addressTable, stack);
+
+    freeValueVector(&stack);
 }

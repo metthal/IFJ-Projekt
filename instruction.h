@@ -15,6 +15,7 @@
  * a   - distance
  *
  * Jmpz:
+ * res - exprStart
  * a   - distance
  * b   - condition
  *
@@ -29,6 +30,9 @@
  *
  * Pop:
  * a   - count
+ *
+ * ClearExpr:
+ * a   - exprStart
  *
  * Call:
  * a   - address index
@@ -52,6 +56,7 @@ typedef enum
     IST_PushC,       //!< IST_PushC
     IST_Reserve,     //!< IST_Reserve
     IST_Pop,         //!< IST_Pop
+    IST_ClearExpr,   //!< IST_ClearExpr
     IST_Call,        //!< IST_Call
     IST_Return,      //!< IST_Return
     IST_Nullify,     //!< IST_Nullify
@@ -101,7 +106,7 @@ void freeInstruction(Instruction **ppt);
 
 void copyInstruction(const Instruction *src, Instruction *dest);
 
-void generateCall(const Token *id, uint32_t paramCount, uint32_t lastParamIdx);
+void generateCall(const Token *id, uint32_t paramCount);
 
 void generateInstruction(InstructionCode code, int32_t res, int32_t a, int32_t b);
 
