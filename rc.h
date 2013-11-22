@@ -70,6 +70,7 @@ static inline ResultCode getRcFromError()
 
             // TODO check this one
         case ERR_BadDefArg:
+        case ERR_Substr:
             return RC_UnkError;
 
         default:

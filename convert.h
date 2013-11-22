@@ -10,7 +10,7 @@
  * @param str String to convert.
  * @return Integer representation of the string.
  */
-int64_t stringToInt(const String *str);
+int stringToInt(const String *str);
 
 /** Converts string to double.
  * @param str String to convert.
@@ -22,12 +22,26 @@ double stringToDouble(const String *str);
  * @param num Integer to convert.
  * @return New instance of string object with converted value.
  */
-String* intToString(int64_t num);
+String* intToString(int num);
+
+/** Converts integer to existing string.
+ * @param num Integer to convert.
+ * @param str Initialized string that will hold converted value.
+ * @return Length of resulting string.
+ */
+int intToStringE(int num, String *str);
 
 /** Converts double to string.
  * @param num Double to convert.
  * @return New instance of string object with converted value.
  */
 String* doubleToString(double num);
+
+/** Converts double to existing string.
+ * @param num Double to convert.
+ * @param str Initialized string that will hold converted value.
+ * @return Length of resulting string.
+ */
+int doubleToStringE(double num, String *str);
 
 #endif

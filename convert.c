@@ -3,13 +3,9 @@
 
 #include <stdlib.h>
 
-int64_t stringToInt(const String *str)
+int stringToInt(const String *str)
 {
-    char *endptr = NULL;
-    int64_t tmp = strtoll(str->data, &endptr, 10);
-    if (endptr == str->data)
-        setError(ERR_Convert);
-    return tmp;
+    return strtol(str->data, NULL, 10);
 }
 
 double stringToDouble(const String *str)
@@ -31,7 +27,7 @@ double stringToDouble(const String *str)
     return tmp;
 }
 
-String* intToString(int64_t num)
+String* intToString(int num)
 {
     String *tmp = NULL;
     /* Buffer size explanation.
@@ -42,15 +38,28 @@ String* intToString(int64_t num)
      * 21 chars needed at most.
      */
     char buffer[21];
-    int written = sprintf(buffer, "%lld", (long long int)num);
+    int written = sprintf(buffer, "%d", num);
     if (written > 0)
         tmp = newStringS(buffer, written);
     else
-        setError(ERR_Convert);
+        tmp = newString();
     return tmp;
 }
 
-// Just basic implementation, will be improved as needed
+int intToStringE(int num, String *str)
+{
+    // See intToString for explanation
+    char buffer[21];
+    int written = sprintf(buffer, "%d", num);
+    if (str != NULL) {
+        if (written > 0)
+            stringSetS(str, buffer, written);
+        else
+            stringEmpty(str);
+    }
+    return written;
+}
+
 String* doubleToString(double num)
 {
     String *tmp = NULL;
@@ -66,6 +75,20 @@ String* doubleToString(double num)
     if (written > 0)
         tmp = newStringS(buffer, written);
     else
-        setError(ERR_Convert);
+        tmp = newString();
     return tmp;
+}
+
+int doubleToStringE(double num, String *str)
+{
+    // See doubleToString for explanation
+    char buffer[26];
+    int written = sprintf(buffer, "%g", num);
+    if (str != NULL) {
+        if (written > 0)
+            stringSetS(str, buffer, written);
+        else
+            stringEmpty(str);
+    }
+    return written;
 }

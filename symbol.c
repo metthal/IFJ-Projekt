@@ -46,6 +46,7 @@ void tokenToValue(const Token *src, Value *dest)
 
         case STT_String:
             dest->type = VT_String;
+            initString(&(dest->data.s));
             stringCopy(&(src->str), &(dest->data.s));
             break;
 

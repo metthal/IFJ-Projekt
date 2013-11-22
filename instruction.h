@@ -38,6 +38,7 @@
  *
  * Nullify:
  * a   - item
+ *
  */
 
 typedef enum

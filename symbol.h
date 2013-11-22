@@ -20,9 +20,9 @@ typedef enum {
 typedef union {
     String s;
     double d;
+    int i;
     Instruction* ip;
     uint32_t sp;
-    int32_t i;
     int8_t b;
 } ValueData;
 

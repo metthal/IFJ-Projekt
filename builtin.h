@@ -3,7 +3,7 @@
 
 #include "symbol.h"
 
-// Ret must be initialized or "after-deletion"
+// Ret must be initialized
 void boolval(const Value *val, Value *ret);
 void doubleval(const Value *val, Value *ret);
 void findString();
@@ -12,7 +12,7 @@ void getSubstring();
 void intval(const Value *val, Value *ret);
 void putString();
 void sortString();
-void strLen();
+int strLen();
 void strval(const Value *val, Value *ret);
 
 #endif

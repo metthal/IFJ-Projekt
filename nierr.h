@@ -17,6 +17,7 @@ typedef enum
     ERR_LexFile,
     ERR_Allocation,
     ERR_Range,
+    ERR_Internal,
     ERR_Convert,
     ERR_Syntax,
     ERR_UndefFunction,
@@ -27,7 +28,8 @@ typedef enum
     ERR_DefArgOrder,
     ERR_BadDefArg,
     ERR_ISTGenerator,
-    ERR_CycleControl //!< Invalid break / continue statement
+    ERR_CycleControl, //!< Invalid break / continue statement
+    ERR_Substr
 } NiErrorType;
 
 typedef struct

@@ -16,7 +16,7 @@ static inline char* _initStringSize(String *ps, uint32_t size)
     if (ps->data != NULL) {
         ps->data[0] = '\0';
     } else {
-        // init failed
+        // TODO init failed
     }
     return ps->data;
 }
@@ -208,7 +208,7 @@ void stringAddS(String *dest, const char *src, uint32_t len)
     dest->data[dest->length - 1] = '\0';
 }
 
-uint32_t stringLength(String *ps)
+uint32_t stringLength(const String *ps)
 {
     return ps->length - 1;
 }

@@ -41,7 +41,7 @@ void stringSetS(String *dest, const char *src, uint32_t len);
 void stringAdd(String *dest, String *src);
 void stringAddS(String *dest, const char *src, uint32_t len);
 
-uint32_t stringLength(String *ps);
+uint32_t stringLength(const String *ps);
 
 int16_t stringCompare(const String *a, const String *b);
 int16_t stringCompareS(const String *a, const char *b, uint32_t bLen);

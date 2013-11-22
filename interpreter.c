@@ -84,6 +84,7 @@ void interpret(const Instruction *firstInstruction, const Vector *constTable, co
                 aVal = vectorAt(stack, stackPtr + 1);
                 if (aVal->data.ip != NULL) {
                     instructionPtr = aVal->data.ip;
+
                 }
                 else {
                     // TODO end interpretation
