@@ -1,3 +1,7 @@
+/**
+ * @file expr.h
+ * @brief Declares interface of the bottom-up parser
+ **/
 #ifndef EXPR_H
 #define EXPR_H
 
@@ -5,12 +9,9 @@
 #include "vector.h"
 #include "token.h"
 
-typedef enum
-{
-    Terminal,
-    NonTerminal,
-} ExprTokenType;
-
+/**
+ * Expression token used in bottom-up parsing
+ **/
 typedef struct
 {
     union

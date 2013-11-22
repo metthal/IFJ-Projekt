@@ -1,3 +1,7 @@
+/**
+ * @file expr.c
+ * @brief Bottom-up parser for expressions
+ **/
 #include "expr.h"
 #include "nierr.h"
 #include "token_vector.h"
@@ -11,18 +15,34 @@ extern ConstTokenVectorIterator tokensIt;
 extern Context *currentContext;
 extern Vector *constantsTable;
 
-static Vector *exprVector = NULL;
-static ExprToken endToken;
-static uint32_t currentStackPos;
+static Vector *exprVector = NULL;   ///< Bottom-up parser stack for @ref ExprVector
+static ExprToken endToken;          ///< Token that should be located on the bottom of the stack, used when stack has no topmost terminal token
+static uint32_t currentStackPos;    ///< Current position in the local stack frame
 
+/**
+ * Defines type of the token located on the bottom-up parser stack
+ **/
 typedef enum
 {
-    Low,
-    High,
-    Equal,
-    Error
+    Terminal,   ///< Terminal token
+    NonTerminal ///< Non-terminal token
+} ExprTokenType;
+
+/**
+ * Defines priority between tokens on the stack and input token
+ **/
+typedef enum
+{
+    Low,        ///< Token on the top of the stack has lower priority than input token
+    High,       ///< Token on the top of the stack has higher priority than input token
+    Equal,      ///< Token on the top of the stack has same priority as input token
+    Error       ///< Token on the top of the stack cannot be followed by input token, syntax error
 } TokenPrecedence;
 
+/**
+ * Precedence table defines all combinations of top of the stack/input token and priorities between them.
+ * Rows mean top of the stack and columns mean input token.
+ **/
 static uint8_t precedenceTable[STT_Semicolon][STT_Semicolon] =
 {
 //      +       -       *       /       .       <       >       <=      >=      ===     !==     (       )       func    ,       $       var
@@ -45,6 +65,9 @@ static uint8_t precedenceTable[STT_Semicolon][STT_Semicolon] =
     {   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   Error,  High,   Error,  High,   High,   Error }   // var
 };
 
+/**
+ * Initializes bottom-up parser.
+ **/
 void initExpr()
 {
     exprVector = newExprTokenVector();
@@ -53,6 +76,10 @@ void initExpr()
     endToken.type = Terminal;
 }
 
+
+/**
+ * Performs cleanup after bottom-up parser.
+ **/
 void deinitExpr()
 {
     free(endToken.token);
@@ -60,9 +87,14 @@ void deinitExpr()
     freeExprTokenVector(&exprVector);
 }
 
+/**
+ * Traverses through the stack and finds the token which is terminal and is closest to the top of the stack
+ *
+ * @return Topmost terminal token. NULL if not found
+ **/
 ExprToken* findTopmostTerminal()
 {
-    ExprTokenVectorIterator itr = vectorEndExprToken(exprVector);
+    ConstExprTokenVectorIterator itr = vectorEndExprToken(exprVector);
 
     while (itr != vectorBeginExprToken(exprVector)) {
         itr--;
@@ -73,6 +105,13 @@ ExprToken* findTopmostTerminal()
     return NULL;
 }
 
+/**
+ * Transforms token type into index in precedence table.
+ *
+ * @param tokenType Token type to transform
+ *
+ * @return Index in precedence table
+ **/
 static inline uint8_t tokenTypeToExprType(uint8_t tokenType)
 {
     if (tokenType >= STT_Semicolon)
@@ -84,9 +123,16 @@ static inline uint8_t tokenTypeToExprType(uint8_t tokenType)
     return tokenType;
 }
 
-static inline uint8_t tokenToInstruction(Token *token)
+/**
+ * Transforms token type into the instruction code.
+ *
+ * @param tokenType Token type to transform
+ *
+ * @return Instruction code for the token type
+ **/
+static inline uint8_t tokenTypeToInstruction(uint8_t tokenType)
 {
-    switch (token->type) {
+    switch (tokenType) {
         case STT_Plus:
             return IST_Add;
 
@@ -125,6 +171,14 @@ static inline uint8_t tokenToInstruction(Token *token)
     }
 }
 
+/**
+ * Reduces expression for multiparameter functions recursively.
+ *
+ * @param stackPos Position on the stack where last parameter of the function is located
+ * @param paramCount Set to the number of parameters, cannot be NULL
+ *
+ * @return Returns 1 in case of success, otherwise 0
+ **/
 uint8_t reduceMultiparamFunc(uint32_t stackPos, uint32_t *paramCount)
 {
     if (stackPos == 0 || paramCount == NULL)
@@ -164,6 +218,13 @@ printf("func(E");
     return 1;
 }
 
+/**
+ * Performs reduction by rule in grammar
+ *
+ * @param topTerm Topmost terminal token on the stack
+ *
+ * @return Returns 1 in case of succes, otherwise 0
+ **/
 uint8_t reduce(ExprToken *topTerm)
 {
     switch (topTerm->token->type) {
@@ -254,7 +315,7 @@ else if (topTerm->token->type == STT_GreaterEqual)
                 return 0;
             }
 
-            generateInstruction(tokenToInstruction(operator->token), currentStackPos, operand1->stackOffset, operand2->stackOffset);
+            generateInstruction(tokenTypeToInstruction(operator->token->type), currentStackPos, operand1->stackOffset, operand2->stackOffset);
             if (getError())
                 return 0;
 
@@ -367,22 +428,44 @@ puts("Rule: E -> (E)");
     return 1;
 }
 
+/**
+ * Initializes new token for the bottom-up parser stack.
+ *
+ * @param token Token to initialize
+ **/
 void initExprToken(ExprToken *token)
 {
     memset(token, 0, sizeof(ExprToken));
 }
 
+/**
+ * Deinitializes token used in the bottom-up parser stack.
+ *
+ * @param token Token to deinitialize
+ **/
 void deleteExprToken(ExprToken *token)
 {
     (void)token;
 }
 
+/**
+ * Copies one expression token into the other
+ *
+ * @param src Source expression token
+ * @param dest Destination expression token
+ **/
 void copyExprToken(const ExprToken *src, ExprToken *dest)
 {
     dest->type = src->type;
     dest->token = src->token;
 }
 
+
+/**
+ * Based on the input token and its priority to the token on the top of the stack performs shift or reduce.
+ *
+ * @return Offset in the local stack frame where the result is stored, in case of error 0
+ **/
 uint32_t expr()
 {
     // insert bottom of the stack (special kind of token) to the stack
