@@ -1,6 +1,7 @@
 #include "builtin.h"
 #include "convert.h"
 #include "nierr.h"
+#include "ial.h"
 
 #include <stdio.h>
 
@@ -245,7 +246,7 @@ void getSubstring(const Value *val, Value *ret, int start, int end)
 
         case VT_Bool:
             if (val->data.b) {
-                stringInitS(&str, "1", 1);
+                initStringS(&str, "1", 1);
                 workingStr = &str;
                 len = 1;
                 return;

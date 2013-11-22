@@ -163,7 +163,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
             }
 
             case IST_IntVal:
-                aVal = vectorAr(stack, stackPtr - 1);
+                aVal = vectorAt(stack, stackPtr - 1);
                 resVal = vectorAt(stack, stackPtr - 2);
                 intval(aVal, resVal);
                 break;
