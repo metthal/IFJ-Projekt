@@ -125,12 +125,16 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 aVal = vectorAt(stack, stackPtr - 1);
                 resVal = vectorAt(stack, stackPtr - 2);
                 boolval(aVal, resVal);
+                // Clear parameters
+                vectorPopValue(stack);
                 break;
 
             case IST_DoubleVal:
                 aVal = vectorAt(stack, stackPtr - 1);
                 resVal = vectorAt(stack, stackPtr - 2);
                 doubleval(aVal, resVal);
+                // Clear parameters
+                vectorPopValue(stack);
                 break;
 
             case IST_FindString:
@@ -138,6 +142,8 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 aVal = vectorAt(stack, stackPtr - 2);
                 resVal = vectorAt(stack, stackPtr - 3);
                 findString(resVal, aVal, bVal);
+                // Clear parameters
+                vectorPopNValue(stack, 2);
                 break;
 
             case IST_GetString:
@@ -159,6 +165,8 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 resVal = vectorAt(stack, stackPtr - 4);
 
                 getSubstring(aVal, resVal, start, end);
+                // Clear parameters
+                vectorPopNValue(stack, 3);
                 break;
             }
 
@@ -166,30 +174,40 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 aVal = vectorAt(stack, stackPtr - 1);
                 resVal = vectorAt(stack, stackPtr - 2);
                 intval(aVal, resVal);
+                // Clear parameters
+                vectorPopValue(stack);
                 break;
 
             case IST_PutString:
                 aVal = vectorAt(stack, stackPtr - instructionPtr->a);
                 resVal = vectorAt(stack, stackPtr - instructionPtr->a - 1);
                 putString(resVal, aVal, instructionPtr->a);
+                // Clear parameters
+                vectorPopNValue(stack, instructionPtr->a);
                 break;
 
             case IST_SortString:
                 aVal = vectorAt(stack, stackPtr - 1);
                 resVal = vectorAt(stack, stackPtr - 2);
                 sortString(aVal, resVal);
+                // Clear parameters
+                vectorPopValue(stack);
                 break;
 
             case IST_StrLen:
                 aVal = vectorAt(stack, stackPtr - 1);
                 resVal = vectorAt(stack, stackPtr - 2);
                 strLen(aVal, resVal);
+                // Clear parameters
+                vectorPopValue(stack);
                 break;
 
             case IST_StrVal:
                 aVal = vectorAt(stack, stackPtr - 1);
                 resVal = vectorAt(stack, stackPtr - 2);
                 strval(aVal, resVal);
+                // Clear parameters
+                vectorPopValue(stack);
                 break;
 
             default:
