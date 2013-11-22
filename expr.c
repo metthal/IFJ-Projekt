@@ -206,13 +206,9 @@ printf("func(E");
         }
     }
 
-    uint32_t paramStackPos = currentStackPos + *paramCount;
-    generateInstruction(IST_Mov, paramStackPos, first->stackOffset, 0);
+    generateInstruction(IST_Push, 0, first->stackOffset, 0);
     if (getError())
         return 0;
-
-    if (paramStackPos + 1 > currentContext->maxStackCount)
-        currentContext->maxStackCount = paramStackPos + 1; // we need to reserve maximum used space on stack
 
     (*paramCount)++;
     return 1;
@@ -239,7 +235,7 @@ uint8_t reduce(ExprToken *topTerm)
             if (getError())
                 return 0;
 
-            generateInstruction(IST_MovC, currentStackPos, vectorSize(constantsTable) - 1, 0);
+            generateInstruction(IST_PushC, 0, vectorSize(constantsTable) - 1, 0);
             if (getError())
                 return 0;
 
@@ -340,7 +336,8 @@ puts("Rule: E -> func()");
 
                     if (nextTerm->type == Terminal && nextTerm->token->type == STT_Identifier) {
                         uint32_t retValStackPos = currentStackPos++;
-                        generateCall(nextTerm->token, 0, currentStackPos + 1);
+                        generateInstruction(IST_Reserve, 0, 1, 0);
+                        generateCall(nextTerm->token, 0);
                         if (getError())
                             return 0;
 
@@ -363,6 +360,10 @@ puts("Rule: E -> func()");
 
 printf("Rule: E -> ");
                         uint32_t retValStackPos = currentStackPos++;
+                        generateInstruction(IST_Reserve, 0, 1, 0);
+                        if (getError())
+                            return 0;
+
                         uint32_t paramCount = 0;
                         if (!reduceMultiparamFunc(stackPos, &paramCount)) {
                             setError(ERR_Syntax);
@@ -372,7 +373,7 @@ printf("Rule: E -> ");
                         vectorPopNExprToken(exprVector, (paramCount << 1) + 1); // paramCount * 2 + 1 (every E has one terminal in front of it and there is one ending ')')
                         nextTerm = vectorBack(exprVector);
 
-                        generateCall(nextTerm->token, paramCount, currentStackPos + paramCount);
+                        generateCall(nextTerm->token, paramCount);
                         if (getError())
                             return 0;
 
@@ -387,15 +388,16 @@ puts(")");
 
                             if (nextTerm->type == Terminal && nextTerm->token->type == STT_Identifier) { // we have id(E) and it's function
 puts("Rule: E -> func(E)");
+                                // return value
                                 uint32_t retValStackPos = currentStackPos++;
-                                generateInstruction(IST_Mov, currentStackPos, exprBackup->stackOffset, 0);
+                                generateInstruction(IST_Reserve, 0, 1, 0);
+
+                                // parameter
+                                generateInstruction(IST_Push, 0, exprBackup->stackOffset, 0);
                                 if (getError())
                                     return 0;
 
-                                if (currentStackPos > currentContext->maxStackCount)
-                                    currentContext->maxStackCount = currentStackPos;
-
-                                generateCall(nextTerm->token, 1, currentStackPos + 1);
+                                generateCall(nextTerm->token, 1);
                                 if (getError())
                                     return 0;
 
@@ -472,7 +474,7 @@ uint32_t expr()
     uint8_t endOfInput = 0;
     const Token *currentToken = NULL;
     vectorClearExprToken(exprVector);
-    currentStackPos = 2 + currentContext->localVariableCount; // 2 stands for stack pointer and instruction pointer
+    currentStackPos = currentContext->exprStart;
 
     while (1) {
         if (!endOfInput) {
