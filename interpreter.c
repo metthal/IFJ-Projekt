@@ -42,6 +42,12 @@ void interpret(const Instruction *firstInstruction, const Vector *constTable, co
                 copyValue(aVal, resVal);
                 break;
 
+            case IST_MovC:
+                resVal = vectorAt(stack, stackPtr + instructionPtr->res);
+                aVal = vectorAt(constTable, instructionPtr->a);
+                copyValue(aVal, resVal);
+                break;
+
             case IST_Jmp:
                 instructionPtr += instructionPtr->a;
                 continue;

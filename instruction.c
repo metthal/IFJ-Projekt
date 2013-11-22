@@ -64,7 +64,7 @@ void processDefaultArg(Context *context, uint32_t *paramCount, uint32_t lastPara
     }
 }
 
-void generateCall(const Token *id, uint32_t paramCount)
+void generateCall(const Token *id, uint32_t paramCount, uint32_t lastParamIdx)
 {
     Instruction inst;
     initInstruction(&inst);
@@ -162,7 +162,7 @@ void generateCall(const Token *id, uint32_t paramCount)
         // Test for too many arguments
         if (symbol->data->func.context.argumentCount >= paramCount) {
             // Default parameters
-            processDefaultArg(&(symbol->data->func.context), &paramCount);
+            processDefaultArg(&(symbol->data->func.context), &paramCount, lastParamIdx);
 
             // Test for too few arguments
             if (symbol->data->func.context.argumentCount == paramCount) {

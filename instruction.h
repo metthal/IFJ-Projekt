@@ -45,6 +45,7 @@ typedef enum
 {
     IST_Noop = 0,    //!< IST_Noop
     IST_Mov,         //!< IST_Mov
+    IST_MovC,        //!< IST_MovC
     IST_Jmp,         //!< IST_Jmp
     IST_Jmpz,        //!< IST_Jmpz
     IST_Push,        //!< IST_Push
@@ -100,7 +101,7 @@ void freeInstruction(Instruction **ppt);
 
 void copyInstruction(const Instruction *src, Instruction *dest);
 
-void generateCall(const Token *id, uint32_t paramCount);
+void generateCall(const Token *id, uint32_t paramCount, uint32_t lastParamIdx);
 
 void generateInstruction(InstructionCode code, int32_t res, int32_t a, int32_t b);
 

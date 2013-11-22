@@ -16,7 +16,7 @@ typedef struct
     union
     {
         Token *token;
-        uint32_t stackOffset;
+        int64_t stackOffset;
     };
     uint8_t type;
 } ExprToken;
