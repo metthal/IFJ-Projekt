@@ -52,6 +52,9 @@ static Vector *toBeModifiedIST = NULL;
 static Context mainContext;
 Context *currentContext;
 
+// Space reserved at stack frame for Stack and Instruction Pointers
+static const uint32_t stackFrameReserved = 2;
+
 static uint8_t secondRun = 0;
 static uint8_t cycleScope = 0;
 
@@ -69,6 +72,8 @@ void parse(Vector* tokenVector)
     initContext(&mainContext);
 
     if (!getError()) {
+        // Initialize exprStart in case of no local variables
+        mainContext.exprStart = stackFrameReserved;
         currentContext = &mainContext;
         secondRun = 0;
         prog();
@@ -291,8 +296,13 @@ void func()
         InstructionPtr* cipvi =
                 vectorAt(addressTable, symbol->data->func.functionAddressIndex);
         (*cipvi) = (InstructionPtr)((size_t)vectorSize(functionsInstructions));
-        // Reserve stack space for locals
+
+        // Instruction to reserve stack space for locals
         generateInstruction(IST_Reserve, 0, currentContext->exprStart, 0);
+    }
+    else {
+        // Initialize exprStart in case of no local variables
+        currentContext->exprStart = stackFrameReserved;
     }
 
     stmtListBracketed();
@@ -1065,9 +1075,6 @@ void assignment(ConstTokenVectorIterator varid, uint8_t skip)
 // If already present, returns the existing symbol.
 Symbol* addLocalVariable(ConstTokenVectorIterator varid)
 {
-    // Space reserved at stack frame for Stack and Instruction Pointers
-    uint32_t reserved = 2;
-
     Symbol *symbol = symbolTableAdd(currentContext->localTable, &(varid->str));
     if (getError())
         return NULL;
@@ -1077,9 +1084,9 @@ Symbol* addLocalVariable(ConstTokenVectorIterator varid)
     else {
         symbol->type = ST_Variable;
         symbol->data = (SymbolData*)newVariable();
-        symbol->data->var.relativeIndex = reserved + currentContext->localVariableCount;
+        symbol->data->var.relativeIndex = stackFrameReserved + currentContext->localVariableCount;
         currentContext->localVariableCount++;
-        currentContext->exprStart = reserved + currentContext->localVariableCount;
+        currentContext->exprStart = stackFrameReserved + currentContext->localVariableCount;
     }
 
     return symbol;
