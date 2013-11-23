@@ -59,9 +59,8 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
             case IST_Reserve:
 		aVal = vectorAt(stack,instructionPtr->a);
-                for (int counter=0;counter<aVal;counter++){
-		    vectorPushValue(stack,vectorAt(stack, instructionPtr->b));	// ivo spytat sa
-		    }
+                for (int32_t i = 0; i < instructionPtr->a; i++)
+		    vectorPushDefaultValue(stack);
                 break;
 
             case IST_Pop:
@@ -306,15 +305,181 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 break;
 
             case IST_Equal:
+                aVal = vectorAt(stack, stackPtr + instructionPtr->a);
+                bVal = vectorAt(stack, stackPtr + instructionPtr->b);
+                resVal = vectorAt(stack, stackPtr + instructionPtr->res);
+                if (aVal->type == bVal->type ) {
+                    if (aVal->type == VT_Integer && (aVal->data.i == bVal->data.i)) {
+                        resVal->type = VT_Bool;
+                        resVal->data.b = 1;
+                    }
+                    else if (aVal->type == VT_Double && (aVal->data.d == bVal->data.d)) {
+                        resVal->type = VT_Bool;
+                        resVal->data.b = 1;
+                    }
+                    else if (aVal->type == VT_String && !stringCompare(&aVal->data.s,&bVal->data.s)) {
+                        resVal->type = VT_Bool;
+                        resVal->data.b = 1;
+                    }
+                    else if (aVal->type == VT_Bool && (aVal->data.b == bVal->data.b)) {
+                        resVal->type = VT_Bool;
+                        resVal->data.b = 1;
+                    }
+                }
+                else {
+                    resVal->type = VT_Bool;
+                    resVal->data.b = 0;
+                }
 
                 break;
 
             case IST_NotEqual:
+                aVal = vectorAt(stack, stackPtr + instructionPtr->a);
+                bVal = vectorAt(stack, stackPtr + instructionPtr->b);
+                resVal = vectorAt(stack, stackPtr + instructionPtr->res);
+                if (aVal->type == bVal->type ) {
+                    if (aVal->type == VT_Integer && (aVal->data.i != bVal->data.i)) {
+			resVal->type = VT_Bool;
+                        resVal->data.b = 1;
+		    }
+                    else if (aVal->type == VT_Double && (aVal->data.d != bVal->data.d)) {
+			resVal->type = VT_Bool;
+                        resVal->data.b = 1;
+		    }
+                    else if (aVal->type == VT_String && (stringCompare(&aVal->data.s, &bVal->data.s) != 0)) {
+		        resVal->type = VT_Bool;
+                        resVal->data.b = 1;
+		    }
+                    else if (aVal->type == VT_Bool && (aVal->data.b != bVal->data.b)) {
+			resVal->type = VT_Bool;
+                        resVal->data.b = 1;
+		    }
+                }
+                else {
+		    resVal->type = VT_Bool;
+                    resVal->data.b = 0;
+		}
 
                 break;
 
             case IST_Less:
+                aVal = vectorAt(stack, stackPtr + instructionPtr->a);
+                bVal = vectorAt(stack, stackPtr + instructionPtr->b);
+                resVal = vectorAt(stack, stackPtr + instructionPtr->res);
+                if (aVal->type == bVal->type ) {
+                    if (aVal->type == VT_Integer && (aVal->data.i < bVal->data.i)) {
+                        resVal->type = VT_Bool;
+                        resVal->data.b = 1;
+                    }
+                    else if (aVal->type == VT_Double && (aVal->data.d < bVal->data.d)) {
+                        resVal->type = VT_Bool;
+                        resVal->data.b = 1;
+                    }
+                    else if (aVal->type == VT_String && (stringCompare(&aVal->data.s, &bVal->data.s) == -1)) {
+                        resVal->type = VT_Bool;
+                        resVal->data.b = 1;
+                    }
+                    else if (aVal->type == VT_Bool && (aVal->data.b < bVal->data.b)) {
+                        resVal->type = VT_Bool;
+                        resVal->data.b = 1;
+                    }
+                }
+                else {
+                    resVal->type = VT_Bool;
+                    resVal->data.b = 0;
+                }
+                break;
 
+	   case IST_LessEq:
+                aVal = vectorAt(stack, stackPtr + instructionPtr->a);
+                bVal = vectorAt(stack, stackPtr + instructionPtr->b);
+                resVal = vectorAt(stack, stackPtr + instructionPtr->res);
+                if (aVal->type == bVal->type ) {
+                    if (aVal->type == VT_Integer && (aVal->data.i <= bVal->data.i)) {
+                        resVal->type = VT_Bool;
+                        resVal->data.b = 1;
+                    }
+                    else if (aVal->type == VT_Double && (aVal->data.d <= bVal->data.d)) {
+                        resVal->type = VT_Bool;
+                        resVal->data.b = 1;
+                    }
+                    else if (aVal->type == VT_String && (stringCompare(&aVal->data.s, &bVal->data.s) == -1) && (stringCompare(&aVal->data.s, &bVal->data.s) == 0)) {
+                        resVal->type = VT_Bool;
+                        resVal->data.b = 1;
+                    }
+                    else if (aVal->type == VT_Bool && (aVal->data.b <= bVal->data.b)) {
+                        resVal->type = VT_Bool;
+                        resVal->data.b = 1;
+                    }
+                    else if (aVal->type == VT_Null) {
+                        resVal->type = VT_Bool;
+                        resVal->data.b = 1;
+                    }
+                }
+                else {
+                    resVal->type = VT_Bool;
+                    resVal->data.b = 0;
+                }
+		break;
+
+		case IST_Greater:
+                aVal = vectorAt(stack, stackPtr + instructionPtr->a);
+                bVal = vectorAt(stack, stackPtr + instructionPtr->b);
+                resVal = vectorAt(stack, stackPtr + instructionPtr->res);
+                if (aVal->type == bVal->type ) {
+                    if (aVal->type == VT_Integer && (aVal->data.i > bVal->data.i)) {
+                        resVal->type = VT_Bool;
+                        resVal->data.b = 1;
+                    }
+                    else if (aVal->type == VT_Double && (aVal->data.d > bVal->data.d)) {
+                        resVal->type = VT_Bool;
+                        resVal->data.b = 1;
+                    }
+                    else if (aVal->type == VT_String && (stringCompare(&aVal->data.s, &bVal->data.s) == 1)) {
+                        resVal->type = VT_Bool;
+                        resVal->data.b = 1;
+                    }
+                    else if (aVal->type == VT_Bool && (aVal->data.b > bVal->data.b)) {
+                        resVal->type = VT_Bool;
+                        resVal->data.b = 1;
+                    }
+                }
+                else {
+                    resVal->type = VT_Bool;
+                    resVal->data.b = 0;
+                }
+                break;
+
+		case IST_GreaterEq:
+                aVal = vectorAt(stack, stackPtr + instructionPtr->a);
+                bVal = vectorAt(stack, stackPtr + instructionPtr->b);
+                resVal = vectorAt(stack, stackPtr + instructionPtr->res);
+                if (aVal->type == bVal->type ) {
+                    if (aVal->type == VT_Integer && (aVal->data.i >= bVal->data.i)) {
+                        resVal->type = VT_Bool;
+                        resVal->data.b = 1;
+                    }
+                    else if (aVal->type == VT_Double && (aVal->data.d >= bVal->data.d)) {
+                        resVal->type = VT_Bool;
+                        resVal->data.b = 1;
+                    }
+                    else if (aVal->type == VT_String && (stringCompare(&aVal->data.s, &bVal->data.s) == 1) && (stringCompare(&aVal->data.s, &bVal->data.s) == 0)) {
+                        resVal->type = VT_Bool;
+                        resVal->data.b = 1;
+                    }
+                    else if (aVal->type == VT_Bool && (aVal->data.b >= bVal->data.b)) {
+                        resVal->type = VT_Bool;
+                        resVal->data.b = 1;
+                    }
+                    else if (aVal->type == VT_Null) {
+                        resVal->type = VT_Bool;
+                        resVal->data.b = 1;
+                    }
+                }
+                else {
+                    resVal->type = VT_Bool;
+                    resVal->data.b = 0;
+                }
                 break;
 
             default:
