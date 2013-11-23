@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdarg.h>
+#include <assert.h>
 
 typedef void (*TestEP)();
 

@@ -44,9 +44,9 @@ SymbolTable *globalSymbolTable = NULL;
 
 Vector *instructions = NULL;
 Vector *constantsTable = NULL;
-static Vector *addressTable = NULL;
-static Vector *mainInstructions = NULL;
-static Vector *functionsInstructions = NULL;
+Vector *addressTable = NULL;
+Vector *mainInstructions = NULL;
+Vector *functionsInstructions = NULL;
 static Vector *toBeModifiedIST = NULL;
 
 static Context mainContext;
@@ -61,7 +61,7 @@ static uint8_t cycleScope = 0;
 // TODO Test all jumping - if, elseif, else, for, while, break, continue...
 // TODO ptr1 in cycles might be called loop, ptr2 endJump
 
-void parse(Vector* tokenVector)
+void parse(Vector *tokenVector, uint8_t testRun)
 {
     tokens = tokenVector;
     tokensIt = vectorBeginToken(tokenVector);
@@ -123,13 +123,15 @@ void parse(Vector* tokenVector)
         }
     }
 
-    interpret(vectorBeginInstruction(mainInstructions), constantsTable, addressTable);
+    if (!testRun) {
+        interpret(vectorBeginInstruction(mainInstructions), constantsTable, addressTable);
 
-    // Cleanup after interpretation
-    freeValueVector(&constantsTable);
-    freeInstructionPtrVector(&addressTable);
-    freeInstructionVector(&mainInstructions);
-    freeInstructionVector(&functionsInstructions);
+        // Cleanup after interpretation
+        freeValueVector(&constantsTable);
+        freeInstructionPtrVector(&addressTable);
+        freeInstructionVector(&mainInstructions);
+        freeInstructionVector(&functionsInstructions);
+    }
 }
 
 void prog()

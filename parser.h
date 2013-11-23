@@ -3,6 +3,6 @@
 
 #include "vector.h"
 
-void parse(Vector* tokenVector);
+void parse(Vector* tokenVector, uint8_t testRun);
 
 #endif

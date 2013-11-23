@@ -5,7 +5,7 @@
 
 uint8_t processParams(int32_t argc, char **argv, Vector** tokenVector)
 {
-    if (argc != 2){
+    if (argc != 2) {
         *tokenVector = NULL;
         return 1;
     }
@@ -25,7 +25,7 @@ int main(int argc, char **argv)
     if(getError())
         return getRcFromError();
 
-    parse(tokenVector);
+    parse(tokenVector, 0);
 
     return getRcFromError();
 }
