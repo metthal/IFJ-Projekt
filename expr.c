@@ -190,7 +190,6 @@ uint8_t reduceMultiparamFunc(uint32_t stackPos, uint32_t *paramCount)
         if (second->type == Terminal && second->token->type == STT_Comma) { // we got ,E,E..), enter recursion
             if (!reduceMultiparamFunc(stackPos - 2, paramCount))
                 return 0;
-printf(",E");
         }
         else if (second->type == Terminal && second->token->type == STT_LeftBracket) { // got (E,..,E), expect id
             if (stackPos < 2)
@@ -202,7 +201,6 @@ printf(",E");
 
             if (id->token->type != STT_Identifier)
                 return 0;
-printf("func(E");
         }
     }
 
@@ -264,29 +262,6 @@ uint8_t reduce(ExprToken *topTerm)
         case STT_Divide:
         case STT_Dot:
         case STT_Plus: {
-if (topTerm->token->type == STT_Plus)
-    puts("Rule: E -> E + E");
-else if (topTerm->token->type == STT_Dot)
-    puts("Rule: E -> E . E");
-else if (topTerm->token->type == STT_Divide)
-    puts("Rule: E -> E / E");
-else if (topTerm->token->type == STT_Multiply)
-    puts("Rule: E -> E * E");
-else if (topTerm->token->type == STT_Minus)
-    puts("Rule: E -> E - E");
-else if (topTerm->token->type == STT_Equal)
-    puts("Rule: E -> E === E");
-else if (topTerm->token->type == STT_NotEqual)
-    puts("Rule: E -> E !== E");
-else if (topTerm->token->type == STT_Less)
-    puts("Rule: E -> E < E");
-else if (topTerm->token->type == STT_Greater)
-    puts("Rule: E -> E > E");
-else if (topTerm->token->type == STT_LessEqual)
-    puts("Rule: E -> E <= E");
-else if (topTerm->token->type == STT_GreaterEqual)
-    puts("Rule: E -> E >= E");
-
             uint32_t stackSize = vectorSize(exprVector);
             if (stackSize < 3) {
                 setError(ERR_Syntax);
@@ -331,7 +306,6 @@ else if (topTerm->token->type == STT_GreaterEqual)
                 nextTerm = vectorAt(exprVector, stackSize - 2);
 
                 if (nextTerm->type == Terminal && nextTerm->token->type == STT_LeftBracket) { // it's function if there is ()
-puts("Rule: E -> func()");
                     nextTerm = vectorAt(exprVector, stackSize - 3);
 
                     if (nextTerm->type == Terminal && nextTerm->token->type == STT_Identifier) {
@@ -358,7 +332,6 @@ puts("Rule: E -> func()");
                             return 0;
                         }
 
-printf("Rule: E -> ");
                         uint32_t retValStackPos = currentStackPos++;
                         generateInstruction(IST_Reserve, 0, 1, 0);
                         if (getError())
@@ -379,7 +352,6 @@ printf("Rule: E -> ");
 
                         nextTerm->type = NonTerminal;
                         nextTerm->stackOffset = retValStackPos;
-puts(")");
                     }
                     else if (nextTerm->type == Terminal && nextTerm->token->type == STT_LeftBracket) { // it's (E) and we don't know if it is single param func or just (E)
                         if (stackSize >= 4) {
@@ -387,7 +359,6 @@ puts(")");
                             nextTerm = vectorAt(exprVector, stackSize - 4);
 
                             if (nextTerm->type == Terminal && nextTerm->token->type == STT_Identifier) { // we have id(E) and it's function
-puts("Rule: E -> func(E)");
                                 // return value
                                 uint32_t retValStackPos = currentStackPos++;
                                 generateInstruction(IST_Reserve, 0, 1, 0);
@@ -406,14 +377,12 @@ puts("Rule: E -> func(E)");
                                 vectorPopNExprToken(exprVector, 3);
                             }
                             else { // it's just (E)
-puts("Rule: E -> (E)");
                                 leftBracketBackup->type = NonTerminal;
                                 leftBracketBackup->stackOffset = exprBackup->stackOffset;
                                 vectorPopNExprToken(exprVector, 2);
                             }
                         }
                         else { // it can only be (E) if we have just 3 items on the stack
-puts("Rule: E -> (E)");
                             nextTerm->type = NonTerminal;
                             nextTerm->stackOffset = exprBackup->stackOffset;
                             vectorPopNExprToken(exprVector, 2);

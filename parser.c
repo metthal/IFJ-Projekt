@@ -139,7 +139,6 @@ void prog()
     switch (tokensIt->type) {
         case STT_Php:
             // Rule 1
-            printf("%s\n", "Rule 1");
             tokensIt++;
 
             if (secondRun) {
@@ -164,7 +163,6 @@ void body()
     switch (tokensIt->type) {
         case STT_EOF:
             // Rule 4
-            printf("%s\n", "Rule 4");
             if (secondRun) {
                 generateInstruction(IST_Nullify, 0, -1, 0);
                 generateInstruction(IST_Return, 0, 0, 0);
@@ -173,7 +171,6 @@ void body()
 
         case STT_Variable:
             // Rule 2
-            printf("%s\n", "Rule 2");
             stmt();
             if (getError())
                 return;
@@ -188,7 +185,6 @@ void body()
             switch (tokensIt->keywordType) {
                 case KTT_Function:
                     // Rule 3
-                    printf("%s\n", "Rule 3");
                     func();
                     if (getError())
                         return;
@@ -206,7 +202,6 @@ void body()
                 case KTT_While:
                 case KTT_For:
                     // Rule 2
-                    printf("%s\n", "Rule 2");
                     stmt();
                     if (getError())
                         return;
@@ -327,12 +322,10 @@ void stmtList()
     switch (tokensIt->type) {
         case STT_RightCurlyBracket:
             // Rule 6
-            printf("%s\n", "Rule 6");
             break;
 
         case STT_Variable:
             // Rule 7
-            printf("%s\n", "Rule 7");
             stmt();
             if (getError())
                 return;
@@ -352,7 +345,6 @@ void stmtList()
                 case KTT_While:
                 case KTT_For:
                     // Rule 7
-                    printf("%s\n", "Rule 7");
                     stmt();
                     if (getError())
                         return;
@@ -378,8 +370,6 @@ void stmt()
     switch (tokensIt->type) {
         case STT_Variable: {
             // Rule 8
-            printf("%s\n", "Rule 8");
-
             ConstTokenVectorIterator varid = tokensIt;
 
             tokensIt++;
@@ -403,7 +393,6 @@ void stmt()
             switch (tokensIt->keywordType) {
                 case KTT_Return:
                     // Rule 9
-                    printf("%s\n", "Rule 9");
                     tokensIt++;
 
                     uint32_t exprRes = generalExpr(0);
@@ -428,7 +417,6 @@ void stmt()
 
                 case KTT_Break:
                     // Rule 10
-                    printf("%s\n", "Rule 10");
                     tokensIt++;
 
                     if (!cycleScope) {
@@ -452,7 +440,6 @@ void stmt()
 
                 case KTT_Continue:
                     // Rule 11
-                    printf("%s\n", "Rule 11");
                     tokensIt++;
 
                     if (!cycleScope) {
@@ -476,7 +463,6 @@ void stmt()
 
                 case KTT_If: {
                     // Rule 12
-                    printf("%s\n", "Rule 12");
                     tokensIt++;
 
                     uint32_t cond = condition();
@@ -512,7 +498,6 @@ void stmt()
 
                 case KTT_While: {
                     // Rule 13 (almost same as Rule 12, missing just elseif call)
-                    printf("%s\n", "Rule 13");
                     tokensIt++;
 
                     uint32_t ptr1 = 0, ptr2 = 0;
@@ -546,7 +531,6 @@ void stmt()
 
                 case KTT_For: {
                     // Rule 14
-                    printf("%s\n", "Rule 14");
                     tokensIt++;
 
                     if (tokensIt->type != STT_LeftBracket) {
@@ -677,8 +661,6 @@ uint8_t elseifStmt()
         case STT_Variable:
         case STT_RightCurlyBracket:
             // Rule 15
-            printf("%s\n", "Rule 15");
-
             return elseStmt();
 
         case STT_Keyword:
@@ -692,13 +674,10 @@ uint8_t elseifStmt()
                 case KTT_While:
                 case KTT_For:
                     // Rule 15
-                    printf("%s\n", "Rule 15");
-
                     return elseStmt();
 
                 case KTT_Elseif:
                     // Rule 16 (almost same as Rule 12)
-                    printf("%s\n", "Rule 16");
                     tokensIt++;
 
                     uint32_t ptr1 = 0, ptr2 = 0;
@@ -761,7 +740,6 @@ uint8_t elseStmt()
         case STT_Variable:
         case STT_RightCurlyBracket:
             // Rule 17
-            printf("%s\n", "Rule 17");
             break;
 
         case STT_Keyword:
@@ -774,13 +752,10 @@ uint8_t elseStmt()
                 case KTT_While:
                 case KTT_For:
                     // Rule 17
-                    printf("%s\n", "Rule 17");
                     break;
 
                 case KTT_Else:
                     // Rule 18
-                    printf("%s\n", "Rule 18");
-
                     uint32_t ptr1 = 0;
                     if (secondRun) {
                         // Reserves space for instruction that jumps
@@ -817,13 +792,10 @@ void paramList()
     switch (tokensIt->type) {
         case STT_RightBracket:
             // Rule 19
-            printf("%s\n", "Rule 19");
             break;
 
         case STT_Variable:
             // Rule 20
-            printf("%s\n", "Rule 20");
-
             ConstTokenVectorIterator varid = tokensIt;
             uint8_t defarg = 0;
 
@@ -856,12 +828,10 @@ void nparamList(uint8_t defarg)
     switch (tokensIt->type) {
         case STT_RightBracket:
             // Rule 21
-            printf("%s\n", "Rule 21");
             break;
 
         case STT_Comma:
             // Rule 22
-            printf("%s\n", "Rule 22");
             tokensIt++;
 
             if (tokensIt->type != STT_Variable) {
@@ -908,13 +878,10 @@ void forStmt1(uint8_t skip)
         case STT_RightBracket:
         case STT_Semicolon:
             // Rule 23
-            printf("%s\n", "Rule 23");
             break;
 
         case STT_Variable:
             // Rule 24 (almost same as the rule 8, missing just semicolon)
-            printf("%s\n", "Rule 24");
-
             ConstTokenVectorIterator varid = tokensIt;
 
             tokensIt++;
@@ -935,12 +902,10 @@ uint8_t forStmt2(uint32_t *cond)
     switch (tokensIt->type) {
         case STT_Semicolon:
             // Rule 25
-            printf("%s\n", "Rule 25");
             break;
 
         default:
-            printf("%s\n", "Rule 26");
-
+            // Rule 26
             *cond = generalExpr(0);
             if(getError())
                 break;
