@@ -19,7 +19,7 @@ void deleteSymbolEntry(SymbolEntry *se)
     return;
 }
 
-void copySymbolEntry(SymbolEntry *src, SymbolEntry *dest)
+void copySymbolEntry(const SymbolEntry *src, SymbolEntry *dest)
 {
     dest->hash = src->hash;
     dest->next = src->next;
@@ -260,7 +260,7 @@ static inline uint32_t _stringSubstrSearchSSO(const char *haystack, uint32_t hay
     return result;
 }
 
-uint32_t stringSubstrSearch(String *haystack, String *needle)
+uint32_t stringSubstrSearch(const String *haystack, const String *needle)
 {
     return _stringSubstrSearchSSO(haystack->data, haystack->length - 1, needle->data, needle->length - 1, 0);
 }
@@ -330,7 +330,7 @@ void stringCharSortDivide(char arr[], char temp[], uint32_t length)
     stringCharSortMerge(arr, temp, length);
 }
 
-void stringCharSort(String *s)
+void stringCharSort(const String *s)
 {
     char *temp = malloc(sizeof(char) * (s->length - 1));
     if (!temp) {

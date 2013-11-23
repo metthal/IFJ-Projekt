@@ -126,7 +126,7 @@ String* stringClone(String *ps)
     return nps;
 }
 
-String* stringSubstr(String *ps, uint32_t offset, uint32_t length)
+String* stringSubstr(const String *ps, uint32_t offset, uint32_t length)
 {
     String *nps = newStringSize(ps->size);
     if (nps != NULL) {

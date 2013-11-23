@@ -58,14 +58,15 @@ typedef struct {
 
 void initValue(Value *value);
 void deleteValue(Value *value);
-void copyValue(Value *src, Value *dest);
+void copyValue(const Value *src, Value *dest);
 
 /// Value must be in initialized state
 void tokenToValue(const Token *src, Value *dest);
 
 void initSymbol(Symbol *symbol);
 void deleteSymbol(Symbol *symbol);
-void copySymbol(Symbol *src, Symbol *dest);
+void copySymbol(const Symbol *src, Symbol *dest);
+void copySymbolData(const SymbolData *src, SymbolData *dest);
 
 Variable* newVariable();
 void freeVariable(Variable **ppt);

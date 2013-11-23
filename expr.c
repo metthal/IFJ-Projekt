@@ -94,7 +94,7 @@ void deinitExpr()
  **/
 ExprToken* findTopmostTerminal()
 {
-    ConstExprTokenVectorIterator itr = vectorEndExprToken(exprVector);
+    ExprTokenVectorIterator itr = vectorEndExprToken(exprVector);
 
     while (itr != vectorBeginExprToken(exprVector)) {
         itr--;
@@ -525,4 +525,5 @@ uint32_t expr()
         if (!endOfInput)
             tokensIt++;
     }
+    return 0;
 }

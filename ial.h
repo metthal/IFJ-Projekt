@@ -17,7 +17,7 @@ typedef struct {
 // TODO ak ich tu nechces mat, sprav novu hlavicku a zdrojak..
 void initSymbolEntry(SymbolEntry *se);
 void deleteSymbolEntry(SymbolEntry *se);
-void copySymbolEntry(SymbolEntry *src, SymbolEntry *dest);
+void copySymbolEntry(const SymbolEntry *src, SymbolEntry *dest);
 
 static uint16_t const SYMBOL_TABLE_DEFAULT_SIZE = 128;
 
@@ -37,13 +37,13 @@ void deleteSymbolTable(SymbolTable *st);
 Symbol* symbolTableFind(SymbolTable *st, const String *key);
 Symbol* symbolTableAdd(SymbolTable *st, const String *key);
 
-uint32_t stringSubstrSearch(String *haystack, String *needle);
+uint32_t stringSubstrSearch(const String *haystack, const String *needle);
 uint32_t stringSubstrSearchO(String *haystack, String *needle, uint32_t offset);
 uint32_t stringSubstrSearchS(String *haystack, const char *needle, uint32_t needleLen);
 uint32_t stringSubstrSearchSO(String *haystack, const char *needle, uint32_t needleLen, uint32_t offset);
 uint32_t stringSubstrSearchSS(const char *haystack, uint32_t haystackLen, const char *needle, uint32_t needleLen);
 uint32_t stringSubstrSearchSSO(const char *haystack, uint32_t haystackLen, const char *needle, uint32_t needleLen, uint32_t offset);
 
-void stringCharSort(String *s);
+void stringCharSort(const String *s);
 
 #endif

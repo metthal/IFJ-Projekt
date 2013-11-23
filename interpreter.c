@@ -28,8 +28,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
             case IST_MovC:
                 resVal = vectorAt(stack, stackPtr + instructionPtr->res);
-                aVal = vectorAt(constTable, instructionPtr->a);
-                copyValue(aVal, resVal);
+                copyValue(vectorAtConst(constTable, instructionPtr->a), resVal);
                 break;
 
             case IST_Jmp:
@@ -100,14 +99,13 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
             case IST_Return:
                 // Load old instruction pointer
                 aVal = vectorAt(stack, stackPtr + 1);
-                if (aVal->data.ip != NULL) {
-                    instructionPtr = aVal->data.ip;
-
-                }
-                else {
+                if (aVal->type == VT_Null) {
                     // End interpretation
                     running = 0;
+                    return;
                 }
+                else
+                    instructionPtr = aVal->data.ip;
 
                 // Load old stack pointer
                 aVal = vectorAt(stack, stackPtr);
@@ -160,7 +158,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 aVal = vectorAt(stack, stackPtr - 2);
                 int start = valueToInt(aVal);
 
-                if (getError)
+                if (getError())
                     return;
 
                 aVal = vectorAt(stack, stackPtr - 3);
@@ -498,21 +496,8 @@ void interpret(const Instruction *firstInstruction, const Vector *constTable, co
 {
     Vector *stack = newValueVector();
 
-    // Create global stack frame
-    {
-        // Reserve space for return value
-        vectorPushDefaultValue(stack);
-        // Null old stack pointer
-        vectorPushDefaultValue(stack);
-        Value *tmp = vectorBack(stack);
-        tmp->type = VT_InstructionPtr;
-        tmp->data.ip = NULL;
-        // Null old instruction pointer
-        vectorPushDefaultValue(stack);
-        tmp = vectorBack(stack);
-        tmp->type = VT_StackPtr;
-        tmp->data.sp = 0;
-    }
+    // Reserve space for global return value
+    vectorPushDefaultValue(stack);
 
     interpretationLoop(firstInstruction, constTable, addressTable, stack);
 

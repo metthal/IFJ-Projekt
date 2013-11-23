@@ -14,7 +14,7 @@ void deleteValue(Value *value)
         deleteString(&(value->data.s));
 }
 
-void copyValue(Value *src, Value *dest)
+void copyValue(const Value *src, Value *dest)
 {
     dest->type = src->type;
     switch(src->type) {
@@ -78,10 +78,20 @@ void deleteSymbol(Symbol *symbol)
         freeVariable((Variable**)&symbol->data);
 }
 
-void copySymbol(Symbol *src, Symbol *dest)
+void copySymbol(const Symbol *src, Symbol *dest)
 {
-    // TODO make this shit!
-    while(1);
+    copySymbolData(src->data, dest->data);
+    dest->type = src->type;
+    // Association with string in Token
+    dest->key = src->key;
+}
+
+void copySymbolData(const SymbolData *src, SymbolData *dest)
+{
+    if (src != NULL && dest != NULL) {
+        // Unsupported operation
+        setError(ERR_Internal);
+    }
 }
 
 Variable* newVariable()

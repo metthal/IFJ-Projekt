@@ -138,6 +138,9 @@ void prog()
             if (secondRun) {
                 // First instruction should reserve space on stack
                 generateInstruction(IST_Reserve, 0, currentContext->exprStart, 0);
+                // Nullify pointers to mark program end
+                generateInstruction(IST_Nullify, 0, 0, 0);
+                generateInstruction(IST_Nullify, 0, 1, 0);
             }
 
             body();

@@ -30,7 +30,7 @@ void freeString(String **pps);
 
 char* stringResize(String *ps, uint32_t size);
 String* stringClone(String *ps);
-String* stringSubstr(String *ps, uint32_t offset, uint32_t length);
+String* stringSubstr(const String *ps, uint32_t offset, uint32_t length);
 
 void stringEmpty(String *ps);
 void stringPush(String *ps, char c);
