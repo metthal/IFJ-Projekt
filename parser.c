@@ -754,7 +754,7 @@ uint8_t elseStmt()
                     // Rule 17
                     break;
 
-                case KTT_Else:
+                case KTT_Else: {
                     // Rule 18
                     uint32_t ptr1 = 0;
                     if (secondRun) {
@@ -775,7 +775,7 @@ uint8_t elseStmt()
                     }
 
                     return 1;
-
+                }
                 default:
                     setError(ERR_Syntax);
             }
@@ -794,7 +794,7 @@ void paramList()
             // Rule 19
             break;
 
-        case STT_Variable:
+        case STT_Variable: {
             // Rule 20
             ConstTokenVectorIterator varid = tokensIt;
             uint8_t defarg = 0;
@@ -817,7 +817,7 @@ void paramList()
             }
 
             break;
-
+        }
         default:
             setError(ERR_Syntax);
     }
@@ -880,7 +880,7 @@ void forStmt1(uint8_t skip)
             // Rule 23
             break;
 
-        case STT_Variable:
+        case STT_Variable: {
             // Rule 24 (almost same as the rule 8, missing just semicolon)
             ConstTokenVectorIterator varid = tokensIt;
 
@@ -891,7 +891,7 @@ void forStmt1(uint8_t skip)
                 return;
 
             break;
-
+        }
         default:
             setError(ERR_Syntax);
     }
