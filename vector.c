@@ -8,7 +8,12 @@ void vectorReserve(Vector *vec, uint32_t capacity)
     if (capacity <= vec->capacity)
         return;
 
-    void *tmp = realloc(vec->data, vec->itemSize * capacity);
+    void *tmp;
+
+    if (vec->capacity > 0)
+        tmp = realloc(vec->data, vec->itemSize * capacity);
+    else
+        tmp = malloc(vec->itemSize * capacity);
 
     if (tmp == NULL) {
         setError(ERR_Allocation);
@@ -22,15 +27,22 @@ void vectorReserve(Vector *vec, uint32_t capacity)
 
 void vectorShrinkToFit(Vector *vec)
 {
-    void *tmp = realloc(vec->data, vec->itemSize * vec->size);
-    if (tmp == NULL) {
-        setError(ERR_Allocation);
-        return;
+    if (vec->size == 0) {
+        free(vec->data);
+        vec->end = vec->data = NULL;
+        vec->capacity = 0;
     }
+    else {
+        void *tmp = realloc(vec->data, vec->itemSize * vec->size);
+        if (tmp == NULL) {
+            setError(ERR_Allocation);
+            return;
+        }
 
-    vec->data = tmp;
-    vec->end = vec->data + vec->size * vec->itemSize;
-    vec->capacity = vec->size;
+        vec->data = tmp;
+        vec->end = vec->data + vec->size * vec->itemSize;
+        vec->capacity = vec->size;
+    }
 }
 
 uint32_t vectorCapacity(Vector *vec)
