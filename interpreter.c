@@ -22,7 +22,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
             case IST_Mov:
                 resVal = vectorAt(stack, stackPtr + instructionPtr->res);
                 aVal = vectorAt(stack, stackPtr + instructionPtr->a);
-                deleteValue(resVal);
+                deleteValue(resVal);    // what is this?
                 copyValue(aVal, resVal);
                 break;
 
@@ -50,7 +50,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 continue;
 
             case IST_Push:
-                // TODO
+                vectorPushValue(stack, vectorAt(stack, instructionPtr->a));
                 break;
 
             case IST_PushC:
@@ -58,7 +58,10 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 break;
 
             case IST_Reserve:
-                // TODO
+		aVal = vectorAt(stack,instructionPtr->a);
+                for (int counter=0;counter<aVal;counter++){
+		    vectorPushValue(stack,vectorAt(stack, instructionPtr->b));	// ivo spytat sa
+		    }
                 break;
 
             case IST_Pop:
@@ -208,6 +211,110 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 strval(aVal, resVal);
                 // Clear parameters
                 vectorPopValue(stack);
+                break;
+            case IST_Add:
+                aVal = vectorAt(stack, stackPtr + instructionPtr->a);
+                bVal = vectorAt(stack, stackPtr + instructionPtr->b);
+                resVal = vectorAt(stack, stackPtr + instructionPtr->res);
+                if ((aVal->type == VT_Integer) && (bVal->type == VT_Integer)) {
+                   resVal->data.i = aVal->data.i + bVal->data.i;
+                   resVal->type = VT_Integer;
+                }
+                else if (aVal->type == VT_Double || bVal->type == VT_Integer) {
+                   resVal->data.d = aVal->data.d + bVal->data.i;
+                   resVal->type = VT_Double;
+                }
+                else if (aVal->type == VT_Integer || bVal->type == VT_Double) {
+                   resVal->data.d = aVal->data.i + bVal->data.d;
+                   resVal->type = VT_Double;
+                }
+                else if (aVal->type == VT_Double || bVal->type == VT_Double) {
+                   resVal->data.d = aVal->data.d + bVal->data.d;
+                   resVal->type = VT_Double;
+                }
+
+                break;
+
+            case IST_Subtract:
+                aVal = vectorAt(stack, stackPtr + instructionPtr->a);
+                bVal = vectorAt(stack, stackPtr + instructionPtr->b);
+                resVal = vectorAt(stack, stackPtr + instructionPtr->res);
+                if ((aVal->type == VT_Integer) && (bVal->type == VT_Integer)) {
+                   resVal->data.i = aVal->data.i - bVal->data.i;
+                   resVal->type = VT_Integer;
+                }
+                else if (aVal->type == VT_Double && bVal->type == VT_Integer) {
+                   resVal->data.d = aVal->data.d - bVal->data.i;
+                   resVal->type = VT_Double;
+                }
+                else if (aVal->type == VT_Integer && bVal->type == VT_Double) {
+                   resVal->data.d = aVal->data.i - bVal->data.d;
+                   resVal->type = VT_Double;
+                }
+                else if (aVal->type == VT_Double && bVal->type == VT_Double) {
+                   resVal->data.d = aVal->data.d - bVal->data.d;
+                   resVal->type = VT_Double;
+                }
+                break;
+
+            case IST_Multiply:
+                aVal = vectorAt(stack, stackPtr + instructionPtr->a);
+                bVal = vectorAt(stack, stackPtr + instructionPtr->b);
+                resVal = vectorAt(stack, stackPtr + instructionPtr->res);
+                if ((aVal->type == VT_Integer) && (bVal->type == VT_Integer)) {
+                   resVal->data.i = aVal->data.i * bVal->data.i;
+                   resVal->type = VT_Integer;
+                }
+                else if (aVal->type == VT_Double && bVal->type == VT_Integer) {
+                   resVal->data.d = aVal->data.d * bVal->data.i;
+                   resVal->type = VT_Double;
+                }
+                else if (aVal->type == VT_Integer && bVal->type == VT_Double) {
+                   resVal->data.d = aVal->data.i * bVal->data.d;
+                   resVal->type = VT_Double;
+                }
+                else if (aVal->type == VT_Double && bVal->type == VT_Double) {
+                   resVal->data.d = aVal->data.d * bVal->data.d;
+                   resVal->type = VT_Double;
+                }
+                break;
+
+            case IST_Divide:
+                aVal = vectorAt(stack, stackPtr + instructionPtr->a);
+                bVal = vectorAt(stack, stackPtr + instructionPtr->b);
+                resVal = vectorAt(stack, stackPtr + instructionPtr->res);
+                if (aVal->type == VT_Double && bVal->type == VT_Integer) {
+                   resVal->data.d = aVal->data.d / bVal->data.i;
+                   resVal->type = VT_Double;
+                }
+                else if (aVal->type == VT_Integer && bVal->type == VT_Double) {
+                   resVal->data.d = aVal->data.i / bVal->data.d;
+                   resVal->type = VT_Double;
+                }
+                else if (aVal->type == VT_Double && bVal->type == VT_Double) {
+                   resVal->data.d = aVal->data.d / bVal->data.d;
+                   resVal->type = VT_Double;
+                }
+                break;
+
+            case IST_Concat:
+                aVal = vectorAt(stack, stackPtr + instructionPtr->a);
+                bVal = vectorAt(stack, stackPtr + instructionPtr->b);
+                resVal = vectorAt(stack, stackPtr + instructionPtr->res);
+                strval(aVal,bVal);
+		copyValue(aVal, resVal);
+                break;
+
+            case IST_Equal:
+
+                break;
+
+            case IST_NotEqual:
+
+                break;
+
+            case IST_Less:
+
                 break;
 
             default:
