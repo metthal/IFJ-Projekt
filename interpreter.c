@@ -64,9 +64,8 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
             case IST_Pop:
                 if (instructionPtr->a == 1)
                     vectorPopValue(stack);
-                else {
-                    // TODO
-                }
+                else 
+                    vectorPopNValue(stack,instructionPtr->a);
                 break;
 
             case IST_ClearExpr:
