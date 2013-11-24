@@ -64,9 +64,8 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
             case IST_Pop:
                 if (instructionPtr->a == 1)
                     vectorPopValue(stack);
-                else {
-                    // TODO
-                }
+                else 
+                    vectorPopNValue(stack,instructionPtr->a);
                 break;
 
             case IST_ClearExpr:
@@ -248,7 +247,8 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                    resVal->data.d = aVal->data.d + bVal->data.d;
                    resVal->type = VT_Double;
                 }
-
+                else
+                    setError(ERR_ISTGenerator);
                 break;
 
             case IST_Subtract:
@@ -271,6 +271,8 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                    resVal->data.d = aVal->data.d - bVal->data.d;
                    resVal->type = VT_Double;
                 }
+                else
+                    setError(ERR_ISTGenerator);
                 break;
 
             case IST_Multiply:
@@ -293,6 +295,8 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                    resVal->data.d = aVal->data.d * bVal->data.d;
                    resVal->type = VT_Double;
                 }
+                else
+                    setError(ERR_ISTGenerator);
                 break;
 
             case IST_Divide:
@@ -311,6 +315,8 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                    resVal->data.d = aVal->data.d / bVal->data.d;
                    resVal->type = VT_Double;
                 }
+                else
+                    setError(ERR_ISTGenerator);
                 break;
 
             case IST_Concat:
