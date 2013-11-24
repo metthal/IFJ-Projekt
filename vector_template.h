@@ -159,11 +159,11 @@ static void TEMPLATE(vectorPopN)(Vector *vec, uint32_t amount)
     if (amount > vec->size)
         amount = vec->size;
 
-    for (uint32_t i = 0; i < amount; ++i) {
-        vec->size--;
-        vec->end -= vec->itemSize;
+    for (uint32_t i = 0; i < amount; ++i)
         DELETE_ITEM(vec->end);
-    }
+
+    vec->size -= amount;
+    vec->end -= amount * vec->itemSize;
 }
 
 /**
