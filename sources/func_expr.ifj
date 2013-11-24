@@ -1,0 +1,12 @@
+<?php
+
+function foo($a = 1, $b = 2, $c = 3, $d = 4) { }
+function bar($a = 1, $b = 2) { }
+function boo($a = 1, $b = 2) { }
+
+$a = foo();
+$b = foo($a + $b);
+$c = foo(bar($a / $b));
+$d = foo(1, 2, 3);
+$e = foo(bar(1, 2), $a + $b, boo($c <= $d, $c !== $d), 17.5);
+$f = foo($a, null);

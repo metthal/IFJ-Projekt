@@ -85,10 +85,11 @@ void testInstructions(Vector *genInstrVector, Vector *expectedInstrVector)
     if (vectorSize(genInstrVector) != vectorSize(expectedInstrVector))
         return;
 
-    for ( ; (itr1 != end1) && (itr2 != end2); ++itr1, ++itr2) {
+    uint32_t count = 0;
+    for ( ; (itr1 != end1) && (itr2 != end2); ++itr1, ++itr2, ++count) {
         if (!INSTRUCTIONS_EQ(itr1, itr2)) {
             // COMMENT OUT THIS LINE IF YOU WANT TO COMPARE INSTRUCTIONS
-            //printf("(Generated/Expected) %d(RES: %d, A: %d, B: %d) / %d(RES: %d, A: %d, B: %d)\n", itr1->code, itr1->res, itr1->a, itr1->b, itr2->code, itr2->res, itr2->a, itr2->b);
+            //printf("(Generated/Expected) (%d) %d(RES: %d, A: %d, B: %d) / %d(RES: %d, A: %d, B: %d)\n", count, itr1->code, itr1->res, itr1->a, itr1->b, itr2->code, itr2->res, itr2->a, itr2->b);
             allOk = 0;
         }
     }
@@ -115,6 +116,8 @@ if (getError())
 /*************************************************************************************
 ************************           TEST AREA               ***************************
 *************************************************************************************/
+uint32_t localVarStart = 0;
+uint32_t exprStart = 0;
 
 // Parser - missing PHP tag
 // input
@@ -131,7 +134,8 @@ TEST_RESULT("missing PHP tag", 0, 0, ERR_Syntax, 0, 0);
 scanSourceFile("sources/empty.ifj");
 
 // expected instructions
-ADD_MAIN_INSTRUCTION(IST_Reserve, 0, 2, 0);
+exprStart = 2;
+ADD_MAIN_INSTRUCTION(IST_Reserve, 0, exprStart, 0);
 ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 0, 0);
 ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 1, 0);
 ADD_MAIN_INSTRUCTION(IST_Nullify, 0, -1, 0);
@@ -145,19 +149,102 @@ TEST_RESULT("empty", 0, 0, ERR_None, 0, 0);
 scanSourceFile("sources/assign.ifj");
 
 // expected instructions
-ADD_MAIN_INSTRUCTION(IST_Reserve, 0, 4, 0);
+localVarStart = 2;
+exprStart = 4;
+ADD_MAIN_INSTRUCTION(IST_Reserve, 0, exprStart, 0);
 ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 0, 0);
 ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 1, 0);
+// $a = 10;
 ADD_MAIN_INSTRUCTION(IST_PushC, 0, 0, 0);
-ADD_MAIN_INSTRUCTION(IST_Mov, 2, 4, 0);
-ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, 4, 0);
-ADD_MAIN_INSTRUCTION(IST_Mov, 3, 2, 0);
-ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, 4, 0);
+ADD_MAIN_INSTRUCTION(IST_Mov, localVarStart + 0, exprStart + 0, 0);
+ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+// $b = $a;
+ADD_MAIN_INSTRUCTION(IST_Mov, localVarStart + 1, localVarStart + 0, 0);
+ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+// end
 ADD_MAIN_INSTRUCTION(IST_Nullify, 0, -1, 0);
 ADD_MAIN_INSTRUCTION(IST_Return, 0, 0, 0);
 
 // run tests
 TEST_RESULT("assign", 0, 0, ERR_None, 1, 0);
+
+// Parser - expressions
+// input
+scanSourceFile("sources/expr.ifj");
+
+// expected instructions
+localVarStart = 2;
+exprStart = localVarStart + 14;
+ADD_MAIN_INSTRUCTION(IST_Reserve, 0, exprStart, 0);
+ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 0, 0);
+ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 1, 0);
+// $a = 10;
+ADD_MAIN_INSTRUCTION(IST_PushC, 0, 0, 0);
+ADD_MAIN_INSTRUCTION(IST_Mov, localVarStart + 0, exprStart + 0, 0);
+ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+// $b = 10.0;
+ADD_MAIN_INSTRUCTION(IST_PushC, 0, 1, 0);
+ADD_MAIN_INSTRUCTION(IST_Mov, localVarStart + 1, exprStart + 0, 0);
+ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+// $c = $a + $b;
+ADD_MAIN_INSTRUCTION(IST_Add, exprStart + 0, localVarStart + 0, localVarStart + 1);
+ADD_MAIN_INSTRUCTION(IST_Mov, localVarStart + 2, exprStart + 0, 0);
+ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+// $d = $a - $b;
+ADD_MAIN_INSTRUCTION(IST_Subtract, exprStart + 0, localVarStart + 0, localVarStart + 1);
+ADD_MAIN_INSTRUCTION(IST_Mov, localVarStart + 3, exprStart + 0, 0);
+ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+// $e = $a * $b;
+ADD_MAIN_INSTRUCTION(IST_Multiply, exprStart + 0, localVarStart + 0, localVarStart + 1);
+ADD_MAIN_INSTRUCTION(IST_Mov, localVarStart + 4, exprStart + 0, 0);
+ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+// $f = $a / $b;
+ADD_MAIN_INSTRUCTION(IST_Divide, exprStart + 0, localVarStart + 0, localVarStart + 1);
+ADD_MAIN_INSTRUCTION(IST_Mov, localVarStart + 5, exprStart + 0, 0);
+ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+// $g = $a === $b;
+ADD_MAIN_INSTRUCTION(IST_Equal, exprStart + 0, localVarStart + 0, localVarStart + 1);
+ADD_MAIN_INSTRUCTION(IST_Mov, localVarStart + 6, exprStart + 0, 0);
+ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+// $h = $a !== $b;
+ADD_MAIN_INSTRUCTION(IST_NotEqual, exprStart + 0, localVarStart + 0, localVarStart + 1);
+ADD_MAIN_INSTRUCTION(IST_Mov, localVarStart + 7, exprStart + 0, 0);
+ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+// $i = $c > $d;
+ADD_MAIN_INSTRUCTION(IST_Greater, exprStart + 0, localVarStart + 2, localVarStart + 3);
+ADD_MAIN_INSTRUCTION(IST_Mov, localVarStart + 8, exprStart + 0, 0);
+ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+// $j = $e < $f;
+ADD_MAIN_INSTRUCTION(IST_Less, exprStart + 0, localVarStart + 4, localVarStart + 5);
+ADD_MAIN_INSTRUCTION(IST_Mov, localVarStart + 9, exprStart + 0, 0);
+ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+// $k = $c >= $d;
+ADD_MAIN_INSTRUCTION(IST_GreaterEq, exprStart + 0, localVarStart + 2, localVarStart + 3);
+ADD_MAIN_INSTRUCTION(IST_Mov, localVarStart + 10, exprStart + 0, 0);
+ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+// $l = $e <= $f;
+ADD_MAIN_INSTRUCTION(IST_LessEq, exprStart + 0, localVarStart + 4, localVarStart + 5);
+ADD_MAIN_INSTRUCTION(IST_Mov, localVarStart + 11, exprStart + 0, 0);
+ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+// $m = (($a + $b) * $a + $b - $c) <= 190;
+ADD_MAIN_INSTRUCTION(IST_Add, exprStart + 0, localVarStart + 0, localVarStart + 1);
+ADD_MAIN_INSTRUCTION(IST_Multiply, exprStart + 1, exprStart + 0, localVarStart + 0);
+ADD_MAIN_INSTRUCTION(IST_Add, exprStart + 2, exprStart + 1, localVarStart + 1);
+ADD_MAIN_INSTRUCTION(IST_Subtract, exprStart + 3, exprStart + 2, localVarStart + 2);
+ADD_MAIN_INSTRUCTION(IST_PushC, 0, 2, 0);
+ADD_MAIN_INSTRUCTION(IST_LessEq, exprStart + 5, exprStart + 3, exprStart + 4);
+ADD_MAIN_INSTRUCTION(IST_Mov, localVarStart + 12, exprStart + 5, 0);
+ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+// $n = $a . $b;
+ADD_MAIN_INSTRUCTION(IST_Concat, exprStart + 0, localVarStart + 0, localVarStart + 1);
+ADD_MAIN_INSTRUCTION(IST_Mov, localVarStart + 13, exprStart + 0, 0);
+ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+// end
+ADD_MAIN_INSTRUCTION(IST_Nullify, 0, -1, 0);
+ADD_MAIN_INSTRUCTION(IST_Return, 0, 0, 0);
+
+// run tests
+TEST_RESULT("expressions", 0, 0, ERR_None, 3, 0);
 
 // HERE PUT ANOTHER TEST
 

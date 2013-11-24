@@ -290,7 +290,7 @@ uint8_t reduce(ExprToken *topTerm)
             if (getError())
                 return 0;
 
-            operand2->stackOffset = currentStackPos++;
+            operand1->stackOffset = currentStackPos++;
             vectorPopNExprToken(exprVector, 2);
             break;
         }
