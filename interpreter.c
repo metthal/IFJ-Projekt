@@ -49,7 +49,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 continue;
 
             case IST_Push:
-                vectorPushValue(stack, vectorAt(stack, instructionPtr->a));
+                vectorPushValue(stack, vectorAt(stack, stackPtr + instructionPtr->a));
                 break;
 
             case IST_PushC:
@@ -57,7 +57,6 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 break;
 
             case IST_Reserve:
-                aVal = vectorAt(stack,instructionPtr->a);
                 for (int32_t i = 0; i < instructionPtr->a; i++)
                     vectorPushDefaultValue(stack);
                 break;
@@ -121,48 +120,57 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 aVal->type = VT_Null;
                 break;
 
-            case IST_BoolVal:
-                aVal = vectorAt(stack, stackPtr - 1);
-                resVal = vectorAt(stack, stackPtr - 2);
+            case IST_BoolVal: {
+                uint32_t simStackPtr = vectorSize(stack);
+                aVal = vectorAt(stack, simStackPtr - 1);
+                resVal = vectorAt(stack, simStackPtr - 2);
                 boolval(aVal, resVal);
                 // Clear parameters
                 vectorPopValue(stack);
                 break;
+            }
 
-            case IST_DoubleVal:
-                aVal = vectorAt(stack, stackPtr - 1);
-                resVal = vectorAt(stack, stackPtr - 2);
+            case IST_DoubleVal: {
+                uint32_t simStackPtr = vectorSize(stack);
+                aVal = vectorAt(stack, simStackPtr - 1);
+                resVal = vectorAt(stack, simStackPtr - 2);
                 doubleval(aVal, resVal);
                 // Clear parameters
                 vectorPopValue(stack);
                 break;
+            }
 
-            case IST_FindString:
-                bVal = vectorAt(stack, stackPtr - 1);
-                aVal = vectorAt(stack, stackPtr - 2);
+            case IST_FindString: {
+                uint32_t simStackPtr = vectorSize(stack);
+                bVal = vectorAt(stack, simStackPtr - 1);
+                aVal = vectorAt(stack, simStackPtr - 2);
                 resVal = vectorAt(stack, stackPtr - 3);
                 findString(resVal, aVal, bVal);
                 // Clear parameters
                 vectorPopNValue(stack, 2);
                 break;
+            }
 
-            case IST_GetString:
-                resVal = vectorAt(stack, stackPtr - 1);
+            case IST_GetString: {
+                uint32_t simStackPtr = vectorSize(stack);
+                resVal = vectorAt(stack, simStackPtr - 1);
                 getString(resVal);
                 break;
+            }
 
             case IST_GetSubstring: {
-                aVal = vectorAt(stack, stackPtr - 1);
+                uint32_t simStackPtr = vectorSize(stack);
+                aVal = vectorAt(stack, simStackPtr - 1);
                 int end = valueToInt(aVal);
 
-                aVal = vectorAt(stack, stackPtr - 2);
+                aVal = vectorAt(stack, simStackPtr - 2);
                 int start = valueToInt(aVal);
 
                 if (getError())
                     return;
 
-                aVal = vectorAt(stack, stackPtr - 3);
-                resVal = vectorAt(stack, stackPtr - 4);
+                aVal = vectorAt(stack, simStackPtr - 3);
+                resVal = vectorAt(stack, simStackPtr - 4);
 
                 getSubstring(aVal, resVal, start, end);
                 // Clear parameters
@@ -170,45 +178,56 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 break;
             }
 
-            case IST_IntVal:
-                aVal = vectorAt(stack, stackPtr - 1);
-                resVal = vectorAt(stack, stackPtr - 2);
+            case IST_IntVal: {
+                uint32_t simStackPtr = vectorSize(stack);
+                aVal = vectorAt(stack, simStackPtr - 1);
+                resVal = vectorAt(stack, simStackPtr - 2);
                 intval(aVal, resVal);
                 // Clear parameters
                 vectorPopValue(stack);
                 break;
+            }
 
-            case IST_PutString:
-                aVal = vectorAt(stack, stackPtr - instructionPtr->a);
-                resVal = vectorAt(stack, stackPtr - instructionPtr->a - 1);
+            case IST_PutString: {
+                uint32_t simStackPtr = vectorSize(stack);
+                aVal = vectorAt(stack, simStackPtr - instructionPtr->a);
+                resVal = vectorAt(stack, simStackPtr - instructionPtr->a - 1);
                 putString(resVal, aVal, instructionPtr->a);
                 // Clear parameters
                 vectorPopNValue(stack, instructionPtr->a);
                 break;
+            }
 
-            case IST_SortString:
-                aVal = vectorAt(stack, stackPtr - 1);
-                resVal = vectorAt(stack, stackPtr - 2);
+            case IST_SortString: {
+                uint32_t simStackPtr = vectorSize(stack);
+                aVal = vectorAt(stack, simStackPtr - 1);
+                resVal = vectorAt(stack, simStackPtr - 2);
                 sortString(aVal, resVal);
                 // Clear parameters
                 vectorPopValue(stack);
                 break;
+            }
 
-            case IST_StrLen:
-                aVal = vectorAt(stack, stackPtr - 1);
-                resVal = vectorAt(stack, stackPtr - 2);
+            case IST_StrLen: {
+                uint32_t simStackPtr = vectorSize(stack);
+                aVal = vectorAt(stack, simStackPtr - 1);
+                resVal = vectorAt(stack, simStackPtr - 2);
                 strLen(aVal, resVal);
                 // Clear parameters
                 vectorPopValue(stack);
                 break;
+            }
 
-            case IST_StrVal:
-                aVal = vectorAt(stack, stackPtr - 1);
-                resVal = vectorAt(stack, stackPtr - 2);
+            case IST_StrVal: {
+                uint32_t simStackPtr = vectorSize(stack);
+                aVal = vectorAt(stack, simStackPtr - 1);
+                resVal = vectorAt(stack, simStackPtr - 2);
                 strval(aVal, resVal);
                 // Clear parameters
                 vectorPopValue(stack);
                 break;
+            }
+
             case IST_Add:
                 aVal = vectorAt(stack, stackPtr + instructionPtr->a);
                 bVal = vectorAt(stack, stackPtr + instructionPtr->b);
