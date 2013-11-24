@@ -1,12 +1,16 @@
 <?php
 
-function foo($a = 1, $b = 2, $c = 3, $d = 4) { }
-function bar($a = 1, $b = 2) { }
-function boo($a = 1, $b = 2) { }
+function noArg() { }
+function defArg1($a = 1) { }
+function defArg2($a, $b = 1) { }
+function defArg12($a = 1, $b = 2) { }
 
-$a = foo();
-$b = foo($a + $b);
-$c = foo(bar($a / $b));
-$d = foo(1, 2, 3);
-$e = foo(bar(1, 2), $a + $b, boo($c <= $d, $c !== $d), 17.5);
-$f = foo($a, null);
+$a = noArg();
+$b = defArg1();
+$c = defArg1($a + $b);
+$d = defArg2($a . $b);
+$e = defArg2($a - $b, $a * $b);
+$f = defArg12();
+$g = defArg12($a + $b * $c);
+$h = defArg12(noArg(), $a !== $b);
+$i = defArg1(defArg1(defArg1()));
