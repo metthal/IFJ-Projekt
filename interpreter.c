@@ -247,7 +247,8 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                    resVal->data.d = aVal->data.d + bVal->data.d;
                    resVal->type = VT_Double;
                 }
-
+                else
+                    setError(ERR_ISTGenerator);
                 break;
 
             case IST_Subtract:
@@ -270,6 +271,8 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                    resVal->data.d = aVal->data.d - bVal->data.d;
                    resVal->type = VT_Double;
                 }
+                else
+                    setError(ERR_ISTGenerator);
                 break;
 
             case IST_Multiply:
@@ -292,6 +295,8 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                    resVal->data.d = aVal->data.d * bVal->data.d;
                    resVal->type = VT_Double;
                 }
+                else
+                    setError(ERR_ISTGenerator);
                 break;
 
             case IST_Divide:
@@ -310,6 +315,8 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                    resVal->data.d = aVal->data.d / bVal->data.d;
                    resVal->type = VT_Double;
                 }
+                else
+                    setError(ERR_ISTGenerator);
                 break;
 
             case IST_Concat:
