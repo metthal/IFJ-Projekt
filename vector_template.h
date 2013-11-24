@@ -56,6 +56,7 @@ static Vector* CONSTRUCT(new, Vector)()
         return NULL;
     }
 
+    memset(vec->data, 0, vec->capacity * vec->itemSize);
     vec->end = vec->data;
     return vec;
 }
@@ -159,8 +160,8 @@ static void TEMPLATE(vectorPopN)(Vector *vec, uint32_t amount)
     if (amount > vec->size)
         amount = vec->size;
 
-    for (uint32_t i = 0; i < amount; ++i)
-        DELETE_ITEM(vec->end);
+    for (uint32_t i = 1; i <= amount; ++i)
+        DELETE_ITEM(vec->end - (vec->itemSize * i));
 
     vec->size -= amount;
     vec->end -= amount * vec->itemSize;

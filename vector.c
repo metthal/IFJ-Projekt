@@ -1,6 +1,7 @@
 #include "vector.h"
 #include "nierr.h"
 #include <stdlib.h>
+#include <string.h>
 
 void vectorReserve(Vector *vec, uint32_t capacity)
 {
@@ -23,6 +24,7 @@ void vectorReserve(Vector *vec, uint32_t capacity)
     vec->data = tmp;
     vec->end = vec->data + vec->size * vec->itemSize;
     vec->capacity = capacity;
+    memset(vec->end, 0, (vec->capacity - vec->size) * vec->itemSize);
 }
 
 void vectorShrinkToFit(Vector *vec)
