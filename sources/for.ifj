@@ -1,14 +1,18 @@
 <?php
 
-// Checks for statement
+// Checks "for" statement
 $i = 0;
 for (;;){
-    $i = $i + 1;
-    if ($i < 10){
-        continue;
+    for (;;){
+        $i = $i + 1;
+        if ($i < 10){
+            continue;
+        }
+        break;
     }
     break;
 }
 
 for ($j = 0; $j < $i; $j = $j + 1){
+    $x = put_string($j, "\n");
 }

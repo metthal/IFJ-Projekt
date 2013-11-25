@@ -196,7 +196,7 @@ void printState(char *fileName)
     uint32_t atSize = vectorSize(addressTable);
     fprintf(file, "Address Table (%d):\n", atSize);
     for (uint32_t i = 0; i < atSize; i++) {
-        fprintf(file, "%d:\t%ld", i, (size_t)(*(InstructionPtr*)vectorAt(addressTable, i)));
+        fprintf(file, "%d:\t%ld\n", i, (size_t)(*(InstructionPtr*)vectorAt(addressTable, i)));
     }
 
     uint32_t ctSize = vectorSize(constantsTable);
@@ -218,7 +218,7 @@ void printState(char *fileName)
                 break;
 
             case VT_String:
-                fprintf(file, "%s\t%s\n", "S", ctIt->data.s.data);
+                fprintf(file, "%s\t\"%s\"\n", "S", ctIt->data.s.data);
                 break;
 
             case VT_Bool:
@@ -473,19 +473,15 @@ ADD_MAIN_INSTRUCTION(IST_Return, 0, 0, 0);
 
 // function instructions
 // function noArg() { }
-ADD_FUNC_INSTRUCTION(IST_Reserve, 0, 2, 0);
 ADD_FUNC_INSTRUCTION(IST_Nullify, 0, -1, 0);
 ADD_FUNC_INSTRUCTION(IST_Return, 0, 0, 0);
 // function defArg1($a = 1) { }
-ADD_FUNC_INSTRUCTION(IST_Reserve, 0, 2, 0);
 ADD_FUNC_INSTRUCTION(IST_Nullify, 0, -2, 0);
 ADD_FUNC_INSTRUCTION(IST_Return, 0, 1, 0);
 // function defArg2($a, $b = 1) { }
-ADD_FUNC_INSTRUCTION(IST_Reserve, 0, 2, 0);
 ADD_FUNC_INSTRUCTION(IST_Nullify, 0, -3, 0);
 ADD_FUNC_INSTRUCTION(IST_Return, 0, 2, 0);
 // function defArg12($a = 1, $b = 2) { }
-ADD_FUNC_INSTRUCTION(IST_Reserve, 0, 2, 0);
 ADD_FUNC_INSTRUCTION(IST_Nullify, 0, -3, 0);
 ADD_FUNC_INSTRUCTION(IST_Return, 0, 2, 0);
 
@@ -495,23 +491,276 @@ TEST_RESULT("sources/func_expr.ifj", "function expr", 0, 0, ERR_None, 4, 4);
 // Parser - if-elseif-else
 // expected instructions
 localVarStart = 2;
-exprStart = localVarStart + 3;
+exprStart = localVarStart + 4;
+
+// begin
 ADD_MAIN_INSTRUCTION(IST_Reserve, 0, exprStart, 0);
 ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 0, 0);
 ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 1, 0);
 
-// $a = 0;
+// $a = 0
 ADD_MAIN_INSTRUCTION(IST_PushC, 0, 0, 0);
 ADD_MAIN_INSTRUCTION(IST_Mov, localVarStart + 0, exprStart + 0, 0);
 ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
 
-// $b = 1.0;
-ADD_MAIN_INSTRUCTION(IST_PushC, 0, 0, 0);
-ADD_MAIN_INSTRUCTION(IST_Mov, localVarStart + 0, exprStart + 0, 0);
+// $b = 1.0
+ADD_MAIN_INSTRUCTION(IST_PushC, 0, 1, 0);
+ADD_MAIN_INSTRUCTION(IST_Mov, localVarStart + 1, exprStart + 0, 0);
 ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+
+// if ($a)
+ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 2, localVarStart + 0);
+
+// if ($a) end
+ADD_MAIN_INSTRUCTION(IST_Jmp, 0, 10, 0);
+
+// elseif ($b)
+ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 5, localVarStart + 1);
+
+// $c = true
+ADD_MAIN_INSTRUCTION(IST_PushC, 0, 2, 0);
+ADD_MAIN_INSTRUCTION(IST_Mov, localVarStart + 2, exprStart + 0, 0);
+ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+
+// elseif ($b) end
+ADD_MAIN_INSTRUCTION(IST_Jmp, 0, 5, 0);
+
+// else
+// $a = $a + 1
+ADD_MAIN_INSTRUCTION(IST_PushC, 0, 3, 0);
+ADD_MAIN_INSTRUCTION(IST_Add, exprStart + 1, 2, exprStart + 0);
+ADD_MAIN_INSTRUCTION(IST_Mov, localVarStart + 0, exprStart + 1, 0);
+ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+
+// if ($a)
+ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 2, localVarStart + 0);
+
+// if ($a) end
+ADD_MAIN_INSTRUCTION(IST_Jmp, 0, 13, 0);
+
+// elseif ($c)
+ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 12, localVarStart + 2);
+
+// $c = false
+ADD_MAIN_INSTRUCTION(IST_PushC, 0, 4, 0);
+ADD_MAIN_INSTRUCTION(IST_Mov, localVarStart + 2, exprStart, 0);
+ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+
+// if ($c)
+ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 2, localVarStart + 2);
+
+// if ($c) end
+ADD_MAIN_INSTRUCTION(IST_Jmp, 0, 7, 0);
+
+// elseif ($a)
+ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 2, localVarStart + 0);
+
+// elseif ($a) end
+ADD_MAIN_INSTRUCTION(IST_Jmp, 0, 5, 0);
+
+// else
+// $a = $a + 2
+ADD_MAIN_INSTRUCTION(IST_PushC, 0, 5, 0);
+ADD_MAIN_INSTRUCTION(IST_Add, exprStart + 1, localVarStart + 0, exprStart);
+ADD_MAIN_INSTRUCTION(IST_Mov, localVarStart + 0, exprStart + 1, 0);
+ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+
+// $res = $a === 2
+ADD_MAIN_INSTRUCTION(IST_PushC, 0, 6, 0);
+ADD_MAIN_INSTRUCTION(IST_Equal, exprStart + 1, localVarStart + 0, exprStart);
+ADD_MAIN_INSTRUCTION(IST_Mov, localVarStart + 3, exprStart + 1, 0);
+ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+
+// end
+ADD_MAIN_INSTRUCTION(IST_Nullify, 0, -1, 0);
+ADD_MAIN_INSTRUCTION(IST_Return, 0, 0, 0);
 
 // run tests
-SAVE_STATE("sources/if.ifj", "sources/if.sta");
+TEST_RESULT("sources/if.ifj", "if-elseif-else", 0, 0, ERR_None, 7, 0);
+
+// Parser - for statement
+// expected instructions
+localVarStart = 2;
+exprStart = localVarStart + 3;
+
+// begin
+ADD_MAIN_INSTRUCTION(IST_Reserve, 0, 5, 0);
+ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 0, 0);
+ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 1, 0);
+// $i = 0
+ADD_MAIN_INSTRUCTION(IST_PushC, 0, 0, 0);
+ADD_MAIN_INSTRUCTION(IST_Mov, localVarStart + 0, 5, 0);
+ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+// for
+// for
+// $i = $i + 1
+ADD_MAIN_INSTRUCTION(IST_PushC, 0, 1, 0);
+ADD_MAIN_INSTRUCTION(IST_Add, 6, localVarStart + 0, 5);
+ADD_MAIN_INSTRUCTION(IST_Mov, localVarStart + 0, 6, 0);
+ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+// if ($i < 10)
+ADD_MAIN_INSTRUCTION(IST_PushC, 0, 2, 0);
+ADD_MAIN_INSTRUCTION(IST_Less, 6, localVarStart + 0, 5);
+ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 2, 6);
+// continue
+ADD_MAIN_INSTRUCTION(IST_Jmp, 0, 2, 0);
+// break
+ADD_MAIN_INSTRUCTION(IST_Jmp, 0, 2, 0);
+// for end
+ADD_MAIN_INSTRUCTION(IST_Jmp, 0, -9, 0);
+// break
+ADD_MAIN_INSTRUCTION(IST_Jmp, 0, 2, 0);
+// for end
+ADD_MAIN_INSTRUCTION(IST_Jmp, 0, -11, 0);
+// for
+// $j = 0
+ADD_MAIN_INSTRUCTION(IST_PushC, 0,   3, 0);
+ADD_MAIN_INSTRUCTION(IST_Mov, localVarStart + 1, 5, 0);
+ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+// $j < $i
+ADD_MAIN_INSTRUCTION(IST_Less, 5, localVarStart + 1, localVarStart + 0);
+ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 13, 5);
+// $x = put_string($j, "\n")
+ADD_MAIN_INSTRUCTION(IST_PushC, 0, 4, 0);
+ADD_MAIN_INSTRUCTION(IST_Reserve, 0, 1, 0);
+ADD_MAIN_INSTRUCTION(IST_Push, 0, 3, 0);
+ADD_MAIN_INSTRUCTION(IST_Push, 0, 5, 0);
+ADD_MAIN_INSTRUCTION(IST_PutString, 0, 2, 0);
+ADD_MAIN_INSTRUCTION(IST_Mov, localVarStart + 2, 6, 0);
+ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+// $j = $j + 1
+ADD_MAIN_INSTRUCTION(IST_PushC, 0, 5, 0);
+ADD_MAIN_INSTRUCTION(IST_Add, 6, localVarStart + 1, 5);
+ADD_MAIN_INSTRUCTION(IST_Mov, localVarStart + 1, 6, 0);
+ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+// for end
+ADD_MAIN_INSTRUCTION(IST_Jmp, 0, -13, 0);
+// end
+ADD_MAIN_INSTRUCTION(IST_Nullify, 0, -1, 0);
+ADD_MAIN_INSTRUCTION(IST_Return, 0, 0, 0);
+
+// run tests
+TEST_RESULT("sources/for.ifj", "for statement", 0, 0, ERR_None, 6, 0);
+
+// Parser - while statement
+// expected instructions
+localVarStart = 2;
+exprStart = localVarStart + 1;
+
+// begin
+ADD_MAIN_INSTRUCTION(IST_Reserve, 0, 3, 0);
+ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 0, 0);
+ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 1, 0);
+// $i = 10
+ADD_MAIN_INSTRUCTION(IST_PushC, 0, 0, 0);
+ADD_MAIN_INSTRUCTION(IST_Mov, localVarStart + 0, 3, 0);
+ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+// while ($i)
+ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 6, localVarStart + 0);
+// $i = $i - 1
+ADD_MAIN_INSTRUCTION(IST_PushC, 0, 1, 0);
+ADD_MAIN_INSTRUCTION(IST_Subtract, 4, localVarStart + 0, 3);
+ADD_MAIN_INSTRUCTION(IST_Mov, localVarStart + 0, 4, 0);
+ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+// while end
+ADD_MAIN_INSTRUCTION(IST_Jmp, 0, -5, 0);
+// while ($i <= 10)
+ADD_MAIN_INSTRUCTION(IST_PushC, 0, 2, 0);
+ADD_MAIN_INSTRUCTION(IST_LessEq, 4, localVarStart + 0, 3);
+ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 8, 4);
+// if (true)
+ADD_MAIN_INSTRUCTION(IST_PushC, 0, 3, 0);
+ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 5, 3);
+// $i = $i + 5
+ADD_MAIN_INSTRUCTION(IST_PushC, 0, 4, 0);
+ADD_MAIN_INSTRUCTION(IST_Add, 4, localVarStart + 0, 3);
+ADD_MAIN_INSTRUCTION(IST_Mov, localVarStart + 0, 4, 0);
+ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+// while end
+ADD_MAIN_INSTRUCTION(IST_Jmp, 0, -9, 0);
+// end
+ADD_MAIN_INSTRUCTION(IST_Nullify, 0, -1, 0);
+ADD_MAIN_INSTRUCTION(IST_Return, 0, 0, 0);
+
+TEST_RESULT("sources/while.ifj", "while statement", 0, 0, ERR_None, 5, 0);
+
+// Parser - functions
+// expected instructions
+localVarStart = 2;
+exprStart = localVarStart + 3;
+
+// begin
+ADD_MAIN_INSTRUCTION(IST_Reserve, 0, 5, 0);
+ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 0, 0);
+ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 1, 0);
+// $a = 2
+ADD_MAIN_INSTRUCTION(IST_PushC, 0, 2, 0);
+ADD_MAIN_INSTRUCTION(IST_Mov, localVarStart + 0, 5, 0);
+ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+// $x = 1
+ADD_MAIN_INSTRUCTION(IST_PushC, 0, 3, 0);
+ADD_MAIN_INSTRUCTION(IST_Mov, localVarStart + 1, 5, 0);
+ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+// $res = dummy($x, $a)
+ADD_MAIN_INSTRUCTION(IST_Reserve, 0, 1, 0);
+ADD_MAIN_INSTRUCTION(IST_Push, 0, localVarStart + 1, 0);
+ADD_MAIN_INSTRUCTION(IST_Push, 0, localVarStart + 0, 0);
+ADD_MAIN_INSTRUCTION(IST_Call, 0, 2, 0);
+ADD_MAIN_INSTRUCTION(IST_Mov, localVarStart + 2, 5, 0);
+ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+// $res = one() + sqr($a) + sqr();
+ADD_MAIN_INSTRUCTION(IST_Reserve, 0, 1, 0);
+ADD_MAIN_INSTRUCTION(IST_Call, 0, 0, 0);
+ADD_MAIN_INSTRUCTION(IST_Reserve, 0, 1, 0);
+ADD_MAIN_INSTRUCTION(IST_Push, 0, localVarStart + 0, 0);
+ADD_MAIN_INSTRUCTION(IST_Call, 0, 1, 0);
+ADD_MAIN_INSTRUCTION(IST_Add, 7, 5, 6);
+ADD_MAIN_INSTRUCTION(IST_Reserve, 0, 1, 0);
+ADD_MAIN_INSTRUCTION(IST_PushC, 0, 0, 0);
+ADD_MAIN_INSTRUCTION(IST_Call, 0, 1, 0);
+ADD_MAIN_INSTRUCTION(IST_Add, 9, 7, 8);
+ADD_MAIN_INSTRUCTION(IST_Mov, localVarStart + 2, 9, 0);
+ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+// end
+ADD_MAIN_INSTRUCTION(IST_Nullify, 0, -1, 0);
+ADD_MAIN_INSTRUCTION(IST_Return, 0, 0, 0);
+
+
+// function one
+exprStart = localVarStart + 0;
+// begin
+// return 1
+ADD_FUNC_INSTRUCTION(IST_PushC, 0, 1, 0);
+ADD_FUNC_INSTRUCTION(IST_Mov, -1, 2, 0);
+ADD_FUNC_INSTRUCTION(IST_Return, 0, 0, 0);
+// end
+ADD_FUNC_INSTRUCTION(IST_Nullify, 0, -1, 0);
+ADD_FUNC_INSTRUCTION(IST_Return, 0, 0, 0);
+
+// function sqr
+exprStart = localVarStart + 0;
+// begin
+// $x = $x * $x
+ADD_FUNC_INSTRUCTION(IST_Multiply, 2, -1, -1);
+ADD_FUNC_INSTRUCTION(IST_Mov, -1, 2, 0);
+ADD_FUNC_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+// return $x
+ADD_FUNC_INSTRUCTION(IST_Mov, -2, -1, 0);
+ADD_FUNC_INSTRUCTION(IST_Return, 0, 1, 0);
+// end
+ADD_FUNC_INSTRUCTION(IST_Nullify, 0, -2, 0);
+ADD_FUNC_INSTRUCTION(IST_Return, 0, 1, 0);
+
+// function dummy
+exprStart = localVarStart + 0;
+// begin
+// end
+ADD_FUNC_INSTRUCTION(IST_Nullify, 0, -3, 0);
+ADD_FUNC_INSTRUCTION(IST_Return, 0, 2, 0);
+
+TEST_RESULT("sources/function.ifj", "Functions", 0, 0, ERR_None, 4, 3);
+
+// SAVE_STATE("sources/function.ifj", "sources/function.sta");
 
 // HERE PUT ANOTHER TEST
 

@@ -295,7 +295,8 @@ void func()
         (*cipvi) = (InstructionPtr)((size_t)vectorSize(functionsInstructions));
 
         // Instruction to reserve stack space for locals
-        generateInstruction(IST_Reserve, 0, currentContext->exprStart, 0);
+        if (currentContext->localVariableCount > 0)
+            generateInstruction(IST_Reserve, 0, currentContext->localVariableCount, 0);
     }
     else {
         // Initialize exprStart in case of no local variables
@@ -553,16 +554,18 @@ void stmt()
                     tokensIt++;
 
                     // Break / continue counter
-                    uint32_t bcCounter = vectorSize(toBeModifiedIST);
+                    uint32_t bcCounter = 0;
                     uint32_t ptr1 = 0, ptr2 = 0, ptr3 = 0;
 
-                    if (secondRun)
+                    if (secondRun) {
                         ptr1 = vectorSize(instructions);
+                        bcCounter = vectorSize(toBeModifiedIST);
+                    }
 
-                    uint8_t for2Used;
                     uint32_t cond;
+                    uint8_t for2Used = forStmt2(&cond);
                     // Check if 2nd statement weren't omitted.
-                    if (secondRun && (for2Used = forStmt2(&cond))) {
+                    if (secondRun && for2Used) {
                         // Reserves space for instruction that jumps
                         // behind for block
                         ptr2 = generateEmptyInstruction();
@@ -575,6 +578,8 @@ void stmt()
                         setError(ERR_Syntax);
                         return;
                     }
+
+                    tokensIt++;
 
                     // A hack to move 3rd for statement after
                     // statement list to minimize number of
@@ -628,7 +633,8 @@ void stmt()
 
                         // Finish everything by filling pre-generated
                         // break and and continue instructions
-                        for (; bcCounter < vectorSize(toBeModifiedIST); bcCounter++) {
+                        uint32_t tbmSize = vectorSize(toBeModifiedIST);
+                        for (; bcCounter < tbmSize; bcCounter++) {
                             Uint32 index = *((Uint32*)vectorBack(toBeModifiedIST));
                             Instruction* pt = vectorAt(instructions, index);
                             if (pt->code == IST_Continue)
@@ -715,7 +721,7 @@ uint8_t elseifStmt()
                         fillInstruction(ptr1, IST_Jmp, 0, vectorSize(instructions) - ptr1, 0);
 
                         // Fills the reserved space with correct jump value
-                        fillInstruction(ptr1, IST_Jmpz, currentContext->exprStart, blockSize, cond);
+                        fillInstruction(ptr2, IST_Jmpz, currentContext->exprStart, blockSize, cond);
                     }
 
                     return 1;
@@ -1019,7 +1025,7 @@ void assignment(ConstTokenVectorIterator varid, uint8_t skip)
 
     uint32_t exprRes = generalExpr(skip);
 
-    if (secondRun) {
+    if (secondRun && !skip) {
         // Symbol should be already in table after first run
         Symbol *symbol = symbolTableFind(currentContext->localTable, &(varid->str));
         if (getError())

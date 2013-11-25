@@ -7,11 +7,12 @@ function one()
     return 1;
 }
 
-$x = 1;
 $a = 2;
-$res = one() + sqr($a) + sqr(5); // Should be 30
+$x = 1;
+$res = dummy($x, $a); // Should set $res to null
+$res = one() + sqr($a) + sqr(); // Should be 30
 
-function sqr($x){
+function sqr($x = 5){
     $x = $x * $x;
     return $x;
 }

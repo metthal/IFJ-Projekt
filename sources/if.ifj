@@ -23,8 +23,8 @@ elseif ($c){        // *
     elseif ($a){    //
     }               //
     else{           // *
-        $a = $a + 1;// *
+        $a = $a + 2;// *
     }               //
 }
 
-$res = $a === 1; // True
+$res = $a === 2; // True
