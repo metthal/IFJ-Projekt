@@ -86,18 +86,19 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
                 // Instruction pointer
                 val.type = VT_InstructionPtr;
-                val.data.ip = instructionPtr;
+                val.data.ip = instructionPtr + 1;
                 vectorPushValue(stack, &val);
 
                 deleteValue(&val);
 
-                instructionPtr = vectorAtConst(addressTable, instructionPtr->a);
+                instructionPtr = *((Instruction**)vectorAtConst(addressTable, instructionPtr->a));
                 continue;
             }
 
             case IST_Return:
                 // Load old instruction pointer
                 aVal = vectorAt(stack, stackPtr + 1);
+                uint32_t paramCount = instructionPtr->a;
                 if (aVal->type == VT_Null) {
                     // End interpretation
                     running = 0;
@@ -107,10 +108,11 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                     instructionPtr = aVal->data.ip;
 
                 // Load old stack pointer
+                uint32_t oldStackPtr = stackPtr;
                 aVal = vectorAt(stack, stackPtr);
                 stackPtr = aVal->data.sp;
 
-                vectorResizeValue(stack, stackPtr - instructionPtr->a);
+                vectorResizeValue(stack, oldStackPtr - paramCount);
                 continue;
 
             case IST_Nullify:
