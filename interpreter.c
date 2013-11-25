@@ -35,18 +35,19 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 instructionPtr += instructionPtr->a;
                 continue;
 
-            case IST_Jmpz:
+            case IST_Jmpz: {
+                uint32_t tempRes = instructionPtr->res;
                 bVal = vectorAt(stack, stackPtr + instructionPtr->b);
-
                 if (valueToBool(bVal))
-                    instructionPtr += instructionPtr->a;
-                else
                     instructionPtr++;
+                else
+                    instructionPtr += instructionPtr->a;
 
                 // Clear space hold by condition's expression
-                vectorResizeValue(stack, stackPtr + instructionPtr->res);
+                vectorResizeValue(stack, stackPtr + tempRes);
 
                 continue;
+            }
 
             case IST_Push:
                 vectorPushValue(stack, vectorAt(stack, stackPtr + instructionPtr->a));
