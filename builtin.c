@@ -180,7 +180,7 @@ void findString(Value *ret, const Value *a, const Value *b)
             break;
 
         case VT_String:
-            y = &(ret->data.s);
+            y = &(b->data.s);
             break;
 
         case VT_Undefined:

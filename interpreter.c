@@ -144,7 +144,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 uint32_t simStackPtr = vectorSize(stack);
                 bVal = vectorAt(stack, simStackPtr - 1);
                 aVal = vectorAt(stack, simStackPtr - 2);
-                resVal = vectorAt(stack, stackPtr - 3);
+                resVal = vectorAt(stack, simStackPtr - 3);
                 findString(resVal, aVal, bVal);
                 // Clear parameters
                 vectorPopNValue(stack, 2);
@@ -322,7 +322,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 }
                 else if (aVal->type == VT_Integer && bVal->type == VT_Integer) {
                    resVal->data.d = (double)aVal->data.i / (double)bVal->data.i;
-                   resVal->type = VT_Double;   
+                   resVal->type = VT_Double;
                 }
                 else
                     setError(ERR_ISTGenerator);
