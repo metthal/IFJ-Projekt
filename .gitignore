@@ -22,3 +22,6 @@ xmilko01.tar.gz
 
 # project files
 *.kdev4
+
+# state files
+*.sta

@@ -71,6 +71,15 @@ static ConstInstructionVectorIterator end1, end2, itr1, itr2;
     if (functionsInstructions)                  \
         freeInstructionVector(&functionsInstructions);
 
+#define SAVE_STATE(inFile, outFile)                                                     \
+    tokenVector = scannerScanFile(inFile);                                              \
+    if (tokenVector)                                                                    \
+        parse(tokenVector, 1);                                                          \
+    if (tokenVector) {                                                                  \
+        printState(outFile);                                                            \
+    }                                                                                   \
+    CLEANUP;
+
 void testInstructions(Vector *genInstrVector, Vector *expectedInstrVector)
 {
     if (!genInstrVector) {
@@ -98,6 +107,153 @@ void testInstructions(Vector *genInstrVector, Vector *expectedInstrVector)
 
     if (allOk)
         instTestFailed = 0;
+}
+
+void printInstruction(FILE *file, int line, Instruction *ist)
+{
+    fprintf(file, "%d:\t", line);
+    switch (ist->code) {
+        case IST_Noop:
+            fprintf(file, "!!! %11s", "Noop"); break;
+        case IST_Mov:
+            fprintf(file, "%15s", "Mov"); break;
+        case IST_MovC:
+            fprintf(file, "%15s", "MovC"); break;
+        case IST_Jmp:
+            fprintf(file, "%15s", "Jmp"); break;
+        case IST_Jmpz:
+            fprintf(file, "%15s", "Jmpz"); break;
+        case IST_Push:        
+            fprintf(file, "%15s", "Push"); break;
+        case IST_PushC:       
+            fprintf(file, "%15s", "PushC"); break;
+        case IST_Reserve:     
+            fprintf(file, "%15s", "Reserve"); break;
+        case IST_Pop:
+            fprintf(file, "%15s", "Pop"); break;
+        case IST_ClearExpr:
+            fprintf(file, "%15s", "ClearExpr"); break;
+        case IST_Call:
+            fprintf(file, "%15s", "Call"); break;
+        case IST_Return:
+            fprintf(file, "%15s", "Return"); break;
+        case IST_Nullify:
+            fprintf(file, "%15s", "Nullify"); break;
+        case IST_BoolVal:
+            fprintf(file, "%15s", "Boolval"); break;
+        case IST_DoubleVal:
+            fprintf(file, "%15s", "Doubleval"); break;
+        case IST_FindString:
+            fprintf(file, "%15s", "FindString"); break;
+        case IST_GetString:
+            fprintf(file, "%15s", "GetString"); break;
+        case IST_GetSubstring:
+            fprintf(file, "%15s", "GetSubstring"); break;
+        case IST_IntVal:
+            fprintf(file, "%15s", "IntVal"); break;
+        case IST_PutString:
+            fprintf(file, "%15s", "PutString"); break;
+        case IST_SortString:
+            fprintf(file, "%15s", "SortString"); break;
+        case IST_StrLen:
+            fprintf(file, "%15s", "StrLen"); break;
+        case IST_StrVal:
+            fprintf(file, "%15s", "StrVal"); break;
+        case IST_Break:
+            fprintf(file, "!!! %11s", "Break"); break;
+        case IST_Continue:
+            fprintf(file, "!!! %11s", "Continue"); break;
+        case IST_Add:
+            fprintf(file, "%15s", "Add"); break;
+        case IST_Subtract:
+            fprintf(file, "%15s", "Subtract"); break;
+        case IST_Multiply:
+            fprintf(file, "%15s", "Multiply"); break;
+        case IST_Divide:
+            fprintf(file, "%15s", "Divide"); break;
+        case IST_Concat:
+            fprintf(file, "%15s", "Concat"); break;
+        case IST_Equal:
+            fprintf(file, "%15s", "Equal"); break;
+        case IST_NotEqual:
+            fprintf(file, "%15s", "NotEqual"); break;
+        case IST_Less:
+            fprintf(file, "%15s", "Less"); break;
+        case IST_LessEq:
+            fprintf(file, "%15s", "LessEq"); break;
+        case IST_Greater:
+            fprintf(file, "%15s", "Greater"); break;
+        case IST_GreaterEq:
+            fprintf(file, "%15s", "GreaterEq"); break;
+    }
+    fprintf(file, "    %5d %5d %5d\n", ist->res, ist->a, ist->b);
+}
+
+void printState(char *fileName)
+{
+    FILE *file = fopen(fileName, "w");
+
+    uint32_t atSize = vectorSize(addressTable);
+    fprintf(file, "Address Table (%d):\n", atSize);
+    for (uint32_t i = 0; i < atSize; i++) {
+        fprintf(file, "%d:\t%ld", i, (size_t)(*(InstructionPtr*)vectorAt(addressTable, i)));
+    }
+
+    uint32_t ctSize = vectorSize(constantsTable);
+    ValueVectorIterator ctIt = vectorBeginValue(constantsTable);
+    fprintf(file, "\nConst Table (%d):\n", ctSize);
+    for (uint32_t i = 0; i < ctSize; i++, ctIt++) {
+        fprintf(file, "%d:\t", i);
+        switch(ctIt->type) {
+            case VT_Undefined:
+                fprintf(file, "%s\n", "U");
+                break;
+
+            case VT_Integer:
+                fprintf(file, "%s\t%d\n", "I", ctIt->data.i);
+                break;
+
+            case VT_Double:
+                fprintf(file, "%s\t%g\n", "D", ctIt->data.d);
+                break;
+
+            case VT_String:
+                fprintf(file, "%s\t%s\n", "S", ctIt->data.s.data);
+                break;
+
+            case VT_Bool:
+                fprintf(file, "%s\t%d\n", "B", ctIt->data.b);
+                break;
+
+            case VT_Null:
+                fprintf(file, "%s\n", "N");
+                break;
+
+            case VT_InstructionPtr:
+                fprintf(file, "!!! %s\t%lu\n", "IP", (size_t)ctIt->data.ip);
+                break;
+
+            case VT_StackPtr:
+                fprintf(file, "!!! %s\t%d\n", "SP", ctIt->data.sp);
+                break;
+        }
+    }
+
+    uint32_t miSize = vectorSize(mainInstructions);
+    InstructionVectorIterator miIt = vectorBeginInstruction(mainInstructions);
+    fprintf(file, "\nMain Instructions (%d):\n", miSize);
+    for (uint32_t i = 0; i < miSize; i++, miIt++) {
+        printInstruction(file, i, miIt);
+    }
+
+    uint32_t fiSize = vectorSize(functionsInstructions);
+    InstructionVectorIterator fiIt = vectorBeginInstruction(functionsInstructions);
+    fprintf(file, "\nFunctions Instructions (%d):\n", fiSize);
+    for (uint32_t i = 0; i < fiSize; i++, fiIt++) {
+        printInstruction(file, i, fiIt);
+    }
+
+    fclose(file);
 }
 
 TEST_SUITE_START(ParserTests)
@@ -335,6 +491,27 @@ ADD_FUNC_INSTRUCTION(IST_Return, 0, 2, 0);
 
 // run tests
 TEST_RESULT("sources/func_expr.ifj", "function expr", 0, 0, ERR_None, 4, 4);
+
+// Parser - if-elseif-else
+// expected instructions
+localVarStart = 2;
+exprStart = localVarStart + 3;
+ADD_MAIN_INSTRUCTION(IST_Reserve, 0, exprStart, 0);
+ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 0, 0);
+ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 1, 0);
+
+// $a = 0;
+ADD_MAIN_INSTRUCTION(IST_PushC, 0, 0, 0);
+ADD_MAIN_INSTRUCTION(IST_Mov, localVarStart + 0, exprStart + 0, 0);
+ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+
+// $b = 1.0;
+ADD_MAIN_INSTRUCTION(IST_PushC, 0, 0, 0);
+ADD_MAIN_INSTRUCTION(IST_Mov, localVarStart + 0, exprStart + 0, 0);
+ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+
+// run tests
+SAVE_STATE("sources/if.ifj", "sources/if.sta");
 
 // HERE PUT ANOTHER TEST
 

@@ -27,4 +27,4 @@ elseif ($c){        // *
     }               //
 }
 
-$res = $a <= 1; // True
+$res = $a === 1; // True
