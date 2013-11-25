@@ -65,7 +65,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
             case IST_Pop:
                 if (instructionPtr->a == 1)
                     vectorPopValue(stack);
-                else 
+                else
                     vectorPopNValue(stack,instructionPtr->a);
                 break;
 
@@ -285,7 +285,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 resVal = vectorAt(stack, stackPtr + instructionPtr->res);
                 if ((aVal->type == VT_Integer) && (bVal->type == VT_Integer)) {
                    resVal->data.i = aVal->data.i * bVal->data.i;
-                   resVal->type = VT_Integer;   
+                   resVal->type = VT_Integer;
                 }
                 else if (aVal->type == VT_Double && bVal->type == VT_Integer) {
                    resVal->data.d = aVal->data.d * bVal->data.i;
@@ -430,6 +430,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
             case IST_Less:
                 aVal = vectorAt(stack, stackPtr + instructionPtr->a);
                 bVal = vectorAt(stack, stackPtr + instructionPtr->b);
+                vectorPushDefaultValue(stack);
                 resVal = vectorAt(stack, stackPtr + instructionPtr->res);
                 if (aVal->type == bVal->type ) {
                     switch (aVal->type) {
@@ -475,6 +476,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
        case IST_LessEq:
                 aVal = vectorAt(stack, stackPtr + instructionPtr->a);
                 bVal = vectorAt(stack, stackPtr + instructionPtr->b);
+                vectorPushDefaultValue(stack);
                 resVal = vectorAt(stack, stackPtr + instructionPtr->res);
                 if (aVal->type == bVal->type ) {
                     switch (aVal->type) {
@@ -566,6 +568,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
         case IST_GreaterEq:
                 aVal = vectorAt(stack, stackPtr + instructionPtr->a);
                 bVal = vectorAt(stack, stackPtr + instructionPtr->b);
+                vectorPushDefaultValue(stack);
                 resVal = vectorAt(stack, stackPtr + instructionPtr->res);
                 if (aVal->type == bVal->type ) {
                     switch (aVal->type) {
