@@ -209,14 +209,15 @@ void findString(Value *ret, const Value *a, const Value *b)
 
 void getString(Value *ret)
 {
-    int c = getchar();
     char buffer[READ_BUFFER_SIZE];
     String *workingStr = &(ret->data.s);
     initString(workingStr);
+    ret->type = VT_String;
 
     // Buffered read until EOL or EOF
+    int c;
     int i = 0;
-    for (; c != '\n' || c != EOF; i++) {
+    for (; (c = getchar()) && (c != '\n' && c != EOF); i++) {
         if (i == READ_BUFFER_SIZE) {
             stringAddS(workingStr, buffer, i);
             i = 0;
