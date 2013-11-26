@@ -73,6 +73,8 @@ void printError()
         case ERR_Substr:
             printErrorF("Substring parameters are wrong.\n");
             break;
+        case ERR_OperandTypes:
+            printf("Invalid operand type.\n");
         default:
             printErrorF("Undocumented error.\n");
             break;

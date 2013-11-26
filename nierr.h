@@ -29,7 +29,8 @@ typedef enum
     ERR_BadDefArg,
     ERR_ISTGenerator,
     ERR_CycleControl, //!< Invalid break / continue statement
-    ERR_Substr
+    ERR_Substr,
+    ERR_OperandTypes
 } NiErrorType;
 
 typedef struct

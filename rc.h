@@ -73,6 +73,9 @@ static inline ResultCode getRcFromError()
         case ERR_Substr:
             return RC_UnkError;
 
+        case ERR_OperandTypes:
+            return RC_ArithmError;
+
         default:
             return RC_FatalError;
     }
