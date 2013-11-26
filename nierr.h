@@ -43,11 +43,10 @@ typedef struct
 
 #ifdef DEBUG
 extern char errorPrinted;
+void printError();
 #endif
 
 extern NiError niErr;
-
-void printError();
 
 /** Gets last interpret error.
  * @return Last error.
