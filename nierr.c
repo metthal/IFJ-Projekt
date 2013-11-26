@@ -83,6 +83,8 @@ void printError()
             break;
         case ERR_OperandTypes:
             printf("Invalid operand type.\n");
+        case ERR_DivideByZero:
+            printf("Division by zero error.\n");
         default:
             printErrorF("Undocumented error.\n");
             break;

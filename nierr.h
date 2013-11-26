@@ -30,7 +30,8 @@ typedef enum
     ERR_ISTGenerator,
     ERR_CycleControl, //!< Invalid break / continue statement
     ERR_Substr,
-    ERR_OperandTypes
+    ERR_OperandTypes,
+    ERR_DivideByZero
 } NiErrorType;
 
 typedef struct

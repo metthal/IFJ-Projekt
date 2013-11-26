@@ -76,6 +76,9 @@ static inline ResultCode getRcFromError()
         case ERR_OperandTypes:
             return RC_ArithmError;
 
+        case ERR_DivideByZero:
+            return RC_DivByZero;
+
         default:
             return RC_FatalError;
     }

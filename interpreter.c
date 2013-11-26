@@ -311,20 +311,36 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 vectorPushDefaultValue(stack);
                 resVal = vectorAt(stack, stackPtr + instructionPtr->res);
                 if (aVal->type == VT_Double && bVal->type == VT_Integer) {
-                   resVal->data.d = aVal->data.d / (double)bVal->data.i;
-                   resVal->type = VT_Double;
+                   if (bVal->data.i != 0) { 
+                       resVal->data.d = aVal->data.d / (double)bVal->data.i;
+                       resVal->type = VT_Double;
+                   }
+                   else
+                       setError(ERR_DivideByZero);
                 }
                 else if (aVal->type == VT_Integer && bVal->type == VT_Double) {
-                   resVal->data.d = (double)aVal->data.i / bVal->data.d;
-                   resVal->type = VT_Double;
+                   if (bVal->data.d != 0) {
+                       resVal->data.d = (double)aVal->data.i / bVal->data.d;
+                       resVal->type = VT_Double;
+                   }
+                   else
+                       setError(ERR_DivideByZero);
                 }
                 else if (aVal->type == VT_Double && bVal->type == VT_Double) {
-                   resVal->data.d = aVal->data.d / bVal->data.d;
-                   resVal->type = VT_Double;
+                   if (bVal->data.d != 0) {
+                       resVal->data.d = aVal->data.d / bVal->data.d;
+                       resVal->type = VT_Double;
+                   }
+                   else
+                       setError(ERR_DivideByZero);
                 }
                 else if (aVal->type == VT_Integer && bVal->type == VT_Integer) {
-                   resVal->data.d = (double)aVal->data.i / (double)bVal->data.i;
-                   resVal->type = VT_Double;
+                   if (bVal->data.i != 0) {
+                       resVal->data.i = (double)aVal->data.i / (double)bVal->data.i;
+                       resVal->type = VT_Double;
+                   }
+                   else
+                       setError(ERR_DivideByZero);
                 }
                 else
                     setError(ERR_OperandTypes);
