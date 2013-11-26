@@ -1,0 +1,4 @@
+<?php
+
+break;
+$x = put_string("Wrong, there should be syntax error");

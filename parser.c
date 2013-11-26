@@ -124,7 +124,8 @@ void parse(Vector *tokenVector, uint8_t testRun)
     }
 
     if (!testRun) {
-        interpret(vectorBeginInstruction(mainInstructions), constantsTable, addressTable);
+        if(!getError())
+            interpret(vectorBeginInstruction(mainInstructions), constantsTable, addressTable);
 
         // Cleanup after interpretation
         freeValueVector(&constantsTable);

@@ -40,6 +40,10 @@ typedef struct
     const char *fun;
 } NiError;
 
+#ifdef DEBUG
+extern char errorPrinted;
+#endif
+
 extern NiError niErr;
 
 void printError();
@@ -66,6 +70,9 @@ static inline void setErrorExp(NiErrorType errType, int line, const char *file,
     niErr.line = line;
     niErr.file = file;
     niErr.fun = fun;
+#ifdef DEBUG
+    errorPrinted = 0;
+#endif
 }
 
 /** Clears interpret error to ERR_None */
