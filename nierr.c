@@ -1,18 +1,26 @@
 #include "nierr.h"
-
-#ifdef DEBUG
-#define NORMAL_COLOR  "\033[0m"
-#define ERR_COLOR     "\033[1m\033[31m"
-char errorPrinted = 1;
-#endif
-
 /** Global interpret error variable. */
 NiError niErr;
 
+#ifdef DEBUG
+#include <unistd.h>
+
+#define STD_ERR_INT   2
+#define NORMAL_COLOR  "\033[0m"
+#define ERR_COLOR     "\033[1m\033[31m"
+
+char errorPrinted = 1;
+
 void printErrorF(const char *str)
 {
-    fprintf(stderr, ERR_COLOR "Error at %s:%d:%s: %s" NORMAL_COLOR,
-            niErr.file, niErr.line, niErr.fun, str);
+    if (isatty(STD_ERR_INT)) {
+        fprintf(stderr, ERR_COLOR "Error at %s:%d:%s: %s" NORMAL_COLOR,
+                niErr.file, niErr.line, niErr.fun, str);
+    }
+    else {
+        fprintf(stderr, "Error at %s:%d:%s: %s",
+                niErr.file, niErr.line, niErr.fun, str);
+    }
 }
 
 void printError()
@@ -78,7 +86,7 @@ void printError()
             break;
     }
 
-    #ifdef DEBUG
     errorPrinted = 1;
-    #endif
 }
+
+#endif
