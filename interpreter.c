@@ -393,10 +393,8 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                     }
 
                 }
-                else {
-                    resVal->type = VT_Bool;
-                    resVal->data.b = 0;
-                }
+                else
+                    setError(ERR_OperandTypes);
 
                 break;
 
@@ -438,10 +436,8 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                     }
 
                 }
-                else {
-                    resVal->type = VT_Bool;
-                    resVal->data.b = 0;
-                }
+                else
+                    setError(ERR_OperandTypes);
 
                 break;
 
@@ -483,10 +479,8 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                     }
 
                 }
-                else {
-                    resVal->type = VT_Bool;
-                    resVal->data.b = 0;
-                }
+                else
+                    setError(ERR_OperandTypes);
 
                 break;
 
@@ -529,10 +523,8 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                     }
 
                 }
-                else {
-                    resVal->type = VT_Bool;
-                    resVal->data.b = 0;
-                }
+                else
+                    setError(ERR_OperandTypes);
 
                 break;
 
@@ -575,10 +567,8 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                     }
 
                 }
-                else {
-                    resVal->type = VT_Bool;
-                    resVal->data.b = 0;
-                }
+                else
+                    setError(ERR_OperandTypes);
 
                 break;
 
@@ -622,10 +612,8 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                     }
 
                 }
-                else {
-                    resVal->type = VT_Bool;
-                    resVal->data.b = 0;
-                }
+                else
+                    setError(ERR_OperandTypes);
 
                 break;
 
