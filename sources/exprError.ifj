@@ -1,6 +1,4 @@
 <?php
 
-$x =
-1 + 3 +
-while; $x = put_string($x, "\n");
-$x = put_string($x, "\n");
+$a = 5;
+$x = put_string("number:", $a,;

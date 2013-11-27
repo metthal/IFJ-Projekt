@@ -930,12 +930,16 @@ uint32_t generalExpr(uint8_t skip)
     }
     else {
         // Skips expression.
-        // If error occured, it won't change token iterator.
-        ConstTokenVectorIterator backup = tokensIt;
+        // TODO decide if needed (for full expression check)
+        // ConstTokenVectorIterator backup = tokensIt;
         int leftBrackets = 0;
         while (1) {
             switch (tokensIt->type) {
                 case STT_Semicolon:
+                    if (leftBrackets > 0) {
+                        setError(ERR_Syntax);
+                        // tokensIt = backup;
+                    }
                     return 0;
 
                 case STT_Assignment:
@@ -944,7 +948,7 @@ uint32_t generalExpr(uint8_t skip)
                 case STT_Php:
                 case STT_EOF:
                     setError(ERR_Syntax);
-                    tokensIt = backup;
+                    // tokensIt = backup;
                     return 0;
 
                 case STT_Keyword:
@@ -955,7 +959,7 @@ uint32_t generalExpr(uint8_t skip)
                         // Default is error
                         default:
                             setError(ERR_Syntax);
-                            tokensIt = backup;
+                            // tokensIt = backup;
                             return 0;
                     }
                     break;
@@ -1035,6 +1039,8 @@ void assignment(ConstTokenVectorIterator varid, uint8_t skip)
     tokensIt++;
 
     uint32_t exprRes = generalExpr(skip);
+    if (getError())
+        return;
 
     if (secondRun && !skip) {
         // Symbol should be already in table after first run
