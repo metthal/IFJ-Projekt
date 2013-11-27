@@ -488,6 +488,33 @@ ADD_FUNC_INSTRUCTION(IST_Return, 0, 2, 0);
 // run tests
 TEST_RESULT("sources/func_expr.ifj", "function expr", 0, 0, ERR_None, 4, 4);
 
+// Parser - precedence
+// expected instructions
+localVarStart = 2;
+exprStart = localVarStart + 1;
+
+// begin
+ADD_MAIN_INSTRUCTION(IST_Reserve, 0, exprStart, 0);
+ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 0, 0);
+ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 1, 0);
+// $x = 10;
+ADD_MAIN_INSTRUCTION(IST_PushC, 0, 0, 0);
+ADD_MAIN_INSTRUCTION(IST_Mov, localVarStart + 0, exprStart + 0, 0);
+ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+// $x = true === $x < 20;
+ADD_MAIN_INSTRUCTION(IST_PushC, 0, 1, 0);
+ADD_MAIN_INSTRUCTION(IST_PushC, 0, 2, 0);
+ADD_MAIN_INSTRUCTION(IST_Less, exprStart + 2, localVarStart + 0, exprStart + 1);
+ADD_MAIN_INSTRUCTION(IST_Equal, exprStart + 3, exprStart + 0, exprStart + 2);
+ADD_MAIN_INSTRUCTION(IST_Mov, localVarStart + 0, exprStart + 3, 0);
+ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+// end
+ADD_MAIN_INSTRUCTION(IST_Nullify, 0, -1, 0);
+ADD_MAIN_INSTRUCTION(IST_Return, 0, 0, 0);
+
+// run tests
+TEST_RESULT("sources/relop_precedence.ifj", "rel. op precedence", 0, 0, ERR_None, 3, 0);
+
 // Parser - if-elseif-else
 // expected instructions
 localVarStart = 2;

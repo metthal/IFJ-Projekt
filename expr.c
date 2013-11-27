@@ -55,8 +55,8 @@ static uint8_t precedenceTable[STT_Semicolon][STT_Semicolon] =
     {   Low,    Low,    Low,    Low,    Low,    High,   High,   High,   High,   High,   High,   Low,    High,   Low,    High,   High,   Low   },  // >
     {   Low,    Low,    Low,    Low,    Low,    High,   High,   High,   High,   High,   High,   Low,    High,   Low,    High,   High,   Low   },  // <=
     {   Low,    Low,    Low,    Low,    Low,    High,   High,   High,   High,   High,   High,   Low,    High,   Low,    High,   High,   Low   },  // >=
-    {   Low,    Low,    Low,    Low,    Low,    High,   High,   High,   High,   High,   High,   Low,    High,   Low,    High,   High,   Low   },  // ===
-    {   Low,    Low,    Low,    Low,    Low,    High,   High,   High,   High,   High,   High,   Low,    High,   Low,    High,   High,   Low   },  // !==
+    {   Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    High,   High,   Low,    High,   Low,    High,   High,   Low   },  // ===
+    {   Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    High,   High,   Low,    High,   Low,    High,   High,   Low   },  // !==
     {   Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Equal,  Low,    Equal,  Error,  Low   },  // (
     {   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   Error,  High,   Error,  High,   High,   Error },  // )
     {   Error,  Error,  Error,  Error,  Error,  Error,  Error,  Error,  Error,  Error,  Error,  Equal,  Error,  Error,  Error,  Error,  Error },  // func
@@ -487,8 +487,7 @@ uint32_t expr()
                 continue;
             case Error:
                 setError(ERR_Syntax);
-                // @todo Cleanup
-                return -1;
+                return 0;
         }
 
         if (!endOfInput)
