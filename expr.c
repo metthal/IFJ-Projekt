@@ -202,7 +202,11 @@ uint8_t reduceMultiparamFunc(uint32_t stackPos, uint32_t *paramCount)
             if (id->token->type != STT_Identifier)
                 return 0;
         }
+        else
+            return 0;
     }
+    else
+        return 0;
 
     generateInstruction(IST_Push, 0, first->stackOffset, 0);
     if (getError())
@@ -319,6 +323,8 @@ uint8_t reduce(ExprToken *topTerm)
                         nextTerm->stackOffset = retValStackPos;
                         vectorPopNExprToken(exprVector, 2);
                     }
+                    else
+                        return 0;
                 }
                 else if (nextTerm->type == NonTerminal) { // we have E) and are not sure what it is
                     ExprTokenVectorIterator exprBackup = nextTerm;
@@ -345,6 +351,8 @@ uint8_t reduce(ExprToken *topTerm)
 
                         vectorPopNExprToken(exprVector, (paramCount << 1) + 1); // paramCount * 2 + 1 (every E has one terminal in front of it and there is one ending ')')
                         nextTerm = vectorBack(exprVector);
+                        if (nextTerm->type != Terminal || (nextTerm->type == Terminal && nextTerm->token->type != STT_Identifier))
+                            return 0;
 
                         generateCall(nextTerm->token, paramCount);
                         if (getError())
@@ -388,8 +396,14 @@ uint8_t reduce(ExprToken *topTerm)
                             vectorPopNExprToken(exprVector, 2);
                         }
                     }
+                    else
+                        return 0;
                 }
+                else
+                    return 0;
             }
+            else
+                return 0;
             break;
         }
         default:
@@ -481,8 +495,10 @@ uint32_t expr()
                 break;
             }
             case High:
-                if (!reduce(topToken))
+                if (!reduce(topToken)) {
+                    setError(ERR_Syntax);
                     return 0;
+                }
 
                 continue;
             case Error:
