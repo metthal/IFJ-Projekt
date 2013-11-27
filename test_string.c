@@ -83,16 +83,26 @@ stringEmpty(a);
 for (uint8_t i = 'a'; i < 'a' + 26; i++) {
     stringPush(a, i);
 }
-SHOULD_EQUAL("stringPush() Length", a->length, 27);
-SHOULD_EQUAL_STR("stringPush() Data", a->data, "abcdefghijklmnopqrstuvwxyz");
+for (uint8_t i = 'a'; i < 'a' + 26; i++) {
+    stringPush(a, i);
+}
+SHOULD_EQUAL("stringPush() Length", a->length, 53);
+SHOULD_EQUAL_STR("stringPush() Data", a->data, "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz");
 
-// stringPop()
-stringSetS(a, CSTR_ARG("abcdefghijklmnopqrstuvwxyz"));
-for (uint8_t i = 0; i < 18; i++) {
+// stringPop() Resize
+stringSetS(a, CSTR_ARG("abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"));
+for (uint8_t i = 0; i < 35; i++) {
     stringPop(a);
 }
-SHOULD_EQUAL("stringPop() Length", a->length, 9);
-SHOULD_EQUAL_STR("stringPop() Data", a->data, "abcdefgh");
+SHOULD_EQUAL("stringPop() Resize Length", a->length, 18);
+SHOULD_EQUAL_STR("stringPop() Resize Data", a->data, "abcdefghijklmnopq");
+// stringPop() Minimal
+stringSetS(a, CSTR_ARG("abcdefghijklmnopq"));
+for (uint8_t i = 0; i < 13; i++) {
+    stringPop(a);
+}
+SHOULD_EQUAL("stringPop() Minimal Length", a->length, 5);
+SHOULD_EQUAL_STR("stringPop() Minimal Data", a->data, "abcd");
 
 // stringCopy()
 stringCopy(c, b);
