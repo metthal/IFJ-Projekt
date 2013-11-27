@@ -47,6 +47,7 @@ static inline ResultCode getRcFromError()
 
         case ERR_Syntax:
         case ERR_CycleControl:
+        case ERR_BadDefArg:
             return RC_SynError;
 
         case ERR_Allocation:
@@ -60,16 +61,13 @@ static inline ResultCode getRcFromError()
             return RC_FuncDefError;
 
         case ERR_UndefVariable:
-            // TODO check this one
-        case ERR_RedefParameter:
             return RC_VarError;
 
         case ERR_BadParamCount:
         case ERR_DefArgOrder:
             return RC_FuncParamError;
 
-            // TODO check this one
-        case ERR_BadDefArg:
+        case ERR_RedefParameter:
         case ERR_Substr:
             return RC_UnkError;
 

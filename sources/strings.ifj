@@ -1,0 +1,4 @@
+<?php
+
+$x = put_string("\n\t\\\\\\t\$\$\k\s\p\"\"\n");
+$x = put_string("\x\$");

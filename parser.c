@@ -939,16 +939,26 @@ uint32_t generalExpr(uint8_t skip)
                     return 0;
 
                 case STT_Assignment:
-                case STT_Keyword:
                 case STT_LeftCurlyBracket:
                 case STT_RightCurlyBracket:
                 case STT_Php:
                 case STT_EOF:
                     setError(ERR_Syntax);
                     tokensIt = backup;
-                    // TODO Make full syntax check to discover true error?
-                    // expr();
                     return 0;
+
+                case STT_Keyword:
+                    switch (tokensIt->keywordType) {
+                        // Keywords that can be part of expression
+                        // explicitly allowed
+
+                        // Default is error
+                        default:
+                            setError(ERR_Syntax);
+                            tokensIt = backup;
+                            return 0;
+                    }
+                    break;
 
                 case STT_LeftBracket:
                     leftBrackets++;
