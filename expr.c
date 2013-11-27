@@ -192,21 +192,31 @@ uint8_t reduceMultiparamFunc(uint32_t stackPos, uint32_t *paramCount)
                 return 0;
         }
         else if (second->type == Terminal && second->token->type == STT_LeftBracket) { // got (E,..,E), expect id
-            if (stackPos < 2)
+            if (stackPos < 2) {
+                setError(ERR_Syntax);
                 return 0;
+            }
 
             ExprTokenVectorIterator id = vectorAt(exprVector, stackPos - 2);
-            if (id->type != Terminal)
+            if (id->type != Terminal) {
+                setError(ERR_Syntax);
                 return 0;
+            }
 
-            if (id->token->type != STT_Identifier)
+            if (id->token->type != STT_Identifier) {
+                setError(ERR_Syntax);
                 return 0;
+            }
         }
-        else
+        else {
+            setError(ERR_Syntax);
             return 0;
+        }
     }
-    else
+    else {
+        setError(ERR_Syntax);
         return 0;
+    }
 
     generateInstruction(IST_Push, 0, first->stackOffset, 0);
     if (getError())
@@ -323,8 +333,10 @@ uint8_t reduce(ExprToken *topTerm)
                         nextTerm->stackOffset = retValStackPos;
                         vectorPopNExprToken(exprVector, 2);
                     }
-                    else
+                    else {
+                        setError(ERR_Syntax);
                         return 0;
+                    }
                 }
                 else if (nextTerm->type == NonTerminal) { // we have E) and are not sure what it is
                     ExprTokenVectorIterator exprBackup = nextTerm;
@@ -344,15 +356,15 @@ uint8_t reduce(ExprToken *topTerm)
                             return 0;
 
                         uint32_t paramCount = 0;
-                        if (!reduceMultiparamFunc(stackPos, &paramCount)) {
-                            setError(ERR_Syntax);
+                        if (!reduceMultiparamFunc(stackPos, &paramCount))
                             return 0;
-                        }
 
                         vectorPopNExprToken(exprVector, (paramCount << 1) + 1); // paramCount * 2 + 1 (every E has one terminal in front of it and there is one ending ')')
                         nextTerm = vectorBack(exprVector);
-                        if (nextTerm->type != Terminal || (nextTerm->type == Terminal && nextTerm->token->type != STT_Identifier))
+                        if (nextTerm->type != Terminal || (nextTerm->type == Terminal && nextTerm->token->type != STT_Identifier)) {
+                            setError(ERR_Syntax);
                             return 0;
+                        }
 
                         generateCall(nextTerm->token, paramCount);
                         if (getError())
@@ -396,14 +408,20 @@ uint8_t reduce(ExprToken *topTerm)
                             vectorPopNExprToken(exprVector, 2);
                         }
                     }
-                    else
+                    else {
+                        setError(ERR_Syntax);
                         return 0;
+                    }
                 }
-                else
+                else {
+                    setError(ERR_Syntax);
                     return 0;
+                }
             }
-            else
+            else {
+                setError(ERR_Syntax);
                 return 0;
+            }
             break;
         }
         default:
@@ -495,10 +513,8 @@ uint32_t expr()
                 break;
             }
             case High:
-                if (!reduce(topToken)) {
-                    setError(ERR_Syntax);
+                if (!reduce(topToken))
                     return 0;
-                }
 
                 continue;
             case Error:
