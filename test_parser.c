@@ -60,8 +60,8 @@ static ConstInstructionVectorIterator end1, end2, itr1, itr2;
 #define CLEANUP                             \
     clearError();                           \
     instTestFailed = 1;                     \
-    vectorClearToken(expectedMainInstrVector);  \
-    vectorClearToken(expectedFuncInstrVector);  \
+    vectorClearInstruction(expectedMainInstrVector);  \
+    vectorClearInstruction(expectedFuncInstrVector);  \
     if (constantsTable)                         \
         freeValueVector(&constantsTable);       \
     if (addressTable)                           \
@@ -123,11 +123,11 @@ void printInstruction(FILE *file, int line, Instruction *ist)
             fprintf(file, "%15s", "Jmp"); break;
         case IST_Jmpz:
             fprintf(file, "%15s", "Jmpz"); break;
-        case IST_Push:        
+        case IST_Push:
             fprintf(file, "%15s", "Push"); break;
-        case IST_PushC:       
+        case IST_PushC:
             fprintf(file, "%15s", "PushC"); break;
-        case IST_Reserve:     
+        case IST_Reserve:
             fprintf(file, "%15s", "Reserve"); break;
         case IST_Pop:
             fprintf(file, "%15s", "Pop"); break;
