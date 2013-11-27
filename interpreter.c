@@ -409,9 +409,9 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
                             break;
                         default:
-                        resVal->type = VT_Bool;
-                        resVal->data.b = 0;
-                        break;
+                            resVal->type = VT_Bool;
+                            resVal->data.b = 0;
+                            break;
                     }
 
                 }
@@ -427,7 +427,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 bVal = vectorAt(stack, stackPtr + instructionPtr->b);
                 vectorPushDefaultValue(stack);
                 resVal = vectorAt(stack, stackPtr + instructionPtr->res);
-                if (aVal->type == bVal->type ) {
+                if (aVal->type == bVal->type) {
                     switch (aVal->type) {
                         case VT_Integer:
                             resVal->data.b = aVal->data.i != bVal->data.i;
