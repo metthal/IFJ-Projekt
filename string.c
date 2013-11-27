@@ -18,16 +18,37 @@ static inline void* _initStringSize(String *ps, uint32_t size)
     return ps->data;
 }
 
+/**
+ * Initializes string to default size.
+ * Sets ERR_Allocation if memory couldn't be allocated.
+ *
+ * @param  ps  String to initialize
+ */
 void initString(String *ps)
 {
     _initStringSize(ps, STRING_DEFAULT_SIZE);
 }
 
+/**
+ * Initializes string with size allocated specified by argument.
+ * Sets ERR_Allocation if memory couldn't be allocated.
+ *
+ * @param  ps    String to initialize
+ * @param  size  Size to allocate
+ */
 void initStringSize(String *ps, uint32_t size)
 {
     _initStringSize(ps, size);
 }
 
+/**
+ * Initializes string with C string.
+ * Sets ERR_Allocation if memory couldn't be allocated.
+ *
+ * @param  ps   String to initialize
+ * @param  str  Char buffer
+ * @param  len  Length without \0
+ */
 void initStringS(String *ps, const char *str, uint32_t len)
 {
     ps->size = len + 1;
@@ -41,6 +62,13 @@ void initStringS(String *ps, const char *str, uint32_t len)
     }
 }
 
+/**
+ * Initializes string with another string.
+ * Sets ERR_Allocation if memory couldn't be allocated.
+ *
+ * @param  ps   String to initialize
+ * @param  src  Source string
+ */
 void initStringSet(String *ps, const String *src)
 {
     ps->size = src->size;
@@ -53,6 +81,11 @@ void initStringSet(String *ps, const String *src)
     }
 }
 
+/**
+ * Frees buffer and resets members.
+ *
+ * @param  ps  String to delete
+ */
 void deleteString(String *ps)
 {
     if (ps != NULL) {
@@ -63,6 +96,12 @@ void deleteString(String *ps)
     }
 }
 
+/**
+ * Creates new String with default size.
+ * Sets ERR_Allocation if memory couldn't be allocated.
+ *
+ * @return  New String
+ */
 String* newString()
 {
     String *ps = malloc(sizeof(String));
@@ -78,6 +117,14 @@ String* newString()
     return ps;
 }
 
+/**
+ * Create new String with specified size.
+ * Sets ERR_Allocation if memory couldn't be allocated.
+ *
+ * @param   size  Size to alloc
+ *
+ * @return        New String
+ */
 String* newStringSize(uint32_t size)
 {
     String *ps = malloc(sizeof(String));
@@ -93,6 +140,15 @@ String* newStringSize(uint32_t size)
     return ps;
 }
 
+/**
+ * Create new String from C string.
+ * Sets ERR_Allocation if memory couldn't be allocated.
+ *
+ * @param   str   Char buffer
+ * @param   len   Length without \0
+ *
+ * @return        New String
+ */
 String* newStringS(const char *str, uint32_t len)
 {
     String *ps = malloc(sizeof(String));
@@ -115,6 +171,11 @@ String* newStringS(const char *str, uint32_t len)
     return ps;
 }
 
+/**
+ * Frees whole string and sets pointer to NULL;
+ *
+ * @param  pps  Pointer to set
+ */
 void freeString(String **pps) {
     if (pps != NULL) {
         if (*pps != NULL) {
@@ -154,6 +215,14 @@ void stringResize(String *ps, uint32_t size)
     }
 }
 
+/**
+ * Clones string into new string.
+ * Sets ERR_Allocation if memory couldn't be allocated.
+ *
+ * @param   ps  String to clone
+ *
+ * @return      New string
+ */
 String* stringClone(String *ps)
 {
     String *nps = newStringSize(ps->size);
@@ -164,6 +233,16 @@ String* stringClone(String *ps)
     return nps;
 }
 
+/**
+ * Returns new string from offset with length.
+ * Sets ERR_Allocation if memory couldn't be allocated.
+ *
+ * @param   ps      Source String
+ * @param   offset  Starts from 0
+ * @param   length  Length of substring
+ *
+ * @return          New substring
+ */
 String* stringSubstr(const String *ps, uint32_t offset, uint32_t length)
 {
     String *nps = newStringSize(ps->size);
@@ -175,12 +254,24 @@ String* stringSubstr(const String *ps, uint32_t offset, uint32_t length)
     return nps;
 }
 
+/**
+ * Empties string.
+ *
+ * @param  ps  String to empty
+ */
 void stringEmpty(String *ps)
 {
     ps->data[0] = '\0';
     ps->length = 1;
 }
 
+/**
+ * Pushes char to string.
+ * Sets ERR_Allocation if memory couldn't be allocated.
+ *
+ * @param  ps  String to push into
+ * @param  c   Char to push
+ */
 void stringPush(String *ps, char c)
 {
     if (!(ps->length < ps->size)) {
@@ -193,6 +284,14 @@ void stringPush(String *ps, char c)
     ps->length++;
 }
 
+/**
+ * Pops char from string.
+ * Sets ERR_Allocation if memory couldn't be allocated.
+ *
+ * @param   ps  String to pop from
+ *
+ * @return      Popped char
+ */
 char stringPop(String *ps)
 {
     char c = ps->data[ps->length - 2];
@@ -206,6 +305,13 @@ char stringPop(String *ps)
     return c;
 }
 
+/**
+ * Copies value from source string to destination string.
+ * Sets ERR_Allocation if memory couldn't be allocated.
+ *
+ * @param  src   Source string
+ * @param  dest  Destination string
+ */
 void stringCopy(const String *src, String *dest)
 {
     if (!_stringResizeRaw(dest, src->length)) {
@@ -215,6 +321,13 @@ void stringCopy(const String *src, String *dest)
     dest->length = src->length;
 }
 
+/**
+ * Sets destination string value to source string value.
+ * Sets ERR_Allocation if memory couldn't be allocated.
+ *
+ * @param  dest  Destination string
+ * @param  src   Source string
+ */
 void stringSet(String *dest, String *src)
 {
     if (!_stringResizeRaw(dest, src->length)) {
@@ -224,6 +337,14 @@ void stringSet(String *dest, String *src)
     dest->length = src->length;
 }
 
+/**
+ * Sets string to C string value.
+ * Sets ERR_Allocation if memory couldn't be allocated.
+ *
+ * @param  dest  String to set
+ * @param  str   C string
+ * @param  len   C string length
+ */
 void stringSetS(String *dest, const char *str, uint32_t len)
 {
     if (!_stringResizeRaw(dest, len + 1)) {
@@ -234,6 +355,13 @@ void stringSetS(String *dest, const char *str, uint32_t len)
     dest->length = len + 1;
 }
 
+/**
+ * Concatenates source string into destination string.
+ * Sets ERR_Allocation if memory couldn't be allocated.
+ *
+ * @param  dest  Destination string
+ * @param  src   Source string
+ */
 void stringAdd(String *dest, String *src)
 {
     uint32_t newLength = dest->length + src->length - 1;
@@ -246,6 +374,14 @@ void stringAdd(String *dest, String *src)
     dest->length = newLength;
 }
 
+/**
+ * Concatenates source C string into destination string.
+ * Sets ERR_Allocation if memory couldn't be allocated.
+ *
+ * @param  dest  Destination string
+ * @param  src   Source C string
+ * @param  len   Source C string length
+ */
 void stringAddS(String *dest, const char *src, uint32_t len)
 {
     uint32_t newLength = dest->length + len;
@@ -259,6 +395,13 @@ void stringAddS(String *dest, const char *src, uint32_t len)
     dest->data[dest->length - 1] = '\0';
 }
 
+/**
+ * Returns string length without \0.
+ *
+ * @param   ps  String
+ *
+ * @return      String length
+ */
 uint32_t stringLength(const String *ps)
 {
     return ps->length - 1;
@@ -279,6 +422,14 @@ static inline int16_t _stringCompareSS(const char *a, uint32_t aLen, const char 
     return *s1 - *s2;
 }
 
+/**
+ * Compares two strings. Returns negative if b > a, zero if a = b, and positive if a > b.
+ *
+ * @param   a  String A
+ * @param   b  String B
+ *
+ * @return     Result of comparison
+ */
 int16_t stringCompare(const String *a, const String *b)
 {
     return _stringCompareSS(a->data, a->length - 1, b->data, b->length - 1);
