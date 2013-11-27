@@ -40,7 +40,19 @@ void initStringS(String *ps, const char *str, uint32_t len)
         memcpy(ps->data, str, len);
         ps->data[len] = '\0';
     } else {
-        // init failed
+        // TODO init failed
+    }
+}
+
+void initStringSet(String *ps, const String *src)
+{
+    ps->size = src->size;
+    ps->length = src->length;
+    ps->data = malloc(sizeof(char) * src->size);
+    if (ps->data != NULL) {
+        memcpy(ps->data, src->data, sizeof(char) * src->length);
+    } else {
+        // TODO init failed
     }
 }
 

@@ -46,6 +46,7 @@ String* intToString(int num)
     return tmp;
 }
 
+// String shouldn't be initialized
 int intToStringE(int num, String *str)
 {
     // See intToString for explanation
@@ -53,9 +54,9 @@ int intToStringE(int num, String *str)
     int written = sprintf(buffer, "%d", num);
     if (str != NULL) {
         if (written > 0)
-            stringSetS(str, buffer, written);
+            initStringS(str, buffer, written);
         else
-            stringEmpty(str);
+            initString(str);
     }
     return written;
 }
@@ -79,6 +80,7 @@ String* doubleToString(double num)
     return tmp;
 }
 
+// String shouldn't be initialized
 int doubleToStringE(double num, String *str)
 {
     // See doubleToString for explanation
@@ -86,9 +88,9 @@ int doubleToStringE(double num, String *str)
     int written = sprintf(buffer, "%g", num);
     if (str != NULL) {
         if (written > 0)
-            stringSetS(str, buffer, written);
+            initStringS(str, buffer, written);
         else
-            stringEmpty(str);
+            initString(str);
     }
     return written;
 }

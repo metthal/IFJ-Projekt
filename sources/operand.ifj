@@ -1,0 +1,12 @@
+<?php
+
+$a = 1;
+$b = 2;
+$c = 2.0;
+$d = $a === $b;
+$e = $a !== $b;
+$f = $b === $c;
+$g = $b !== $c;
+$h = doubleval($b) === $c;
+$x = put_string(intval($d), " ", $e, " [", $f, "] ", $g, " ", $h, "\n");
+$y = $b / intval(""); // Should fail

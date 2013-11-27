@@ -67,6 +67,43 @@ int valueToInt(const Value *val)
     return 0;
 }
 
+void valueToString(const Value *val, String *str)
+{
+    switch (val->type) {
+        case VT_Null:
+            initString(str);
+            break;
+
+        case VT_Bool:
+            if (val->data.b)
+                initStringS(str, "1", 1);
+            else
+                initString(str);
+            break;
+
+        case VT_Integer:
+            intToStringE(val->data.i, str);
+            break;
+
+        case VT_Double:
+            doubleToStringE(val->data.d, str);
+            break;
+
+        case VT_String:
+            initStringSet(str, &(val->data.s));
+            break;
+
+        case VT_Undefined:
+            setError(ERR_UndefVariable);
+            return;
+
+        case VT_StackPtr:
+        case VT_InstructionPtr:
+            setError(ERR_Internal);
+            return;
+    }
+}
+
 void boolval(const Value *val, Value *ret)
 {
     ret->data.b = valueToBool(val);
@@ -128,13 +165,11 @@ void findString(Value *ret, const Value *a, const Value *b)
             break;
 
         case VT_Integer:
-            initString(&c);
             intToStringE(a->data.i, &c);
             x = &c;
             break;
 
         case VT_Double:
-            initString(&c);
             doubleToStringE(a->data.d, &c);
             x = &c;
             break;
@@ -153,6 +188,9 @@ void findString(Value *ret, const Value *a, const Value *b)
             return;
     }
 
+    if (getError())
+        return;
+
     switch (b->type) {
         case VT_Null:
             initString(&d);
@@ -168,13 +206,11 @@ void findString(Value *ret, const Value *a, const Value *b)
             break;
 
         case VT_Integer:
-            initString(&d);
             intToStringE(b->data.i, &d);
             y = &d;
             break;
 
         case VT_Double:
-            initString(&d);
             doubleToStringE(b->data.d, &d);
             y = &d;
             break;
@@ -195,10 +231,14 @@ void findString(Value *ret, const Value *a, const Value *b)
             break;
     }
 
-    if (!getError()) {
-        ret->type = VT_Integer;
-        ret->data.i = stringSubstrSearch(x, y);
+    if (getError()) {
+        if (x == &c)
+            deleteString(&c);
+        return;
     }
+
+    ret->type = VT_Integer;
+    ret->data.i = stringSubstrSearch(x, y);
 
     if (x == &c)
         deleteString(&c);
@@ -257,14 +297,12 @@ void getSubstring(const Value *val, Value *ret, int start, int end)
             break;
 
         case VT_Integer: {
-            initString(&str);
             len = intToStringE(val->data.i, &str);
             workingStr = &str;
             break;
         }
 
         case VT_Double: {
-            initString(&str);
             len = doubleToStringE(val->data.d, &str);
             workingStr = &str;
             break;
@@ -317,7 +355,8 @@ void putString(Value *ret, Value *firstVal, int count)
                 break;
 
             case VT_Bool:
-                putchar('1');
+                if (firstVal->data.b)
+                    putchar('1');
                 break;
 
             case VT_Integer:
@@ -365,22 +404,19 @@ void sortString(const Value *val, Value *ret)
             break;
 
         case VT_Integer: {
-            initString(&(ret->data.s));
             intToStringE(val->data.i, &(ret->data.s));
             stringCharSort(&(val->data.s));
             break;
         }
 
         case VT_Double: {
-            initString(&(ret->data.s));
             doubleToStringE(val->data.d, &(ret->data.s));
             stringCharSort(&(val->data.s));
             break;
         }
 
         case VT_String:
-            initString(&(ret->data.s));
-            stringCopy(&(val->data.s), &(ret->data.s));
+            initStringSet(&(ret->data.s), &(val->data.s));
             stringCharSort(&(ret->data.s));
             break;
 
@@ -434,41 +470,6 @@ void strLen(const Value *val, Value *ret)
 
 void strval(const Value *val, Value *ret)
 {
-    switch (val->type) {
-        case VT_Null:
-            initString(&(ret->data.s));
-            break;
-
-        case VT_Bool:
-            if (val->data.b)
-                initStringS(&(ret->data.s), "1", 1);
-            else
-                initString(&(ret->data.s));
-            break;
-
-        case VT_Integer:
-            initString(&(ret->data.s));
-            intToStringE(val->data.i, &(ret->data.s));
-            break;
-
-        case VT_Double:
-            initString(&(ret->data.s));
-            doubleToStringE(val->data.d, &(ret->data.s));
-            break;
-
-        case VT_String:
-            initString(&(ret->data.s));
-            stringCopy(&(val->data.s), &(ret->data.s));
-            break;
-
-        case VT_Undefined:
-            setError(ERR_UndefVariable);
-            return;
-
-        case VT_StackPtr:
-        case VT_InstructionPtr:
-            setError(ERR_Internal);
-            return;
-    }
+    valueToString(val, &(ret->data.s));
     ret->type = VT_String;
 }

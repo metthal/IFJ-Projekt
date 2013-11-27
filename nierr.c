@@ -82,9 +82,11 @@ void printError()
             printErrorF("Substring parameters are wrong.\n");
             break;
         case ERR_OperandTypes:
-            printf("Invalid operand type.\n");
+            printErrorF("Invalid operand type.\n");
+            break;
         case ERR_DivideByZero:
-            printf("Division by zero error.\n");
+            printErrorF("Division by zero.\n");
+            break;
         default:
             printErrorF("Undocumented error.\n");
             break;

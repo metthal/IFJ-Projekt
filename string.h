@@ -21,6 +21,7 @@ static uint16_t const STRING_DEFAULT_SIZE = 16;
 void initString(String *ps);
 void initStringSize(String *ps, uint32_t size);
 void initStringS(String *ps, const char *str, uint32_t len);
+void initStringSet(String *ps, const String *src);
 void deleteString(String *ps);
 
 String* newString();

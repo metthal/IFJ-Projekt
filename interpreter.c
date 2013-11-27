@@ -28,6 +28,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
             case IST_MovC:
                 resVal = vectorAt(stack, stackPtr + instructionPtr->res);
+                deleteValue(resVal);
                 copyValue(vectorAtConst(constTable, instructionPtr->a), resVal);
                 break;
 
@@ -239,15 +240,15 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                    resVal->data.i = aVal->data.i + bVal->data.i;
                    resVal->type = VT_Integer;
                 }
-                else if (aVal->type == VT_Double || bVal->type == VT_Integer) {
+                else if (aVal->type == VT_Double && bVal->type == VT_Integer) {
                    resVal->data.d = aVal->data.d + bVal->data.i;
                    resVal->type = VT_Double;
                 }
-                else if (aVal->type == VT_Integer || bVal->type == VT_Double) {
+                else if (aVal->type == VT_Integer && bVal->type == VT_Double) {
                    resVal->data.d = aVal->data.i + bVal->data.d;
                    resVal->type = VT_Double;
                 }
-                else if (aVal->type == VT_Double || bVal->type == VT_Double) {
+                else if (aVal->type == VT_Double && bVal->type == VT_Double) {
                    resVal->data.d = aVal->data.d + bVal->data.d;
                    resVal->type = VT_Double;
                 }
@@ -347,12 +348,33 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 break;
 
             case IST_Concat:
+                // Test if first operand is string
                 aVal = vectorAt(stack, stackPtr + instructionPtr->a);
-                bVal = vectorAt(stack, stackPtr + instructionPtr->b);
+                if (aVal->type != VT_String) {
+                    setError(ERR_OperandTypes);
+                    break;
+                }
+
+                // Copy aVal to resVal
                 vectorPushDefaultValue(stack);
                 resVal = vectorAt(stack, stackPtr + instructionPtr->res);
-                strval(aVal,bVal);
-                copyValue(aVal, resVal);
+                initStringSet(&(resVal->data.s), &(aVal->data.s));
+
+                // Add bVal, thus concatenating
+                bVal = vectorAt(stack, stackPtr + instructionPtr->b);
+                if (bVal->type == VT_String)
+                    stringAdd(&(resVal->data.s), &(bVal->data.s));
+                else {
+                    String tmp;
+                    valueToString(bVal, &tmp);
+                    if (getError())
+                        return;
+
+                    stringAdd(&(resVal->data.s), &tmp);
+                    deleteString(&tmp);
+                }
+
+                resVal->type = VT_String;
                 break;
 
             case IST_Equal:
@@ -418,12 +440,8 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                             break;
 
                         case VT_String:
-                            if (stringCompare(&aVal->data.s,&bVal->data.s) != 0)
-                                resVal->data.b = 1;
-                            else
-                                resVal->data.b = 0;
+                            resVal->data.b = stringCompare(&(aVal->data.s), &(bVal->data.s)) != 0;
                             resVal->type = VT_Bool;
-
                             break;
 
                         case VT_Bool:
@@ -440,7 +458,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 }
                 else {
                     resVal->type = VT_Bool;
-                    resVal->data.b = 0;
+                    resVal->data.b = 1;
                 }
 
                 break;
@@ -483,10 +501,8 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                     }
 
                 }
-                else {
-                    resVal->type = VT_Bool;
-                    resVal->data.b = 0;
-                }
+                else
+                    setError(ERR_OperandTypes);
 
                 break;
 
@@ -529,10 +545,8 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                     }
 
                 }
-                else {
-                    resVal->type = VT_Bool;
-                    resVal->data.b = 0;
-                }
+                else
+                    setError(ERR_OperandTypes);
 
                 break;
 
@@ -575,10 +589,8 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                     }
 
                 }
-                else {
-                    resVal->type = VT_Bool;
-                    resVal->data.b = 0;
-                }
+                else
+                    setError(ERR_OperandTypes);
 
                 break;
 
@@ -622,10 +634,8 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                     }
 
                 }
-                else {
-                    resVal->type = VT_Bool;
-                    resVal->data.b = 0;
-                }
+                else
+                    setError(ERR_OperandTypes);
 
                 break;
 
