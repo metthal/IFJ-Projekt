@@ -50,7 +50,7 @@ typedef union {
     Function func;
 } SymbolData;
 
-typedef struct {
+typedef struct sSymbol {
     SymbolData *data;
     SymbolType type;
     const String *key;

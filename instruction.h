@@ -96,6 +96,8 @@ typedef struct
     int32_t res;
 } Instruction;
 
+struct sSymbol;
+
 Instruction* newInstruction();
 
 void initInstruction(Instruction *pt);
@@ -106,12 +108,14 @@ void freeInstruction(Instruction **ppt);
 
 void copyInstruction(const Instruction *src, Instruction *dest);
 
-void generateCall(const Token *id, uint32_t paramCount);
+void generateCall(struct sSymbol *symbol, InstructionCode instCode, uint32_t paramCount);
 
 void generateInstruction(InstructionCode code, int32_t res, int32_t a, int32_t b);
 
 uint32_t generateEmptyInstruction();
 
 void fillInstruction(uint32_t index, InstructionCode code, int32_t res, int32_t a, int32_t b);
+
+struct sSymbol* fillInstFuncInfo(Token *funcToken, InstructionCode *instCode, int64_t *paramCount);
 
 #endif

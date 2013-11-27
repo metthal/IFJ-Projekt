@@ -14,10 +14,15 @@
 extern ConstTokenVectorIterator tokensIt;
 extern Context *currentContext;
 extern Vector *constantsTable;
+extern SymbolTable *globalSymbolTable;
 
 static Vector *exprVector = NULL;   ///< Bottom-up parser stack for @ref ExprVector
 static ExprToken endToken;          ///< Token that should be located on the bottom of the stack, used when stack has no topmost terminal token
 static uint32_t currentStackPos;    ///< Current position in the local stack frame
+
+static InstructionCode currentFuncInstCode;
+static int64_t currentFuncParamLimit;
+static Symbol *currentFuncSymbol;
 
 /**
  * Defines type of the token located on the bottom-up parser stack
@@ -179,7 +184,7 @@ static inline uint8_t tokenTypeToInstruction(uint8_t tokenType)
  *
  * @return Returns 1 in case of success, otherwise 0
  **/
-uint8_t reduceMultiparamFunc(uint32_t stackPos, uint32_t *paramCount)
+uint8_t reduceMultiparamFunc(uint32_t stackPos, uint32_t *paramCount, uint32_t *totalParamCount)
 {
     if (stackPos == 0 || paramCount == NULL)
         return 0;
@@ -188,7 +193,7 @@ uint8_t reduceMultiparamFunc(uint32_t stackPos, uint32_t *paramCount)
     ExprTokenVectorIterator second = vectorAt(exprVector, stackPos - 1);
     if (first->type == NonTerminal) { // got E,E..) expect , or (
         if (second->type == Terminal && second->token->type == STT_Comma) { // we got ,E,E..), enter recursion
-            if (!reduceMultiparamFunc(stackPos - 2, paramCount))
+            if (!reduceMultiparamFunc(stackPos - 2, paramCount, totalParamCount))
                 return 0;
         }
         else if (second->type == Terminal && second->token->type == STT_LeftBracket) { // got (E,..,E), expect id
@@ -198,15 +203,12 @@ uint8_t reduceMultiparamFunc(uint32_t stackPos, uint32_t *paramCount)
             }
 
             ExprTokenVectorIterator id = vectorAt(exprVector, stackPos - 2);
-            if (id->type != Terminal) {
+            if (id->type != Terminal || (id->type == Terminal && id->token->type != STT_Identifier)) {
                 setError(ERR_Syntax);
                 return 0;
             }
 
-            if (id->token->type != STT_Identifier) {
-                setError(ERR_Syntax);
-                return 0;
-            }
+            currentFuncSymbol = fillInstFuncInfo(id->token, &currentFuncInstCode, &currentFuncParamLimit);
         }
         else {
             setError(ERR_Syntax);
@@ -218,11 +220,16 @@ uint8_t reduceMultiparamFunc(uint32_t stackPos, uint32_t *paramCount)
         return 0;
     }
 
-    generateInstruction(IST_Push, 0, first->stackOffset, 0);
-    if (getError())
-        return 0;
+    // if it doesn't matter on parameter count or we reached the limit
+    if (currentFuncParamLimit == -1 || *paramCount < currentFuncParamLimit) {
+        generateInstruction(IST_Push, 0, first->stackOffset, 0);
+        if (getError())
+            return 0;
 
-    (*paramCount)++;
+        (*paramCount)++;
+    }
+    (*totalParamCount)++;
+
     return 1;
 }
 
@@ -325,7 +332,8 @@ uint8_t reduce(ExprToken *topTerm)
                     if (nextTerm->type == Terminal && nextTerm->token->type == STT_Identifier) {
                         uint32_t retValStackPos = currentStackPos++;
                         generateInstruction(IST_Reserve, 0, 1, 0);
-                        generateCall(nextTerm->token, 0);
+                        currentFuncSymbol = fillInstFuncInfo(nextTerm->token, &currentFuncInstCode, &currentFuncParamLimit);
+                        generateCall(currentFuncSymbol, currentFuncInstCode, 0);
                         if (getError())
                             return 0;
 
@@ -355,18 +363,18 @@ uint8_t reduce(ExprToken *topTerm)
                         if (getError())
                             return 0;
 
-                        uint32_t paramCount = 0;
-                        if (!reduceMultiparamFunc(stackPos, &paramCount))
+                        uint32_t paramCount = 0, totalParamCount = 0;
+                        if (!reduceMultiparamFunc(stackPos, &paramCount, &totalParamCount))
                             return 0;
 
-                        vectorPopNExprToken(exprVector, (paramCount << 1) + 1); // paramCount * 2 + 1 (every E has one terminal in front of it and there is one ending ')')
+                        vectorPopNExprToken(exprVector, (totalParamCount << 1) + 1); // paramCount * 2 + 1 (every E has one terminal in front of it and there is one ending ')')
                         nextTerm = vectorBack(exprVector);
                         if (nextTerm->type != Terminal || (nextTerm->type == Terminal && nextTerm->token->type != STT_Identifier)) {
                             setError(ERR_Syntax);
                             return 0;
                         }
 
-                        generateCall(nextTerm->token, paramCount);
+                        generateCall(currentFuncSymbol, currentFuncInstCode, paramCount);
                         if (getError())
                             return 0;
 
@@ -383,12 +391,16 @@ uint8_t reduce(ExprToken *topTerm)
                                 uint32_t retValStackPos = currentStackPos++;
                                 generateInstruction(IST_Reserve, 0, 1, 0);
 
-                                // parameter
-                                generateInstruction(IST_Push, 0, exprBackup->stackOffset, 0);
-                                if (getError())
-                                    return 0;
+                                currentFuncSymbol = fillInstFuncInfo(nextTerm->token, &currentFuncInstCode, &currentFuncParamLimit);
 
-                                generateCall(nextTerm->token, 1);
+                                // parameter
+                                if (currentFuncParamLimit == -1 || currentFuncParamLimit > 0) {
+                                    generateInstruction(IST_Push, 0, exprBackup->stackOffset, 0);
+                                    if (getError())
+                                        return 0;
+                                }
+
+                                generateCall(currentFuncSymbol, currentFuncInstCode, currentFuncParamLimit == 0 ? 0 : 1);
                                 if (getError())
                                     return 0;
 

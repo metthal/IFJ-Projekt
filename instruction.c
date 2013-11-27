@@ -60,118 +60,92 @@ void processDefaultArg(Context *context, uint32_t *paramCount)
     }
 }
 
-void generateCall(const Token *id, uint32_t paramCount)
+void generateCall(Symbol *symbol, InstructionCode instCode, uint32_t paramCount)
 {
     Instruction inst;
     initInstruction(&inst);
+    inst.code = instCode;
     uint8_t undef = 1, badParamCount = 0;
 
-    Symbol *symbol = symbolTableFind(globalSymbolTable, &id->str);
-    if (symbol == NULL) {
-        switch(id->str.data[0]) {
-            case 'b':
-                if (stringCompareS(&id->str, "boolval", 7) == 0) {
-                    if (paramCount == 1)
-                        inst.code = IST_BoolVal;
-                    else
-                        badParamCount = 1;
-                    undef = 0;
-                }
-                break;
-            case 'd':
-                if (stringCompareS(&id->str, "doubleval", 9) == 0) {
-                    if (paramCount == 1)
-                        inst.code = IST_DoubleVal;
-                    else
-                        badParamCount = 1;
-                    undef = 0;
-                }
-                break;
-            case 'f':
-                if (stringCompareS(&id->str, "find_string", 11) == 0) {
-                    if (paramCount == 2)
-                        inst.code = IST_FindString;
-                    else
-                        badParamCount = 1;
-                    undef = 0;
-                }
-                break;
-            case 'g':
-                if (stringCompareS(&id->str, "get_string", 10) == 0) {
-                    if (paramCount == 0)
-                        inst.code = IST_GetString;
-                    else
-                        badParamCount = 1;
-                    undef = 0;
-                }
-                else if (stringCompareS(&id->str, "get_substring", 13) == 0) {
-                    if (paramCount == 3)
-                        inst.code = IST_GetSubstring;
-                    else
-                        badParamCount = 1;
-                    undef = 0;
-                }
-                break;
-            case 'i':
-                if (stringCompareS(&id->str, "intval", 6) == 0) {
-                    if (paramCount == 1)
-                        inst.code = IST_IntVal;
-                    else
-                        badParamCount = 1;
-                    undef = 0;
-                }
-                break;
-            case 'p':
-                if (stringCompareS(&id->str, "put_string", 10) == 0) {
-                    // Set number of parameters as operand.
-                    inst.code = IST_PutString;
-                    inst.a = paramCount;
-                    undef = 0;
-                }
-                break;
-            case 's':
-                if (stringCompareS(&id->str, "sort_string", 11) == 0) {
-                    if (paramCount == 1)
-                        inst.code = IST_SortString;
-                    else
-                        badParamCount = 1;
-                    undef = 0;
-                }
-                else if (stringCompareS(&id->str, "strlen", 6) == 0) {
-                    if (paramCount == 1)
-                        inst.code = IST_StrLen;
-                    else
-                        badParamCount = 1;
-                    undef = 0;
-                }
-                else if (stringCompareS(&id->str, "strval", 6) == 0) {
-                    if (paramCount == 1)
-                        inst.code = IST_StrVal;
-                    else
-                        badParamCount = 1;
-                    undef = 0;
-                }
-                break;
-        }
-    }
-    else {
-        // Test for too many arguments
-        if (symbol->data->func.context.argumentCount >= paramCount) {
-            // Default parameters
-            processDefaultArg(&(symbol->data->func.context), &paramCount);
+    switch(instCode) {
+        case IST_BoolVal:
+            if (paramCount != 1)
+                badParamCount = 1;
 
-            // Test for too few arguments
-            if (symbol->data->func.context.argumentCount == paramCount) {
-                inst.code = IST_Call;
-                inst.a = symbol->data->func.functionAddressIndex;
+            undef = 0;
+            break;
+        case IST_DoubleVal:
+            if (paramCount != 1)
+                badParamCount = 1;
+
+            undef = 0;
+            break;
+        case IST_FindString:
+            if (paramCount != 2)
+                badParamCount = 1;
+
+            undef = 0;
+            break;
+        case IST_GetString:
+            if (paramCount != 0)
+                badParamCount = 1;
+
+            undef = 0;
+            break;
+        case IST_GetSubstring:
+            if (paramCount != 3)
+                badParamCount = 1;
+
+            undef = 0;
+            break;
+        case IST_IntVal:
+            if (paramCount != 1)
+                badParamCount = 1;
+
+            undef = 0;
+            break;
+        case IST_PutString:
+            // Set number of parameters as operand.
+            inst.a = paramCount;
+            undef = 0;
+            break;
+        case IST_SortString:
+            if (paramCount != 1)
+                badParamCount = 1;
+
+            undef = 0;
+            break;
+        case IST_StrLen:
+            if (paramCount != 1)
+                inst.code = IST_StrLen;
+
+            undef = 0;
+            break;
+        case IST_StrVal:
+            if (paramCount != 1)
+                badParamCount = 1;
+
+            undef = 0;
+            break;
+        case IST_Call:
+            // Test for too many arguments
+            if (symbol->data->func.context.argumentCount >= paramCount) {
+                // Default parameters
+                processDefaultArg(&(symbol->data->func.context), &paramCount);
+
+                // Test for too few arguments
+                if (symbol->data->func.context.argumentCount == paramCount)
+                    inst.a = symbol->data->func.functionAddressIndex;
+                else
+                    badParamCount = 1;
             }
             else
                 badParamCount = 1;
-        }
-        else
-            badParamCount = 1;
 
-        undef = 0;
+            undef = 0;
+            break;
+        default:
+            return;
     }
 
     if (undef)
@@ -218,4 +192,77 @@ void fillInstruction(uint32_t index, InstructionCode code, int32_t res, int32_t 
         pt->a = a;
         pt->b = b;
     }
+}
+
+struct sSymbol* fillInstFuncInfo(Token *funcToken, InstructionCode *instCode, int64_t *paramCount)
+{
+    struct sSymbol *symbol = symbolTableFind(globalSymbolTable, &funcToken->str);
+    if (symbol== NULL) {
+        switch(funcToken->str.data[0]) {
+            case 'b':
+                if (stringCompareS(&funcToken->str, "boolval", 7) == 0) {
+                    *instCode = IST_BoolVal;
+                    *paramCount = 1;
+                }
+                break;
+            case 'd':
+                if (stringCompareS(&funcToken->str, "doubleval", 9) == 0) {
+                    *instCode = IST_DoubleVal;
+                    *paramCount = 1;
+                }
+                break;
+            case 'f':
+                if (stringCompareS(&funcToken->str, "find_string", 11) == 0) {
+                    *instCode = IST_FindString;
+                    *paramCount = 2;
+                }
+                break;
+            case 'g':
+                if (stringCompareS(&funcToken->str, "get_string", 10) == 0) {
+                    *instCode = IST_GetString;
+                    *paramCount = 0;
+                }
+                else if (stringCompareS(&funcToken->str, "get_substring", 13) == 0) {
+                    *instCode = IST_GetSubstring;
+                    *paramCount = 3;
+                }
+                break;
+            case 'i':
+                if (stringCompareS(&funcToken->str, "intval", 6) == 0) {
+                    *instCode = IST_IntVal;
+                    *paramCount = 1;
+                }
+                break;
+            case 'p':
+                if (stringCompareS(&funcToken->str, "put_string", 10) == 0) {
+                    *instCode = IST_PutString;
+                    *paramCount = -1;
+                }
+                break;
+            case 's':
+                if (stringCompareS(&funcToken->str, "sort_string", 11) == 0) {
+                    *instCode = IST_SortString;
+                    *paramCount = 1;
+                }
+                else if (stringCompareS(&funcToken->str, "strlen", 6) == 0) {
+                    *instCode = IST_StrLen;
+                    *paramCount = 1;
+                }
+                else if (stringCompareS(&funcToken->str, "strval", 6) == 0) {
+                    *instCode = IST_StrVal;
+                    *paramCount = 1;
+                }
+                break;
+            default:
+                *instCode = IST_Noop;
+                *paramCount = 0;
+                break;
+        }
+    }
+    else {
+        *instCode = IST_Call;
+        *paramCount = symbol->data->func.context.argumentCount;
+    }
+
+    return symbol;
 }
