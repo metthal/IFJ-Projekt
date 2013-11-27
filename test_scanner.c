@@ -201,6 +201,27 @@ SHOULD_EQUAL_STR("GetToken - string - string data", token->str.data, "string");
 token = nextToken();
 SHOULD_EQUAL("GetToken - string - EOF", token->type, STT_EOF);
 
+overwriteFile(filePath, "\"\\x\"");
+token = nextToken();
+SHOULD_EQUAL("GetToken - string", token->type, STT_String);
+SHOULD_EQUAL_STR("GetToken - string - string data", token->str.data, "\\x");
+token = nextToken();
+SHOULD_EQUAL("GetToken - string - EOF", token->type, STT_EOF);
+
+overwriteFile(filePath, "\"\\x\\\"\"");
+token = nextToken();
+SHOULD_EQUAL("GetToken - string", token->type, STT_String);
+SHOULD_EQUAL_STR("GetToken - string - string data", token->str.data, "\\x\"");
+token = nextToken();
+SHOULD_EQUAL("GetToken - string - EOF", token->type, STT_EOF);
+
+overwriteFile(filePath, "\"\\xa\\\"\"");
+token = nextToken();
+SHOULD_EQUAL("GetToken - string", token->type, STT_String);
+SHOULD_EQUAL_STR("GetToken - string - string data", token->str.data, "\\xa\"");
+token = nextToken();
+SHOULD_EQUAL("GetToken - string - EOF", token->type, STT_EOF);
+
 // "Ahoj
 // $svete!` \a\'\r\f\b\0\v"
 overwriteFile(filePath, "\"\\\"Ahoj\\n\\$vete\\x21` \\a\\'\\r\\f\\b\\0\\v\\\"\"");

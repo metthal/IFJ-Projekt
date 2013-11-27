@@ -680,10 +680,11 @@ void scannerFillToken(Token *token)
                     state = SS_StringEscapeHex1;
                 }
                 else {
-                    state = SS_String;
                     stringPush(tokenStr, '\\');
                     stringPush(tokenStr, 'x');
-                    stringPush(tokenStr, symbol);
+                    lastChar = symbol;
+                    charStreamSwitch = 0;
+                    state = SS_String;
                 }
                 hexCodeBackup = symbol;
                 break;
@@ -705,11 +706,12 @@ void scannerFillToken(Token *token)
                     state = SS_String;
                 }
                 else {
-                    state = SS_String;
                     stringPush(tokenStr, '\\');
                     stringPush(tokenStr, 'x');
                     stringPush(tokenStr, hexCodeBackup);
-                    stringPush(tokenStr, symbol);
+                    lastChar = symbol;
+                    charStreamSwitch = 0;
+                    state = SS_String;
                 }
                 break;
             }
