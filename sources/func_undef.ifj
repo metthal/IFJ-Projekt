@@ -1,0 +1,6 @@
+<?php
+
+function boo() {}
+
+$y = boo();
+$x = foo(1);

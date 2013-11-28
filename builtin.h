@@ -1,7 +1,26 @@
 #ifndef BUILTIN_H
 #define BUILTIN_H
 
+#include "string.h"
 #include "symbol.h"
+
+typedef enum
+{
+    BTI_None = 0,
+    BTI_BoolVal,
+    BTI_DoubleVal,
+    BTI_FindString,
+    BTI_GetString,
+    BTI_GetSubstring,
+    BTI_IntVal,
+    BTI_PutString,
+    BTI_SortString,
+    BTI_StrLen,
+    BTI_StrVal,
+} BuiltinCode;
+
+BuiltinCode getBuiltinCode(const String *str);
+int64_t getBuiltinParamCount(BuiltinCode code);
 
 uint8_t valueToBool(const Value *val);
 int valueToInt(const Value *val);

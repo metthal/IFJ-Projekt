@@ -1,4 +1,2 @@
 <?php
-
-$a = 5;
-$x = put_string("number:", $a,;
+$x = put_string("a".6.6.6."a\n");

@@ -1,7 +1,9 @@
 #ifndef INSTRUCTION_H
 #define INSTRUCTION_H
 
+#include "builtin.h"
 #include "token.h"
+#include "symbol.h"
 
 /** Instruction operand conventions:
  * Noop:
@@ -106,12 +108,14 @@ void freeInstruction(Instruction **ppt);
 
 void copyInstruction(const Instruction *src, Instruction *dest);
 
-void generateCall(const Token *id, uint32_t paramCount);
+void generateCall(const Symbol *symbol, BuiltinCode builtinCode, uint32_t paramCount);
 
 void generateInstruction(InstructionCode code, int32_t res, int32_t a, int32_t b);
 
 uint32_t generateEmptyInstruction();
 
 void fillInstruction(uint32_t index, InstructionCode code, int32_t res, int32_t a, int32_t b);
+
+Symbol* fillInstFuncInfo(const Token *funcToken, BuiltinCode *builtinCode, int64_t *paramCount);
 
 #endif

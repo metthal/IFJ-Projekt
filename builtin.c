@@ -7,6 +7,81 @@
 
 #define READ_BUFFER_SIZE 64
 
+BuiltinCode getBuiltinCode(const String *str)
+{
+    switch(str->data[0]) {
+        case 'b':
+            if (stringCompareS(str, "boolval", 7) == 0)
+                return BTI_BoolVal;
+            break;
+        case 'd':
+            if (stringCompareS(str, "doubleval", 9) == 0)
+                return BTI_DoubleVal;
+            break;
+        case 'f':
+            if (stringCompareS(str, "find_string", 11) == 0)
+                return BTI_FindString;
+            break;
+        case 'g':
+            if (stringCompareS(str, "get_string", 10) == 0)
+                return BTI_GetString;
+            else if (stringCompareS(str, "get_substring", 13) == 0)
+                return BTI_GetSubstring;
+            break;
+        case 'i':
+            if (stringCompareS(str, "intval", 6) == 0)
+                return BTI_IntVal;
+            break;
+        case 'p':
+            if (stringCompareS(str, "put_string", 10) == 0)
+                return BTI_PutString;
+            break;
+        case 's':
+            if (stringCompareS(str, "sort_string", 11) == 0)
+                return BTI_SortString;
+            else if (stringCompareS(str, "strlen", 6) == 0)
+                return BTI_StrLen;
+            else if (stringCompareS(str, "strval", 6) == 0)
+                return BTI_StrVal;
+            break;
+
+        default:
+            break;
+    }
+
+    return BTI_None;
+}
+
+int64_t getBuiltinParamCount(BuiltinCode code)
+{
+    switch (code) {
+        case BTI_None:
+            setError(ERR_Internal);
+            return 0;
+        case BTI_BoolVal:
+            return 1;
+        case BTI_DoubleVal:
+            return 1;
+        case BTI_FindString:
+            return 2;
+        case BTI_GetString:
+            return 0;
+        case BTI_GetSubstring:
+            return 3;
+        case BTI_IntVal:
+            return 1;
+        case BTI_PutString:
+            return -1;
+        case BTI_SortString:
+            return 1;
+        case BTI_StrLen:
+            return 1;
+        case BTI_StrVal:
+            return 1;
+    }
+    return 0;
+}
+
 uint8_t valueToBool(const Value *val)
 {
     switch (val->type) {
