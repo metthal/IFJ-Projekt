@@ -9,9 +9,9 @@ TAR = tar -czf
 STD_C99 = -std=c99
 STD_GNU99 = -std=gnu99
 
-CFLAGS = -Wall -Wextra -c
+CFLAGS = -Wall -Wextra -c -Wno-unused-function
 CFLAGS_RELEASE = -O2 -s
-CFLAGS_DEBUG = -O0 -g -DDEBUG -Wno-unused-function
+CFLAGS_DEBUG = -O0 -g -DDEBUG
 CFLAGS_PROFILE = $(CFLAGS_DEBUG) -pg
 
 LFLAGS =
