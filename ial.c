@@ -233,10 +233,10 @@ uint32_t* stringSubstrSearchBuildTable(const char *str, uint32_t len)
 
 static inline uint32_t _stringSubstrSearchSSO(const char *haystack, uint32_t haystackLen, const char *needle, uint32_t needleLen, uint32_t offset)
 {
-    uint32_t haystackIndex = offset, needleIndex = 0, result = haystackLen;
+    uint32_t haystackIndex = offset, needleIndex = 0, result = (uint32_t)-1;
     uint32_t *table = stringSubstrSearchBuildTable(needle, needleLen);
     if (!table) {
-        return haystackLen;
+        return result;
     }
 
     while (haystackIndex + needleIndex < haystackLen) {
