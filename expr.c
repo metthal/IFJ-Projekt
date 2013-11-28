@@ -19,9 +19,10 @@ static Vector *exprVector = NULL;   ///< Bottom-up parser stack for @ref ExprVec
 static ExprToken endToken;          ///< Token that should be located on the bottom of the stack, used when stack has no topmost terminal token
 static uint32_t currentStackPos;    ///< Current position in the local stack frame
 
-static BuiltinCode currentFuncBuiltinCode;
-static int64_t currentFuncParamLimit;
-static Symbol *currentFuncSymbol;
+// used as helper variables for function call generation
+static BuiltinCode currentFuncBuiltinCode;  ///< BuiltinCode for currently processed function
+static int64_t currentFuncParamLimit;       ///< Max. parameters pushed on stack for currently processed function
+static Symbol *currentFuncSymbol;           ///< Symbol in SymbolTable for currently processed function
 
 /**
  * Defines type of the token located on the bottom-up parser stack
@@ -201,6 +202,7 @@ uint8_t reduceMultiparamFunc(uint32_t stackPos, uint32_t *paramCount, uint32_t *
                 return 0;
             }
 
+            // check if we have id token before (
             ExprTokenVectorIterator id = vectorAt(exprVector, stackPos - 2);
             if (id->type != Terminal || (id->type == Terminal && id->token->type != STT_Identifier)) {
                 setError(ERR_Syntax);
@@ -208,6 +210,8 @@ uint8_t reduceMultiparamFunc(uint32_t stackPos, uint32_t *paramCount, uint32_t *
             }
 
             currentFuncSymbol = fillInstFuncInfo(id->token, &currentFuncBuiltinCode, &currentFuncParamLimit);
+            if (getError())
+                return 0;
         }
         else {
             setError(ERR_Syntax);
@@ -247,7 +251,6 @@ uint8_t reduce(ExprToken *topTerm)
         case STT_Null:
         case STT_Bool:
         case STT_String:
-            // TODO generate new constant into constants table and generate push instruction
             vectorPushDefaultValue(constantsTable);
             tokenToValue(topTerm->token, vectorBack(constantsTable));
             if (getError())
@@ -332,6 +335,9 @@ uint8_t reduce(ExprToken *topTerm)
                         uint32_t retValStackPos = currentStackPos++;
                         generateInstruction(IST_Reserve, 0, 1, 0);
                         currentFuncSymbol = fillInstFuncInfo(nextTerm->token, &currentFuncBuiltinCode, &currentFuncParamLimit);
+                        if (getError())
+                            return 0;
+
                         generateCall(currentFuncSymbol, currentFuncBuiltinCode, 0);
                         if (getError())
                             return 0;
@@ -391,8 +397,9 @@ uint8_t reduce(ExprToken *topTerm)
                                 generateInstruction(IST_Reserve, 0, 1, 0);
 
                                 currentFuncSymbol = fillInstFuncInfo(nextTerm->token, &currentFuncBuiltinCode, &currentFuncParamLimit);
-
-                                // parameter
+                                if (getError())
+                                    return 0;
+                                // if there is no parameter limit or it is higher than 0
                                 if (currentFuncParamLimit == -1 || currentFuncParamLimit > 0) {
                                     generateInstruction(IST_Push, 0, exprBackup->stackOffset, 0);
                                     if (getError())
