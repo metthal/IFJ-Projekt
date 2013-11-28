@@ -1,0 +1,23 @@
+<?php
+
+// Checks if late declaration and LST are working
+
+function one()
+{
+    return 1;
+}
+
+$a = 2;
+$x = 1;
+$res = dummy($x, $a); // Should set $res to null
+$res = one(1,2,3) + sqr($a, $x, 20) + sqr(); // Should be 30
+$res = put_string($res, "\n");
+
+function sqr($x = 5){
+    $x = $x * $x;
+    return $x;
+}
+
+function dummy($x, $y)
+{
+}

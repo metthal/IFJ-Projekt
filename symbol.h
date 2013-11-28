@@ -3,7 +3,6 @@
 
 #include "string.h"
 #include "context.h"
-#include "instruction.h"
 #include "token.h"
 
 typedef enum {
@@ -21,7 +20,7 @@ typedef union {
     String s;
     double d;
     int i;
-    const Instruction* ip;
+    const void* ip;
     uint32_t sp;
     int8_t b;
 } ValueData;
@@ -50,7 +49,7 @@ typedef union {
     Function func;
 } SymbolData;
 
-typedef struct sSymbol {
+typedef struct {
     SymbolData *data;
     SymbolType type;
     const String *key;

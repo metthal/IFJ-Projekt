@@ -1,4 +1,5 @@
 #include "parser.h"
+#include "builtin.h"
 #include "interpreter.h"
 #include "token_vector.h"
 #include "uint32_vector.h"
@@ -236,12 +237,19 @@ void func()
 
     Symbol *symbol;
     if (!secondRun) {
+        // Test if function's name doesn't collide with builtin's.
+        if (getBuiltinCode(&(tokensIt->str)) != BTI_None) {
+            setError(ERR_RedefFunction);
+            return;
+        }
+
         // Add new symbol with name of function to GST.
         symbol = symbolTableAdd(globalSymbolTable, &(tokensIt->str));
         if (getError())
             return;
 
         if (symbol == NULL) {
+            // Function's name already exists in symbol table.
             setError(ERR_RedefFunction);
             return;
         }
