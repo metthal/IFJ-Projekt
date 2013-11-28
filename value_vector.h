@@ -15,4 +15,25 @@ typedef const Value* ConstValueVectorIterator;
 #undef VECTOR_ITEM
 #undef VECTOR_STRUCT_ITEM
 
+static inline void vectorPushIndexValue(Vector *vec, uint32_t index)
+{
+    if (index >= vec->size) {
+        setError(ERR_Range);
+        return;
+    }
+
+    if (vec->size == vec->capacity) {
+        if (vec->capacity == 0)
+            vectorReserve(vec, VectorDefaultCapacity);
+        else
+            vectorReserve(vec, vec->capacity * VectorResizeIncRate);
+        if (getError())
+            return;
+    }
+
+    copyValue((const Value*)(vec->data + index * vec->itemSize), (Value*)vec->end);
+    vec->size++;
+    vec->end += vec->itemSize;
+}
+
 #endif
