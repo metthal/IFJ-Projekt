@@ -38,7 +38,9 @@ typedef enum
     SS_Php_0,
     SS_Php_1,
     SS_Php_2,
-    SS_Php_3
+    SS_Php_3,
+    SS_And,
+    SS_Or
 } ScannerState;
 
 static int32_t charStreamSwitch = 1;
@@ -51,6 +53,12 @@ void scannerFillToken(Token *token);
 KeywordTokenType strToKeyword(String *str)
 {
     switch (str->data[0]) {
+        case 'a': {
+            if (stringCompareS(str, "and", 3) == 0) {
+                return KTT_And;
+            }
+            break;
+        }
         case 'b': {
             if (stringCompareS(str, "break", 5) == 0) {
                 return KTT_Break;
@@ -93,6 +101,12 @@ KeywordTokenType strToKeyword(String *str)
         case 'n': {
             if (stringCompareS(str, "null", 4) == 0) {
                 return KTT_Null;
+            }
+            break;
+        }
+        case 'o': {
+            if (stringCompareS(str, "or", 2) == 0) {
+                return KTT_Or;
             }
             break;
         }
@@ -295,6 +309,12 @@ void scannerFillToken(Token *token)
                         case '$':
                             state = SS_Dollar;
                             break;
+                        case '&':
+                            state = SS_And;
+                            break;
+                        case '|':
+                            state = SS_Or;
+                            break;
                         default:
                             setError(ERR_LexFile);
                             return;
@@ -459,6 +479,12 @@ void scannerFillToken(Token *token)
                         else if (keywordType == KTT_Null) {
                             token->type = STT_Null;
                         }
+                        else if (keywordType == KTT_And) {
+                            token->type = STT_And;
+                        }
+                        else if (keywordType == KTT_Or) {
+                            token->type = STT_Or;
+                        }
                         else {
                             token->type = STT_Keyword;
                             token->keywordType = keywordType;
@@ -581,7 +607,7 @@ void scannerFillToken(Token *token)
                 else {
                     lastChar = symbol;
                     charStreamSwitch = 0;
-                    setError(ERR_LexFile);
+                    token->type = STT_Not;
                     return;
                 }
                 break;
@@ -755,9 +781,22 @@ void scannerFillToken(Token *token)
                     return;
                 }
             }
+            case SS_And:
+                if (symbol != '&') {
+                    setError(ERR_LexFile);
+                    return;
+                }
+
+                token->type = STT_And;
+                return;
+            case SS_Or:
+                if (symbol != '|') {
+                    setError(ERR_LexFile);
+                    return;
+                }
+
+                token->type = STT_Or;
+                return;
         }
     }
 }
-
-
-

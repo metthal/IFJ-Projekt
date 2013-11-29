@@ -1,0 +1,106 @@
+<?php
+
+$x = 5;
+$y = 6;
+
+// expected output
+// yes
+// yes
+// no
+// yes
+// yes
+// no
+// no
+// no
+// yes
+// yes
+
+if ($x && $y)
+{
+    $tmp = put_string("yes\n");
+}
+else
+{
+    $tmp = put_string("no\n");
+}
+
+if ($x - $x || $y)
+{
+    $tmp = put_string("yes\n");
+}
+else
+{
+    $tmp = put_string("no\n");
+}
+
+if ($x - $x && $y)
+{
+    $tmp = put_string("yes\n");
+}
+else
+{
+    $tmp = put_string("no\n");
+}
+
+if ($x and $y)
+{
+    $tmp = put_string("yes\n");
+}
+else
+{
+    $tmp = put_string("no\n");
+}
+
+if ($x - $x or $y)
+{
+    $tmp = put_string("yes\n");
+}
+else
+{
+    $tmp = put_string("no\n");
+}
+
+if ($x - $x and $y)
+{
+    $tmp = put_string("yes\n");
+}
+else
+{
+    $tmp = put_string("no\n");
+}
+
+if ($x && $y < 5)
+{
+    $tmp = put_string("yes\n");
+}
+else
+{
+    $tmp = put_string("no\n");
+}
+
+if (!$x)
+{
+    $tmp = put_string("yes\n");
+}
+else
+{
+    $tmp = put_string("no\n");
+}
+
+if (!!$x)
+{
+    $tmp = put_string("yes\n");
+}
+else
+{
+    $tmp = put_string("no\n");
+}
+
+if (!($x === 1))
+{
+    $tmp = put_string("yes\n");
+}
+else
+{
+    $tmp = put_string("no\n");
+}
