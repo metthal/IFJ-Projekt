@@ -51,7 +51,6 @@ typedef enum
 {
     IST_Noop = 0,    //!< IST_Noop
     IST_Mov,         //!< IST_Mov
-    IST_MovC,        //!< IST_MovC
     IST_Jmp,         //!< IST_Jmp
     IST_Jmpz,        //!< IST_Jmpz
     IST_Push,        //!< IST_Push

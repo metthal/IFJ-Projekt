@@ -8,30 +8,38 @@
 uint8_t fillValuePtrs(Value *base, const Value *constBase, Value **res, const Value **a, const Value **b,
         int32_t ires, int32_t ia, int32_t ib)
 {
-    *res = base + ires;
-    *a = base + ia;
-    *b = base + ib;
-
-    if ((*res)->type == VT_Reference)
-        *res = base + (*res)->data.ref;
-    else if ((*res)->type == VT_ConstReference) {
-        setError(ERR_Internal);
-        return 0;
+    if (res != NULL) {
+        *res = base + ires;
+        if ((*res)->type == VT_Reference)
+            *res = base + (*res)->data.ref;
+        else if ((*res)->type == VT_ConstReference) {
+            setError(ERR_Internal);
+            return 0;
+        }
     }
 
-    if ((*a)->type == VT_Reference)
-        *a = base + (*a)->data.ref;
-    else if ((*a)->type == VT_ConstReference)
-        *a = constBase + (*a)->data.ref;
+    if (a != NULL) {
+        *a = base + ia;
+        if ((*a)->type == VT_Reference)
+            *a = base + (*a)->data.ref;
+        else if ((*a)->type == VT_ConstReference)
+            *a = constBase + (*a)->data.ref;
+        else if ((*a)->type == VT_Undefined) {
+            setError(ERR_UndefVariable);
+            return 0;
+        }
+    }
 
-    if ((*b)->type == VT_Reference)
-        *b = base + (*b)->data.ref;
-    else if ((*b)->type == VT_ConstReference)
-        *b = constBase + (*b)->data.ref;
-
-    if ((*a)->type == VT_Undefined || (*b)->type == VT_Undefined) {
-        setError(ERR_UndefVariable);
-        return 0;
+    if (b != NULL) {
+        *b = base + ib;
+        if ((*b)->type == VT_Reference)
+            *b = base + (*b)->data.ref;
+        else if ((*b)->type == VT_ConstReference)
+            *b = constBase + (*b)->data.ref;
+        else if ((*b)->type == VT_Undefined) {
+            setError(ERR_UndefVariable);
+            return 0;
+        }
     }
 
     return 1;
@@ -55,31 +63,34 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
     while (running) {
         switch (instructionPtr->code) {
-            case IST_Mov:
-                aVal = vectorAt(stack, stackPtr + instructionPtr->a);
-                if (aVal->type == VT_Undefined) {
-                    setError(ERR_UndefVariable);
-                    break;
+            case IST_Mov: {
+                Value *base = vectorAt(stack, stackPtr);
+                aVal = base + instructionPtr->a;
+
+                // Dereference to prevent linked references.
+                if (aVal == VT_Reference) {
+                    aVal = base + aVal->data.ref;
                 }
 
-                resVal = vectorAt(stack, stackPtr + instructionPtr->res);
+                if (!fillValuePtrs(base, cCtIt, &resVal, NULL, NULL,
+                        instructionPtr->res, 0, 0))
+                    break;
+
                 deleteValue(resVal);
                 copyValue(aVal, resVal);
                 break;
-
-            case IST_MovC:
-                resVal = vectorAt(stack, stackPtr + instructionPtr->res);
-                deleteValue(resVal);
-                copyValue(vectorAtConst(constTable, instructionPtr->a), resVal);
-                break;
+            }
 
             case IST_Jmp:
                 instructionPtr += instructionPtr->a;
                 continue;
 
             case IST_Jmpz: {
+                if (!fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, NULL, NULL, &bVal,
+                        0, 0, instructionPtr->b))
+                    break;
+
                 uint32_t tempRes = instructionPtr->res;
-                bVal = vectorAt(stack, stackPtr + instructionPtr->b);
                 if (valueToBool(bVal))
                     instructionPtr++;
                 else
@@ -95,13 +106,29 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 continue;
             }
 
-            case IST_Push:
-                vectorPushIndexValue(stack, stackPtr + instructionPtr->a);
-                break;
+            case IST_Push: {
+                aVal = vectorAt(stack, stackPtr + instructionPtr->a);
 
-            case IST_PushC:
-                vectorPushValue(stack, vectorAtConst(constTable, instructionPtr->a));
+                // Dereference to prevent linked references.
+                if (aVal == VT_Reference)
+                    vectorPushIndexValue(stack, stackPtr + aVal->data.ref);
+                else
+                    vectorPushIndexValue(stack, stackPtr + instructionPtr->a);
+
                 break;
+            }
+
+            case IST_PushC: {
+                // TODO remake with vectorPushDefault return value
+                // resVal = vectorPushDefaultValue(stack);
+                // resVal->data.ref = instructionPtr->a
+                // resVal->type = VT_ConstReference
+                Value val;
+                val.data.ref = instructionPtr->a;
+                val.type = VT_ConstReference;
+                vectorPushValue(stack, &val);
+                break;
+            }
 
             case IST_Reserve:
                 for (int32_t i = 0; i < instructionPtr->a; i++)
@@ -112,7 +139,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 if (instructionPtr->a == 1)
                     vectorPopValue(stack);
                 else
-                    vectorPopNValue(stack,instructionPtr->a);
+                    vectorPopNValue(stack, instructionPtr->a);
                 break;
 
             case IST_ClearExpr:
@@ -162,16 +189,20 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 continue;
 
             case IST_Nullify:
-                aVal = vectorAt(stack, stackPtr + instructionPtr->a);
+                if (!fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, NULL, NULL,
+                        instructionPtr->a, 0, 0))
+                    break;
+
                 deleteValue(aVal);
                 initValue(aVal);
                 aVal->type = VT_Null;
                 break;
 
             case IST_BoolVal: {
-                uint32_t simStackPtr = vectorSize(stack);
-                aVal = vectorAt(stack, simStackPtr - 1);
-                resVal = vectorAt(stack, simStackPtr - 2);
+                if (!fillValuePtrs(vectorEnd(stack), cCtIt, &resVal, &aVal, NULL,
+                        -2, -1, 0))
+                    break;
+
                 boolval(aVal, resVal);
                 // Clear parameters
                 vectorPopValue(stack);
@@ -179,9 +210,10 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
             }
 
             case IST_DoubleVal: {
-                uint32_t simStackPtr = vectorSize(stack);
-                aVal = vectorAt(stack, simStackPtr - 1);
-                resVal = vectorAt(stack, simStackPtr - 2);
+                if (!fillValuePtrs(vectorEnd(stack), cCtIt, &resVal, &aVal, NULL,
+                        -2, -1, 0))
+                    break;
+
                 doubleval(aVal, resVal);
                 // Clear parameters
                 vectorPopValue(stack);
@@ -189,10 +221,10 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
             }
 
             case IST_FindString: {
-                uint32_t simStackPtr = vectorSize(stack);
-                bVal = vectorAt(stack, simStackPtr - 1);
-                aVal = vectorAt(stack, simStackPtr - 2);
-                resVal = vectorAt(stack, simStackPtr - 3);
+                if (!fillValuePtrs(vectorEnd(stack), cCtIt, &resVal, &aVal, &bVal,
+                        -3, -2, -1))
+                    break;
+
                 findString(resVal, aVal, bVal);
                 // Clear parameters
                 vectorPopNValue(stack, 2);
@@ -200,25 +232,28 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
             }
 
             case IST_GetString: {
-                uint32_t simStackPtr = vectorSize(stack);
-                resVal = vectorAt(stack, simStackPtr - 1);
+                if (!fillValuePtrs(vectorEnd(stack), cCtIt, &resVal, NULL, NULL,
+                        -1, 0, 0))
+                    break;
+
                 getString(resVal);
                 break;
             }
 
             case IST_GetSubstring: {
-                uint32_t simStackPtr = vectorSize(stack);
-                aVal = vectorAt(stack, simStackPtr - 1);
-                int end = valueToInt(aVal);
+                if (!fillValuePtrs(vectorEnd(stack), cCtIt, NULL, &aVal, &bVal,
+                        0, -2, -1))
+                    break;
 
-                aVal = vectorAt(stack, simStackPtr - 2);
                 int start = valueToInt(aVal);
+                int end = valueToInt(bVal);
 
                 if (getError())
                     return;
 
-                aVal = vectorAt(stack, simStackPtr - 3);
-                resVal = vectorAt(stack, simStackPtr - 4);
+                if (!fillValuePtrs(vectorEnd(stack), cCtIt, &resVal, &aVal, NULL,
+                        -4, -3, 0))
+                    break;
 
                 getSubstring(aVal, resVal, start, end);
                 // Clear parameters
@@ -227,9 +262,10 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
             }
 
             case IST_IntVal: {
-                uint32_t simStackPtr = vectorSize(stack);
-                aVal = vectorAt(stack, simStackPtr - 1);
-                resVal = vectorAt(stack, simStackPtr - 2);
+                if (!fillValuePtrs(vectorEnd(stack), cCtIt, &resVal, &aVal, NULL,
+                        -2, -1, 0))
+                    break;
+
                 intval(aVal, resVal);
                 // Clear parameters
                 vectorPopValue(stack);
@@ -237,9 +273,10 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
             }
 
             case IST_PutString: {
-                uint32_t simStackPtr = vectorSize(stack);
-                aVal = vectorAt(stack, simStackPtr - instructionPtr->a);
-                resVal = vectorAt(stack, simStackPtr - instructionPtr->a - 1);
+                if (!fillValuePtrs(vectorEnd(stack), cCtIt, &resVal, &aVal, NULL,
+                        -instructionPtr->a - 1, -instructionPtr->a, 0))
+                    break;
+
                 putString(resVal, aVal, instructionPtr->a);
                 // Clear parameters
                 vectorPopNValue(stack, instructionPtr->a);
@@ -247,9 +284,10 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
             }
 
             case IST_SortString: {
-                uint32_t simStackPtr = vectorSize(stack);
-                aVal = vectorAt(stack, simStackPtr - 1);
-                resVal = vectorAt(stack, simStackPtr - 2);
+                if (!fillValuePtrs(vectorEnd(stack), cCtIt, &resVal, &aVal, NULL,
+                        -2, -1, 0))
+                    break;
+
                 sortString(aVal, resVal);
                 // Clear parameters
                 vectorPopValue(stack);
@@ -257,9 +295,10 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
             }
 
             case IST_StrLen: {
-                uint32_t simStackPtr = vectorSize(stack);
-                aVal = vectorAt(stack, simStackPtr - 1);
-                resVal = vectorAt(stack, simStackPtr - 2);
+                if (!fillValuePtrs(vectorEnd(stack), cCtIt, &resVal, &aVal, NULL,
+                        -2, -1, 0))
+                    break;
+
                 strLen(aVal, resVal);
                 // Clear parameters
                 vectorPopValue(stack);
@@ -267,9 +306,10 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
             }
 
             case IST_StrVal: {
-                uint32_t simStackPtr = vectorSize(stack);
-                aVal = vectorAt(stack, simStackPtr - 1);
-                resVal = vectorAt(stack, simStackPtr - 2);
+                if (!fillValuePtrs(vectorEnd(stack), cCtIt, &resVal, &aVal, NULL,
+                        -2, -1, 0))
+                    break;
+
                 strval(aVal, resVal);
                 // Clear parameters
                 vectorPopValue(stack);
@@ -278,8 +318,9 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
             case IST_Add:
                 vectorPushDefaultValue(stack);
-                fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
-                        instructionPtr->res, instructionPtr->a, instructionPtr->b);
+                if (!fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
+                        instructionPtr->res, instructionPtr->a, instructionPtr->b))
+                    break;
 
                 if (aVal->type == VT_Integer) {
                     if (bVal->type == VT_Integer) {
@@ -316,8 +357,9 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
             case IST_Subtract:
                 vectorPushDefaultValue(stack);
-                fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
-                        instructionPtr->res, instructionPtr->a, instructionPtr->b);
+                if (!fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
+                        instructionPtr->res, instructionPtr->a, instructionPtr->b))
+                    break;
 
                 if (aVal->type == VT_Integer) {
                     if (bVal->type == VT_Integer) {
@@ -354,8 +396,9 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
             case IST_Multiply:
                 vectorPushDefaultValue(stack);
-                fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
-                        instructionPtr->res, instructionPtr->a, instructionPtr->b);
+                if (!fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
+                        instructionPtr->res, instructionPtr->a, instructionPtr->b))
+                    break;
 
                 if (aVal->type == VT_Integer) {
                     if (bVal->type == VT_Integer) {
@@ -392,8 +435,9 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
             case IST_Divide:
                 vectorPushDefaultValue(stack);
-                fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
-                        instructionPtr->res, instructionPtr->a, instructionPtr->b);
+                if (!fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
+                        instructionPtr->res, instructionPtr->a, instructionPtr->b))
+                    break;
 
                 if (bVal->type == VT_Integer) {
                     if (bVal->data.i == 0) {
@@ -441,13 +485,9 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
             case IST_Concat:
                 vectorPushDefaultValue(stack);
-                aVal = vectorAt(stack, stackPtr + instructionPtr->a);
-                bVal = vectorAt(stack, stackPtr + instructionPtr->b);
-
-                if (aVal->type == VT_Undefined || bVal->type == VT_Undefined) {
-                    setError(ERR_UndefVariable);
+                if (!fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
+                        instructionPtr->res, instructionPtr->a, instructionPtr->b))
                     break;
-                }
 
                 // Test if first operand is string
                 if (aVal->type != VT_String) {
@@ -456,7 +496,6 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 }
 
                 // Copy aVal to resVal
-                resVal = vectorAt(stack, stackPtr + instructionPtr->res);
                 initStringSet(&(resVal->data.s), &(aVal->data.s));
 
                 // Add bVal, thus concatenating
@@ -477,8 +516,9 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
             case IST_Equal:
                 vectorPushDefaultValue(stack);
-                fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
-                        instructionPtr->res, instructionPtr->a, instructionPtr->b);
+                if (!fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
+                        instructionPtr->res, instructionPtr->a, instructionPtr->b))
+                    break;
 
                 if (aVal->type == bVal->type ) {
                     switch (aVal->type) {
@@ -522,8 +562,9 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
             case IST_NotEqual:
                 vectorPushDefaultValue(stack);
-                fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
-                        instructionPtr->res, instructionPtr->a, instructionPtr->b);
+                if (!fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
+                        instructionPtr->res, instructionPtr->a, instructionPtr->b))
+                    break;
 
                 if (aVal->type == bVal->type) {
                     switch (aVal->type) {
@@ -563,8 +604,9 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
             case IST_Less:
                 vectorPushDefaultValue(stack);
-                fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
-                        instructionPtr->res, instructionPtr->a, instructionPtr->b);
+                if (!fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
+                        instructionPtr->res, instructionPtr->a, instructionPtr->b))
+                    break;
 
                 if (aVal->type == bVal->type ) {
                     switch (aVal->type) {
@@ -607,8 +649,9 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
             case IST_LessEq:
                 vectorPushDefaultValue(stack);
-                fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
-                        instructionPtr->res, instructionPtr->a, instructionPtr->b);
+                if (!fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
+                        instructionPtr->res, instructionPtr->a, instructionPtr->b))
+                    break;
 
                 if (aVal->type == bVal->type ) {
                     switch (aVal->type) {
@@ -651,8 +694,9 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
             case IST_Greater:
                 vectorPushDefaultValue(stack);
-                fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
-                        instructionPtr->res, instructionPtr->a, instructionPtr->b);
+                if (!fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
+                        instructionPtr->res, instructionPtr->a, instructionPtr->b))
+                    break;
 
                 if (aVal->type == bVal->type ) {
                     switch (aVal->type) {
@@ -695,8 +739,9 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
             case IST_GreaterEq:
                 vectorPushDefaultValue(stack);
-                fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
-                        instructionPtr->res, instructionPtr->a, instructionPtr->b);
+                if (!fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
+                        instructionPtr->res, instructionPtr->a, instructionPtr->b))
+                    break;
 
                 if (aVal->type == bVal->type ) {
                     switch (aVal->type) {
@@ -739,15 +784,10 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
             case IST_And:
                 vectorPushDefaultValue(stack);
-                aVal = vectorAt(stack, stackPtr + instructionPtr->a);
-                bVal = vectorAt(stack, stackPtr + instructionPtr->b);
-
-                if (aVal->type == VT_Undefined || bVal->type == VT_Undefined) {
-                    setError(ERR_UndefVariable);
+                if (!fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
+                        instructionPtr->res, instructionPtr->a, instructionPtr->b))
                     break;
-                }
 
-                resVal = vectorAt(stack, stackPtr + instructionPtr->res);
                 resVal->data.b = valueToBool(aVal) && valueToBool(bVal);
                 resVal->type = VT_Bool;
 
@@ -755,15 +795,10 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
             case IST_Or:
                 vectorPushDefaultValue(stack);
-                aVal = vectorAt(stack, stackPtr + instructionPtr->a);
-                bVal = vectorAt(stack, stackPtr + instructionPtr->b);
-
-                if (aVal->type == VT_Undefined || bVal->type == VT_Undefined) {
-                    setError(ERR_UndefVariable);
+                if (!fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
+                        instructionPtr->res, instructionPtr->a, instructionPtr->b))
                     break;
-                }
 
-                resVal = vectorAt(stack, stackPtr + instructionPtr->res);
                 resVal->data.b = valueToBool(aVal) || valueToBool(bVal);
                 resVal->type = VT_Bool;
 
@@ -771,14 +806,9 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
             case IST_Not:
                 vectorPushDefaultValue(stack);
-                aVal = vectorAt(stack, stackPtr + instructionPtr->a);
-
-                if (aVal->type == VT_Undefined) {
-                    setError(ERR_UndefVariable);
-                    return;
-                }
-
-                resVal = vectorAt(stack, stackPtr + instructionPtr->res);
+                if (!fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, NULL,
+                        instructionPtr->res, instructionPtr->a, 0))
+                    break;
 
                 // if B is 1 it means we are actually performing negation (used in case of odd number of negations)
                 // if B is 0 it means we just convert value to bool (used in case of even number of negations)
