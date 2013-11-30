@@ -33,7 +33,7 @@ void findString(Value *ret, const Value *a, const Value *b);
 void getString(Value *ret);
 void getSubstring(const Value *val, Value *ret, int start, int end);
 void intval(const Value *val, Value *ret);
-void putString(Value *ret, Value *firstVal, int count);
+void putString(Value *ret, const Value *firstVal, int count);
 void sortString(const Value *val, Value *ret);
 void strLen(const Value *val, Value *ret);
 void strval(const Value *val, Value *ret);

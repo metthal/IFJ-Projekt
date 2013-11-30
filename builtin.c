@@ -104,8 +104,7 @@ uint8_t valueToBool(const Value *val)
             setError(ERR_UndefVariable);
             return 0;
 
-        case VT_StackPtr:
-        case VT_InstructionPtr:
+        default:
             setError(ERR_Internal);
             return 0;
     }
@@ -134,8 +133,7 @@ int valueToInt(const Value *val)
             setError(ERR_UndefVariable);
             return 0;
 
-        case VT_StackPtr:
-        case VT_InstructionPtr:
+        default:
             setError(ERR_Internal);
             return 0;
     }
@@ -172,8 +170,7 @@ void valueToString(const Value *val, String *str)
             setError(ERR_UndefVariable);
             return;
 
-        case VT_StackPtr:
-        case VT_InstructionPtr:
+        default:
             setError(ERR_Internal);
             return;
     }
@@ -212,8 +209,7 @@ void doubleval(const Value *val, Value *ret)
             setError(ERR_UndefVariable);
             return;
 
-        case VT_StackPtr:
-        case VT_InstructionPtr:
+        default:
             setError(ERR_Internal);
             return;
     }
@@ -257,8 +253,7 @@ void findString(Value *ret, const Value *a, const Value *b)
             setError(ERR_UndefVariable);
             return;
 
-        case VT_StackPtr:
-        case VT_InstructionPtr:
+        default:
             setError(ERR_Internal);
             return;
     }
@@ -299,8 +294,7 @@ void findString(Value *ret, const Value *a, const Value *b)
             // break because cleanup is required
             break;
 
-        case VT_StackPtr:
-        case VT_InstructionPtr:
+        default:
             setError(ERR_Internal);
             // break because cleanup is required
             break;
@@ -392,8 +386,7 @@ void getSubstring(const Value *val, Value *ret, int start, int end)
             setError(ERR_UndefVariable);
             return;
 
-        case VT_StackPtr:
-        case VT_InstructionPtr:
+        default:
             setError(ERR_Internal);
             return;
     }
@@ -421,7 +414,7 @@ void intval(const Value *val, Value *ret)
     ret->type = VT_Integer;
 }
 
-void putString(Value *ret, Value *firstVal, int count)
+void putString(Value *ret, const Value *firstVal, int count)
 {
     int i = 0;
     for (;i < count; i++, firstVal++){
@@ -450,8 +443,7 @@ void putString(Value *ret, Value *firstVal, int count)
                 setError(ERR_UndefVariable);
                 return;
 
-            case VT_StackPtr:
-            case VT_InstructionPtr:
+            default:
                 setError(ERR_Internal);
                 return;
         }
@@ -499,8 +491,7 @@ void sortString(const Value *val, Value *ret)
             setError(ERR_UndefVariable);
             return;
 
-        case VT_StackPtr:
-        case VT_InstructionPtr:
+        default:
             setError(ERR_Internal);
             return;
     }
@@ -535,8 +526,7 @@ void strLen(const Value *val, Value *ret)
             setError(ERR_UndefVariable);
             return;
 
-        case VT_StackPtr:
-        case VT_InstructionPtr:
+        default:
             setError(ERR_Internal);
             return;
     }

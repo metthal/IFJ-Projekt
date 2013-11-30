@@ -5,14 +5,50 @@
 
 #include <stdint.h>
 
+uint8_t fillValuePtrs(Value *base, const Value *constBase, Value **res, const Value **a, const Value **b,
+        int32_t ires, int32_t ia, int32_t ib)
+{
+    *res = base + ires;
+    *a = base + ia;
+    *b = base + ib;
+
+    if ((*res)->type == VT_Reference)
+        *res = base + (*res)->data.ref;
+    else if ((*res)->type == VT_ConstReference) {
+        setError(ERR_Internal);
+        return 0;
+    }
+
+    if ((*a)->type == VT_Reference)
+        *a = base + (*a)->data.ref;
+    else if ((*a)->type == VT_ConstReference)
+        *a = constBase + (*a)->data.ref;
+
+    if ((*b)->type == VT_Reference)
+        *b = base + (*b)->data.ref;
+    else if ((*b)->type == VT_ConstReference)
+        *b = constBase + (*b)->data.ref;
+
+    if ((*a)->type == VT_Undefined || (*b)->type == VT_Undefined) {
+        setError(ERR_UndefVariable);
+        return 0;
+    }
+
+    return 1;
+}
+
 void interpretationLoop(const Instruction *firstInstruction, const Vector *constTable, const Vector *addressTable, Vector *stack)
 {
     // 3 value pointers used during interpretation
-    Value *resVal, *aVal, *bVal;
+    Value *resVal;
+    const Value *aVal, *bVal;
 
     // Stack pointer have to be index because of possibility of stack
     // vector reallocation
     uint32_t stackPtr = 1;
+
+    // Pointer on first constant for fast access
+    ConstValueVectorIterator cCtIt = vectorBeginValue(constTable);
 
     const Instruction *instructionPtr = firstInstruction;
     uint8_t running = 1;
@@ -242,15 +278,9 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
             case IST_Add:
                 vectorPushDefaultValue(stack);
-                aVal = vectorAt(stack, stackPtr + instructionPtr->a);
-                bVal = vectorAt(stack, stackPtr + instructionPtr->b);
+                fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
+                        instructionPtr->res, instructionPtr->a, instructionPtr->b);
 
-                if (aVal->type == VT_Undefined || bVal->type == VT_Undefined) {
-                    setError(ERR_UndefVariable);
-                    break;
-                }
-
-                resVal = vectorAt(stack, stackPtr + instructionPtr->res);
                 if (aVal->type == VT_Integer) {
                     if (bVal->type == VT_Integer) {
                         resVal->data.i = aVal->data.i + bVal->data.i;
@@ -286,15 +316,9 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
             case IST_Subtract:
                 vectorPushDefaultValue(stack);
-                aVal = vectorAt(stack, stackPtr + instructionPtr->a);
-                bVal = vectorAt(stack, stackPtr + instructionPtr->b);
+                fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
+                        instructionPtr->res, instructionPtr->a, instructionPtr->b);
 
-                if (aVal->type == VT_Undefined || bVal->type == VT_Undefined) {
-                    setError(ERR_UndefVariable);
-                    break;
-                }
-
-                resVal = vectorAt(stack, stackPtr + instructionPtr->res);
                 if (aVal->type == VT_Integer) {
                     if (bVal->type == VT_Integer) {
                         resVal->data.i = aVal->data.i - bVal->data.i;
@@ -330,15 +354,9 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
             case IST_Multiply:
                 vectorPushDefaultValue(stack);
-                aVal = vectorAt(stack, stackPtr + instructionPtr->a);
-                bVal = vectorAt(stack, stackPtr + instructionPtr->b);
+                fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
+                        instructionPtr->res, instructionPtr->a, instructionPtr->b);
 
-                if (aVal->type == VT_Undefined || bVal->type == VT_Undefined) {
-                    setError(ERR_UndefVariable);
-                    break;
-                }
-
-                resVal = vectorAt(stack, stackPtr + instructionPtr->res);
                 if (aVal->type == VT_Integer) {
                     if (bVal->type == VT_Integer) {
                         resVal->data.i = aVal->data.i * bVal->data.i;
@@ -374,15 +392,9 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
             case IST_Divide:
                 vectorPushDefaultValue(stack);
-                aVal = vectorAt(stack, stackPtr + instructionPtr->a);
-                bVal = vectorAt(stack, stackPtr + instructionPtr->b);
+                fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
+                        instructionPtr->res, instructionPtr->a, instructionPtr->b);
 
-                if (aVal->type == VT_Undefined || bVal->type == VT_Undefined) {
-                    setError(ERR_UndefVariable);
-                    break;
-                }
-
-                resVal = vectorAt(stack, stackPtr + instructionPtr->res);
                 if (bVal->type == VT_Integer) {
                     if (bVal->data.i == 0) {
                         setError(ERR_DivideByZero);
@@ -464,14 +476,9 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
             case IST_Equal:
                 vectorPushDefaultValue(stack);
-                aVal = vectorAt(stack, stackPtr + instructionPtr->a);
-                bVal = vectorAt(stack, stackPtr + instructionPtr->b);
-                if (aVal->type == VT_Undefined || bVal->type == VT_Undefined) {
-                    setError(ERR_UndefVariable);
-                    break;
-                }
+                fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
+                        instructionPtr->res, instructionPtr->a, instructionPtr->b);
 
-                resVal = vectorAt(stack, stackPtr + instructionPtr->res);
                 if (aVal->type == bVal->type ) {
                     switch (aVal->type) {
                         case VT_Integer:
@@ -514,14 +521,9 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
             case IST_NotEqual:
                 vectorPushDefaultValue(stack);
-                aVal = vectorAt(stack, stackPtr + instructionPtr->a);
-                bVal = vectorAt(stack, stackPtr + instructionPtr->b);
-                if (aVal->type == VT_Undefined || bVal->type == VT_Undefined) {
-                    setError(ERR_UndefVariable);
-                    break;
-                }
+                fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
+                        instructionPtr->res, instructionPtr->a, instructionPtr->b);
 
-                resVal = vectorAt(stack, stackPtr + instructionPtr->res);
                 if (aVal->type == bVal->type) {
                     switch (aVal->type) {
                         case VT_Integer:
@@ -560,14 +562,9 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
             case IST_Less:
                 vectorPushDefaultValue(stack);
-                aVal = vectorAt(stack, stackPtr + instructionPtr->a);
-                bVal = vectorAt(stack, stackPtr + instructionPtr->b);
-                if (aVal->type == VT_Undefined || bVal->type == VT_Undefined) {
-                    setError(ERR_UndefVariable);
-                    break;
-                }
+                fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
+                        instructionPtr->res, instructionPtr->a, instructionPtr->b);
 
-                resVal = vectorAt(stack, stackPtr + instructionPtr->res);
                 if (aVal->type == bVal->type ) {
                     switch (aVal->type) {
                         case VT_Integer:
@@ -609,14 +606,9 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
        case IST_LessEq:
                 vectorPushDefaultValue(stack);
-                aVal = vectorAt(stack, stackPtr + instructionPtr->a);
-                bVal = vectorAt(stack, stackPtr + instructionPtr->b);
-                if (aVal->type == VT_Undefined || bVal->type == VT_Undefined) {
-                    setError(ERR_UndefVariable);
-                    break;
-                }
+                fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
+                        instructionPtr->res, instructionPtr->a, instructionPtr->b);
 
-                resVal = vectorAt(stack, stackPtr + instructionPtr->res);
                 if (aVal->type == bVal->type ) {
                     switch (aVal->type) {
                         case VT_Integer:
@@ -658,14 +650,9 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
         case IST_Greater:
                 vectorPushDefaultValue(stack);
-                aVal = vectorAt(stack, stackPtr + instructionPtr->a);
-                bVal = vectorAt(stack, stackPtr + instructionPtr->b);
-                if (aVal->type == VT_Undefined || bVal->type == VT_Undefined) {
-                    setError(ERR_UndefVariable);
-                    break;
-                }
+                fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
+                        instructionPtr->res, instructionPtr->a, instructionPtr->b);
 
-                resVal = vectorAt(stack, stackPtr + instructionPtr->res);
                 if (aVal->type == bVal->type ) {
                     switch (aVal->type) {
                         case VT_Integer:
@@ -707,14 +694,9 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
         case IST_GreaterEq:
                 vectorPushDefaultValue(stack);
-                aVal = vectorAt(stack, stackPtr + instructionPtr->a);
-                bVal = vectorAt(stack, stackPtr + instructionPtr->b);
-                if (aVal->type == VT_Undefined || bVal->type == VT_Undefined) {
-                    setError(ERR_UndefVariable);
-                    break;
-                }
+                fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
+                        instructionPtr->res, instructionPtr->a, instructionPtr->b);
 
-                resVal = vectorAt(stack, stackPtr + instructionPtr->res);
                 if (aVal->type == bVal->type ) {
                     switch (aVal->type) {
                         case VT_Integer:
