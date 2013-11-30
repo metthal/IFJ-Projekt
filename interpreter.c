@@ -448,6 +448,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                     setError(ERR_UndefVariable);
                     break;
                 }
+
                 // Test if first operand is string
                 if (aVal->type != VT_String) {
                     setError(ERR_OperandTypes);
@@ -604,7 +605,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 break;
 
 
-       case IST_LessEq:
+            case IST_LessEq:
                 vectorPushDefaultValue(stack);
                 fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
                         instructionPtr->res, instructionPtr->a, instructionPtr->b);
@@ -648,7 +649,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 break;
 
 
-        case IST_Greater:
+            case IST_Greater:
                 vectorPushDefaultValue(stack);
                 fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
                         instructionPtr->res, instructionPtr->a, instructionPtr->b);
@@ -692,7 +693,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 break;
 
 
-        case IST_GreaterEq:
+            case IST_GreaterEq:
                 vectorPushDefaultValue(stack);
                 fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
                         instructionPtr->res, instructionPtr->a, instructionPtr->b);
@@ -733,6 +734,60 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 }
                 else
                     setError(ERR_OperandTypes);
+
+                break;
+
+            case IST_And:
+                vectorPushDefaultValue(stack);
+                aVal = vectorAt(stack, stackPtr + instructionPtr->a);
+                bVal = vectorAt(stack, stackPtr + instructionPtr->b);
+
+                if (aVal->type == VT_Undefined || bVal->type == VT_Undefined) {
+                    setError(ERR_UndefVariable);
+                    break;
+                }
+
+                resVal = vectorAt(stack, stackPtr + instructionPtr->res);
+                resVal->data.b = valueToBool(aVal) && valueToBool(bVal);
+                resVal->type = VT_Bool;
+
+                break;
+
+            case IST_Or:
+                vectorPushDefaultValue(stack);
+                aVal = vectorAt(stack, stackPtr + instructionPtr->a);
+                bVal = vectorAt(stack, stackPtr + instructionPtr->b);
+
+                if (aVal->type == VT_Undefined || bVal->type == VT_Undefined) {
+                    setError(ERR_UndefVariable);
+                    break;
+                }
+
+                resVal = vectorAt(stack, stackPtr + instructionPtr->res);
+                resVal->data.b = valueToBool(aVal) || valueToBool(bVal);
+                resVal->type = VT_Bool;
+
+                break;
+
+            case IST_Not:
+                vectorPushDefaultValue(stack);
+                aVal = vectorAt(stack, stackPtr + instructionPtr->a);
+
+                if (aVal->type == VT_Undefined) {
+                    setError(ERR_UndefVariable);
+                    return;
+                }
+
+                resVal = vectorAt(stack, stackPtr + instructionPtr->res);
+
+                // if B is 1 it means we are actually performing negation (used in case of odd number of negations)
+                // if B is 0 it means we just convert value to bool (used in case of even number of negations)
+                // A is TRUE(1) and B is TRUE(1) = 1 ^ 1 = FALSE(0)
+                // A is FALSE(0) and B is TRUE(1) = 0 ^ 1 = TRUE(1)
+                // A is TRUE(1) and B is FALSE(0) = 1 ^ 0 = TRUE(1)
+                // A is FALSE(0) and B is FALSE(0) = 0 ^ 0 = FALSE(0)
+                resVal->data.b = valueToBool(aVal) ^ instructionPtr->b;
+                resVal->type = VT_Bool;
 
                 break;
 

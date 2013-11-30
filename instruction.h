@@ -87,7 +87,10 @@ typedef enum
     IST_Less,        //!< IST_Less
     IST_LessEq,      //!< IST_LessEq
     IST_Greater,     //!< IST_Greater
-    IST_GreaterEq    //!< IST_GreaterEq
+    IST_GreaterEq,   //!< IST_GreaterEq
+    IST_And,         //!< IST_And
+    IST_Or,          //!< IST_Or
+    IST_Not          //!< IST_Not
 } InstructionCode;
 
 typedef struct

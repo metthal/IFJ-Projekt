@@ -16,6 +16,8 @@ typedef enum
     KTT_For,
     KTT_Return,
     KTT_Function,
+    KTT_And,
+    KTT_Or,
     // Helper keywords that gets converted to value
     KTT_True,
     KTT_False,
@@ -35,6 +37,9 @@ typedef enum
     STT_GreaterEqual,
     STT_Equal,
     STT_NotEqual,
+    STT_And,
+    STT_Or,
+    STT_Not,
     STT_LeftBracket,
     STT_RightBracket,
     STT_Identifier,

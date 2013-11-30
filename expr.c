@@ -50,24 +50,27 @@ typedef enum
  **/
 static uint8_t precedenceTable[STT_Semicolon][STT_Semicolon] =
 {
-//      +       -       *       /       .       <       >       <=      >=      ===     !==     (       )       func    ,       $       var
-    {   High,   High,   Low,    Low,    Low,    High,   High,   High,   High,   High,   High,   Low,    High,   Low,    High,   High,   Low   },  // +
-    {   High,   High,   Low,    Low,    Low,    High,   High,   High,   High,   High,   High,   Low,    High,   Low,    High,   High,   Low   },  // -
-    {   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   Low,    High,   Low,    High,   High,   Low   },  // *
-    {   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   Low,    High,   Low,    High,   High,   Low   },  // /
-    {   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   Low,    High,   Low,    High,   High,   Low   },  // .
-    {   Low,    Low,    Low,    Low,    Low,    High,   High,   High,   High,   High,   High,   Low,    High,   Low,    High,   High,   Low   },  // <
-    {   Low,    Low,    Low,    Low,    Low,    High,   High,   High,   High,   High,   High,   Low,    High,   Low,    High,   High,   Low   },  // >
-    {   Low,    Low,    Low,    Low,    Low,    High,   High,   High,   High,   High,   High,   Low,    High,   Low,    High,   High,   Low   },  // <=
-    {   Low,    Low,    Low,    Low,    Low,    High,   High,   High,   High,   High,   High,   Low,    High,   Low,    High,   High,   Low   },  // >=
-    {   Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    High,   High,   Low,    High,   Low,    High,   High,   Low   },  // ===
-    {   Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    High,   High,   Low,    High,   Low,    High,   High,   Low   },  // !==
-    {   Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Equal,  Low,    Equal,  Error,  Low   },  // (
-    {   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   Error,  High,   Error,  High,   High,   Error },  // )
-    {   Error,  Error,  Error,  Error,  Error,  Error,  Error,  Error,  Error,  Error,  Error,  Equal,  Error,  Error,  Error,  Error,  Error },  // func
-    {   Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Equal,  Low,    Equal,  Error,  Low   },  // ,
-    {   Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Error,  Low,    Error,  Error,  Low   },  // $
-    {   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   Error,  High,   Error,  High,   High,   Error }   // var
+//      +       -       *       /       .       <       >       <=      >=      ===     !==     &&      ||      !       (       )       func    ,       $       var
+    {   High,   High,   Low,    Low,    Low,    High,   High,   High,   High,   High,   High,   High,   High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // +
+    {   High,   High,   Low,    Low,    Low,    High,   High,   High,   High,   High,   High,   High,   High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // -
+    {   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // *
+    {   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // /
+    {   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // .
+    {   Low,    Low,    Low,    Low,    Low,    High,   High,   High,   High,   High,   High,   High,   High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // <
+    {   Low,    Low,    Low,    Low,    Low,    High,   High,   High,   High,   High,   High,   High,   High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // >
+    {   Low,    Low,    Low,    Low,    Low,    High,   High,   High,   High,   High,   High,   High,   High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // <=
+    {   Low,    Low,    Low,    Low,    Low,    High,   High,   High,   High,   High,   High,   High,   High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // >=
+    {   Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    High,   High,   High,   High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // ===
+    {   Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    High,   High,   High,   High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // !==
+    {   Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    High,   High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // &&
+    {   Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // ||
+    {   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // !
+    {   Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Equal,  Low,    Equal,  Error,  Low   },  // (
+    {   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   Error,  High,   Error,  High,   High,   Error },  // )
+    {   Error,  Error,  Error,  Error,  Error,  Error,  Error,  Error,  Error,  Error,  Error,  Error,  Error,  Error,  Equal,  Error,  Error,  Error,  Error,  Error },  // func
+    {   Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Equal,  Low,    Equal,  Error,  Low   },  // ,
+    {   Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Error,  Low,    Error,  Error,  Low   },  // $
+    {   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   Error,  Error,  High,   Error,  High,   High,   Error }   // var
 };
 
 /**
@@ -171,6 +174,12 @@ static inline uint8_t tokenTypeToInstruction(uint8_t tokenType)
         case STT_GreaterEqual:
             return IST_GreaterEq;
 
+        case STT_And:
+            return IST_And;
+
+        case STT_Or:
+            return IST_Or;
+
         default:
             return IST_Noop;
     }
@@ -190,7 +199,7 @@ uint8_t reduceMultiparamFunc(uint32_t stackPos, uint32_t *paramCount, uint32_t *
         return 0;
 
     ExprTokenVectorIterator first = vectorAt(exprVector, stackPos);
-    ExprTokenVectorIterator second = vectorAt(exprVector, stackPos - 1);
+    ExprTokenVectorIterator second = first - 1;
     if (first->type == NonTerminal) { // got E,E..) expect , or (
         if (second->type == Terminal && second->token->type == STT_Comma) { // we got ,E,E..), enter recursion
             if (!reduceMultiparamFunc(stackPos - 2, paramCount, totalParamCount))
@@ -203,7 +212,7 @@ uint8_t reduceMultiparamFunc(uint32_t stackPos, uint32_t *paramCount, uint32_t *
             }
 
             // check if we have id token before (
-            ExprTokenVectorIterator id = vectorAt(exprVector, stackPos - 2);
+            ExprTokenVectorIterator id = first - 2;
             if (id->type != Terminal || (id->type == Terminal && id->token->type != STT_Identifier)) {
                 setError(ERR_Syntax);
                 return 0;
@@ -274,6 +283,54 @@ uint8_t reduce(ExprToken *topTerm)
             topTerm->stackOffset = symbol->data->var.relativeIndex;
             break;
         }
+        case STT_Not: {
+            uint32_t stackSize = vectorSize(exprVector);
+            if (stackSize < 2) {
+                setError(ERR_Syntax);
+                return 0;
+            }
+
+            ExprTokenVectorIterator operand = vectorBack(exprVector);
+            if (operand->type != NonTerminal) {
+                setError(ERR_Syntax);
+                return 0;
+            }
+
+            ExprTokenVectorIterator notOperator = operand - 1;
+            if (notOperator != topTerm) {
+                setError(ERR_Syntax);
+                return 0;
+            }
+
+            uint32_t notCount = 1;
+            if (stackSize > 2) {
+                int64_t stackPos = stackSize - 3;
+
+                // get the number of ! operators so we can perform optimalization
+                // for odd count perform one negation
+                // for even count just convert to bool
+                do
+                {
+                    notOperator--;
+                    if (notOperator->type != Terminal || (notOperator->type == Terminal && notOperator->token->type != STT_Not)) {
+                        notOperator++; // restore the last token that was !
+                        break;
+                    }
+
+                    stackPos--;
+                } while (stackPos != -1);
+
+                notCount += (stackSize - 3 - stackPos);
+            }
+
+            notOperator->type = NonTerminal;
+            notOperator->stackOffset = currentStackPos++;
+            generateInstruction(IST_Not, notOperator->stackOffset, operand->stackOffset, notCount & 1); // same as notCount % 2
+            vectorPopNExprToken(exprVector, notCount);
+            break;
+        }
+        case STT_And:
+        case STT_Or:
         case STT_Equal:
         case STT_NotEqual:
         case STT_Less:
@@ -291,19 +348,19 @@ uint8_t reduce(ExprToken *topTerm)
                 return 0;
             }
 
-            ExprTokenVectorIterator operand2 = vectorAt(exprVector, stackSize - 1);
+            ExprTokenVectorIterator operand2 = vectorBack(exprVector);
             if (operand2->type != NonTerminal) {
                 setError(ERR_Syntax);
                 return 0;
             }
 
-            ExprTokenVectorIterator operator = vectorAt(exprVector, stackSize - 2);
+            ExprTokenVectorIterator operator = operand2 - 1;
             if (operator != topTerm) {
                 setError(ERR_Syntax);
                 return 0;
             }
 
-            ExprTokenVectorIterator operand1 = vectorAt(exprVector, stackSize - 3);
+            ExprTokenVectorIterator operand1 = operand2 - 2;
             if (operand1->type != NonTerminal) {
                 setError(ERR_Syntax);
                 return 0;
@@ -324,12 +381,12 @@ uint8_t reduce(ExprToken *topTerm)
                 return 0;
             }
 
-            ExprTokenVectorIterator nextTerm = vectorAt(exprVector, stackSize - 1);
+            ExprTokenVectorIterator nextTerm = vectorBack(exprVector);
             if (nextTerm == topTerm) { // at top must be )
-                nextTerm = vectorAt(exprVector, stackSize - 2);
+                nextTerm--;
 
                 if (nextTerm->type == Terminal && nextTerm->token->type == STT_LeftBracket) { // it's function if there is ()
-                    nextTerm = vectorAt(exprVector, stackSize - 3);
+                    nextTerm--;
 
                     if (nextTerm->type == Terminal && nextTerm->token->type == STT_Identifier) {
                         uint32_t retValStackPos = currentStackPos++;
@@ -353,7 +410,7 @@ uint8_t reduce(ExprToken *topTerm)
                 }
                 else if (nextTerm->type == NonTerminal) { // we have E) and are not sure what it is
                     ExprTokenVectorIterator exprBackup = nextTerm;
-                    nextTerm = vectorAt(exprVector, stackSize - 3);
+                    nextTerm--;
 
                     if (nextTerm->type == Terminal && nextTerm->token->type == STT_Comma) { // we have ,E) and it's function
                         uint32_t stackPos = stackSize - 2;
@@ -389,7 +446,7 @@ uint8_t reduce(ExprToken *topTerm)
                     else if (nextTerm->type == Terminal && nextTerm->token->type == STT_LeftBracket) { // it's (E) and we don't know if it is single param func or just (E)
                         if (stackSize >= 4) {
                             ExprTokenVectorIterator leftBracketBackup = nextTerm; // we need to backup current token for (E) case
-                            nextTerm = vectorAt(exprVector, stackSize - 4);
+                            nextTerm--;
 
                             if (nextTerm->type == Terminal && nextTerm->token->type == STT_Identifier) { // we have id(E) and it's function
                                 // return value

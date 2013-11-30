@@ -98,6 +98,12 @@ void printToken(const Token *token) {
             fprintf(stderr, "="); break;
         case STT_Php:
             fprintf(stderr, "<?php"); break;
+        case STT_And:
+            fprintf(stderr, "&&"); break;
+        case STT_Or:
+            fprintf(stderr, "||"); break;
+        case STT_Not:
+            fprintf(stderr, "!"); break;
         default:
             break;
     }
