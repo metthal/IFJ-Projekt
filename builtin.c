@@ -414,30 +414,39 @@ void intval(const Value *val, Value *ret)
     ret->type = VT_Integer;
 }
 
-void putString(Value *ret, const Value *firstVal, int count)
+void putString(const Value *base, const Value *constBase, Value *ret, int count)
 {
-    int i = 0;
-    for (;i < count; i++, firstVal++){
-        switch (firstVal->type) {
+    const Value *it = base - count;
+    const Value *item = it;
+    while (it != base){
+        switch (item->type) {
             case VT_Null:
                 break;
 
             case VT_Bool:
-                if (firstVal->data.b)
+                if (item->data.b)
                     putchar('1');
                 break;
 
             case VT_Integer:
-                printf("%d", firstVal->data.i);
+                printf("%d", item->data.i);
                 break;
 
             case VT_Double:
-                printf("%g", firstVal->data.d);
+                printf("%g", item->data.d);
                 break;
 
             case VT_String:
-                printf("%s", firstVal->data.s.data);
+                printf("%s", item->data.s.data);
                 break;
+
+            case VT_Reference:
+                item = base + it->data.ref;
+                continue;
+
+            case VT_ConstReference:
+                item = constBase + it->data.ref;
+                continue;
 
             case VT_Undefined:
                 setError(ERR_UndefVariable);
@@ -447,10 +456,13 @@ void putString(Value *ret, const Value *firstVal, int count)
                 setError(ERR_Internal);
                 return;
         }
+
+        it++;
+        item = it;
     }
 
     ret->type = VT_Integer;
-    ret->data.i = i;
+    ret->data.i = count;
 
     // Force printing to output
     fflush(stdout);

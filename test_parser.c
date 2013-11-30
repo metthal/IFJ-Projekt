@@ -117,6 +117,8 @@ void printInstruction(FILE *file, int line, Instruction *ist)
             fprintf(file, "!!! %11s", "Noop"); break;
         case IST_Mov:
             fprintf(file, "%15s", "Mov"); break;
+        case IST_MovC:
+            fprintf(file, "%15s", "MovC"); break;
         case IST_Jmp:
             fprintf(file, "%15s", "Jmp"); break;
         case IST_Jmpz:

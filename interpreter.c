@@ -12,10 +12,6 @@ uint8_t fillValuePtrs(Value *base, const Value *constBase, Value **res, const Va
         *res = base + ires;
         if ((*res)->type == VT_Reference)
             *res = base + (*res)->data.ref;
-        else if ((*res)->type == VT_ConstReference) {
-            setError(ERR_Internal);
-            return 0;
-        }
     }
 
     if (a != NULL) {
@@ -80,6 +76,12 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 copyValue(aVal, resVal);
                 break;
             }
+
+            case IST_MovC:
+                resVal = vectorAt(stack, stackPtr + instructionPtr->res);
+                resVal->data.ref = instructionPtr->a;
+                resVal->type = VT_ConstReference;
+                break;
 
             case IST_Jmp:
                 instructionPtr += instructionPtr->a;
@@ -273,11 +275,12 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
             }
 
             case IST_PutString: {
-                if (!fillValuePtrs(vectorEndValue(stack), cCtIt, &resVal, &aVal, NULL,
-                        -instructionPtr->a - 1, -instructionPtr->a, 0))
+                Value *base = vectorEndValue(stack);
+                if (!fillValuePtrs(base, cCtIt, &resVal, NULL, NULL,
+                        -instructionPtr->a - 1, 0, 0))
                     break;
 
-                putString(resVal, aVal, instructionPtr->a);
+                putString(base, cCtIt, resVal, instructionPtr->a);
                 // Clear parameters
                 vectorPopNValue(stack, instructionPtr->a);
                 break;
