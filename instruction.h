@@ -56,6 +56,7 @@ typedef enum
     IST_Jmpz,        //!< IST_Jmpz
     IST_Push,        //!< IST_Push
     IST_PushC,       //!< IST_PushC
+    IST_PushRef,     //!< IST_PushRef
     IST_Reserve,     //!< IST_Reserve
     IST_Pop,         //!< IST_Pop
     IST_ClearExpr,   //!< IST_ClearExpr

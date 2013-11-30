@@ -108,7 +108,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 continue;
             }
 
-            case IST_Push: {
+            case IST_Push:
                 aVal = vectorAt(stack, stackPtr + instructionPtr->a);
 
                 // Dereference to prevent linked references.
@@ -118,19 +118,18 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                     vectorPushIndexValue(stack, stackPtr + instructionPtr->a);
 
                 break;
-            }
 
-            case IST_PushC: {
-                // TODO remake with vectorPushDefault return value
-                // resVal = vectorPushDefaultValue(stack);
-                // resVal->data.ref = instructionPtr->a
-                // resVal->type = VT_ConstReference
-                Value val;
-                val.data.ref = instructionPtr->a;
-                val.type = VT_ConstReference;
-                vectorPushValue(stack, &val);
+            case IST_PushC:
+                resVal = vectorPushDefaultValue(stack);
+                resVal->data.ref = instructionPtr->a;
+                resVal->type = VT_ConstReference;
                 break;
-            }
+
+            case IST_PushRef:
+                resVal = vectorPushDefaultValue(stack);
+                resVal->data.ref = instructionPtr->a;
+                resVal->type = VT_Reference;
+                break;
 
             case IST_Reserve:
                 for (int32_t i = 0; i < instructionPtr->a; i++)
@@ -149,22 +148,16 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 break;
 
             case IST_Call: {
-                // Save stack and instruction pointers
-                Value val;
-                initValue(&val);
-
                 // Stack pointer
-                val.type = VT_StackPtr;
-                val.data.sp = stackPtr;
-                stackPtr = vectorSize(stack);
-                vectorPushValue(stack, &val);
+                Value *val = vectorPushDefaultValue(stack);
+                val->type = VT_StackPtr;
+                val->data.sp = stackPtr;
+                stackPtr = vectorSize(stack) - 1;
 
                 // Instruction pointer
-                val.type = VT_InstructionPtr;
-                val.data.ip = instructionPtr + 1;
-                vectorPushValue(stack, &val);
-
-                deleteValue(&val);
+                val = vectorPushDefaultValue(stack);
+                val->type = VT_InstructionPtr;
+                val->data.ip = instructionPtr + 1;
 
                 instructionPtr = *((Instruction**)vectorAtConst(addressTable, instructionPtr->a));
                 continue;

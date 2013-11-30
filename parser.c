@@ -28,7 +28,7 @@ void forStmt1(uint8_t skip);
 uint8_t forStmt2(uint32_t *cond);
 
 // Forward declaration of helper functions
-uint32_t generalExpr(uint8_t skip);
+uint32_t generalExpr(uint8_t skip, uint32_t resultOffset);
 uint32_t condition();
 void stmtListBracketed();
 void assignment(ConstTokenVectorIterator varid, uint8_t skip);
@@ -405,7 +405,7 @@ void stmt()
                     // Rule 9
                     tokensIt++;
 
-                    uint32_t exprRes = generalExpr(0);
+                    uint32_t exprRes = generalExpr(0, 0);
                     if (getError())
                         return;
 
@@ -921,7 +921,7 @@ uint8_t forStmt2(uint32_t *cond)
 
         default:
             // Rule 26
-            *cond = generalExpr(0);
+            *cond = generalExpr(0, 0);
             if(getError())
                 break;
 
@@ -931,10 +931,10 @@ uint8_t forStmt2(uint32_t *cond)
     return 0;
 }
 
-uint32_t generalExpr(uint8_t skip)
+uint32_t generalExpr(uint8_t skip, uint32_t resultOffset)
 {
     if (secondRun && !skip) {
-        return expr();
+        return expr(resultOffset);
     }
     else {
         // Skips expression.
@@ -1001,7 +1001,7 @@ uint32_t condition()
 
     tokensIt++;
 
-    uint32_t exprRes = generalExpr(0);
+    uint32_t exprRes = generalExpr(0, 0);
     if (getError())
         return 0;
 
@@ -1046,7 +1046,8 @@ void assignment(ConstTokenVectorIterator varid, uint8_t skip)
 
     tokensIt++;
 
-    uint32_t exprRes = generalExpr(skip);
+    // TODO here send resultOffset to generalExpr
+    uint32_t exprRes = generalExpr(skip, 0);
     if (getError())
         return;
 
@@ -1056,8 +1057,10 @@ void assignment(ConstTokenVectorIterator varid, uint8_t skip)
         if (getError())
            return;
 
+        // TODO remove this
         // Move result of expression to variable
-        generateInstruction(IST_Mov, symbol->data->var.relativeIndex, exprRes, 0);
+        //generateInstruction(IST_Mov, symbol->data->var.relativeIndex, exprRes, 0);
+
 
         // Clear generated expression space
         generateInstruction(IST_ClearExpr, 0, currentContext->exprStart, 0);

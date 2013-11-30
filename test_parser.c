@@ -127,6 +127,8 @@ void printInstruction(FILE *file, int line, Instruction *ist)
             fprintf(file, "%15s", "Push"); break;
         case IST_PushC:
             fprintf(file, "%15s", "PushC"); break;
+        case IST_PushRef:
+            fprintf(file, "%15s", "PushRef"); break;
         case IST_Reserve:
             fprintf(file, "%15s", "Reserve"); break;
         case IST_Pop:
