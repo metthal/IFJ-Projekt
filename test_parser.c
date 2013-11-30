@@ -117,8 +117,6 @@ void printInstruction(FILE *file, int line, Instruction *ist)
             fprintf(file, "!!! %11s", "Noop"); break;
         case IST_Mov:
             fprintf(file, "%15s", "Mov"); break;
-        case IST_MovC:
-            fprintf(file, "%15s", "MovC"); break;
         case IST_Jmp:
             fprintf(file, "%15s", "Jmp"); break;
         case IST_Jmpz:
@@ -185,6 +183,12 @@ void printInstruction(FILE *file, int line, Instruction *ist)
             fprintf(file, "%15s", "Greater"); break;
         case IST_GreaterEq:
             fprintf(file, "%15s", "GreaterEq"); break;
+        case IST_And:
+            fprintf(file, "%15s", "And"); break;
+        case IST_Or:
+            fprintf(file, "%15s", "Or"); break;
+        case IST_Not:
+            fprintf(file, "%15s", "Not"); break;
     }
     fprintf(file, "    %5d %5d %5d\n", ist->res, ist->a, ist->b);
 }
@@ -227,6 +231,14 @@ void printState(char *fileName)
 
             case VT_Null:
                 fprintf(file, "%s\n", "N");
+                break;
+
+            case VT_Reference:
+                fprintf(file, "%s\t%d\n", "R", ctIt->data.ref);
+                break;
+
+            case VT_ConstReference:
+                fprintf(file, "%s\t%d\n", "CR", ctIt->data.ref);
                 break;
 
             case VT_InstructionPtr:
@@ -787,7 +799,7 @@ ADD_FUNC_INSTRUCTION(IST_Return, 0, 2, 0);
 
 TEST_RESULT("sources/function.ifj", "Functions", 0, 0, ERR_None, 4, 3);
 
-// SAVE_STATE("sources/function.ifj", "sources/function.sta");
+// SAVE_STATE("sources/fun_nested.ifj", "sources/fun_nested.sta");
 
 // HERE PUT ANOTHER TEST
 

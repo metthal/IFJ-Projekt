@@ -56,7 +56,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
     uint32_t stackPtr = 1;
 
     // Pointer on first constant for fast access
-    ConstValueVectorIterator cCtIt = vectorBeginValue(constTable);
+    const Value *cCtIt = vectorAtConst(constTable, 0);
 
     const Instruction *instructionPtr = firstInstruction;
     uint8_t running = 1;
@@ -68,7 +68,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 aVal = base + instructionPtr->a;
 
                 // Dereference to prevent linked references.
-                if (aVal == VT_Reference) {
+                if (aVal->type == VT_Reference) {
                     aVal = base + aVal->data.ref;
                 }
 
@@ -110,7 +110,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 aVal = vectorAt(stack, stackPtr + instructionPtr->a);
 
                 // Dereference to prevent linked references.
-                if (aVal == VT_Reference)
+                if (aVal->type == VT_Reference)
                     vectorPushIndexValue(stack, stackPtr + aVal->data.ref);
                 else
                     vectorPushIndexValue(stack, stackPtr + instructionPtr->a);
@@ -193,13 +193,13 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                         instructionPtr->a, 0, 0))
                     break;
 
-                deleteValue(aVal);
-                initValue(aVal);
-                aVal->type = VT_Null;
+                deleteValue(resVal);
+                initValue(resVal);
+                resVal->type = VT_Null;
                 break;
 
             case IST_BoolVal: {
-                if (!fillValuePtrs(vectorEnd(stack), cCtIt, &resVal, &aVal, NULL,
+                if (!fillValuePtrs(vectorEndValue(stack), cCtIt, &resVal, &aVal, NULL,
                         -2, -1, 0))
                     break;
 
@@ -210,7 +210,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
             }
 
             case IST_DoubleVal: {
-                if (!fillValuePtrs(vectorEnd(stack), cCtIt, &resVal, &aVal, NULL,
+                if (!fillValuePtrs(vectorEndValue(stack), cCtIt, &resVal, &aVal, NULL,
                         -2, -1, 0))
                     break;
 
@@ -221,7 +221,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
             }
 
             case IST_FindString: {
-                if (!fillValuePtrs(vectorEnd(stack), cCtIt, &resVal, &aVal, &bVal,
+                if (!fillValuePtrs(vectorEndValue(stack), cCtIt, &resVal, &aVal, &bVal,
                         -3, -2, -1))
                     break;
 
@@ -232,7 +232,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
             }
 
             case IST_GetString: {
-                if (!fillValuePtrs(vectorEnd(stack), cCtIt, &resVal, NULL, NULL,
+                if (!fillValuePtrs(vectorEndValue(stack), cCtIt, &resVal, NULL, NULL,
                         -1, 0, 0))
                     break;
 
@@ -241,7 +241,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
             }
 
             case IST_GetSubstring: {
-                if (!fillValuePtrs(vectorEnd(stack), cCtIt, NULL, &aVal, &bVal,
+                if (!fillValuePtrs(vectorEndValue(stack), cCtIt, NULL, &aVal, &bVal,
                         0, -2, -1))
                     break;
 
@@ -251,7 +251,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 if (getError())
                     return;
 
-                if (!fillValuePtrs(vectorEnd(stack), cCtIt, &resVal, &aVal, NULL,
+                if (!fillValuePtrs(vectorEndValue(stack), cCtIt, &resVal, &aVal, NULL,
                         -4, -3, 0))
                     break;
 
@@ -262,7 +262,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
             }
 
             case IST_IntVal: {
-                if (!fillValuePtrs(vectorEnd(stack), cCtIt, &resVal, &aVal, NULL,
+                if (!fillValuePtrs(vectorEndValue(stack), cCtIt, &resVal, &aVal, NULL,
                         -2, -1, 0))
                     break;
 
@@ -273,7 +273,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
             }
 
             case IST_PutString: {
-                if (!fillValuePtrs(vectorEnd(stack), cCtIt, &resVal, &aVal, NULL,
+                if (!fillValuePtrs(vectorEndValue(stack), cCtIt, &resVal, &aVal, NULL,
                         -instructionPtr->a - 1, -instructionPtr->a, 0))
                     break;
 
@@ -284,7 +284,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
             }
 
             case IST_SortString: {
-                if (!fillValuePtrs(vectorEnd(stack), cCtIt, &resVal, &aVal, NULL,
+                if (!fillValuePtrs(vectorEndValue(stack), cCtIt, &resVal, &aVal, NULL,
                         -2, -1, 0))
                     break;
 
@@ -295,7 +295,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
             }
 
             case IST_StrLen: {
-                if (!fillValuePtrs(vectorEnd(stack), cCtIt, &resVal, &aVal, NULL,
+                if (!fillValuePtrs(vectorEndValue(stack), cCtIt, &resVal, &aVal, NULL,
                         -2, -1, 0))
                     break;
 
@@ -306,7 +306,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
             }
 
             case IST_StrVal: {
-                if (!fillValuePtrs(vectorEnd(stack), cCtIt, &resVal, &aVal, NULL,
+                if (!fillValuePtrs(vectorEndValue(stack), cCtIt, &resVal, &aVal, NULL,
                         -2, -1, 0))
                     break;
 

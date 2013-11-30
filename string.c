@@ -362,7 +362,7 @@ void stringSetS(String *dest, const char *str, uint32_t len)
  * @param  dest  Destination string
  * @param  src   Source string
  */
-void stringAdd(String *dest, String *src)
+void stringAdd(String *dest, const String *src)
 {
     uint32_t newLength = dest->length + src->length - 1;
     if (dest->size < newLength) {

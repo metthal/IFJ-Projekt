@@ -1,0 +1,19 @@
+<?php
+
+function fun()
+{
+    return 1;
+}
+
+function bar($param)
+{
+    return $param;
+}
+
+function foo($param)
+{
+    $param = $param + 1;
+    return $param;
+}
+
+$a = foo(bar(fun()));
