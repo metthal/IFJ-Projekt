@@ -1,0 +1,14 @@
+<?php
+
+function boo()
+{
+    return 2 + 3 * 4;
+}
+
+function foo()
+{
+    return boo();
+}
+
+$res = foo();
+$res = put_string($res, "\n");

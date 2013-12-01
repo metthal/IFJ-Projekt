@@ -126,7 +126,11 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
             case IST_PushRef:
                 resVal = vectorPushDefaultValue(stack);
-                resVal->data.ref = instructionPtr->a;
+                aVal = resVal + instructionPtr->a;
+                if (aVal->type == VT_Reference)
+                    resVal->data.ref = aVal->data.ref + instructionPtr->a;
+                else
+                    resVal->data.ref = instructionPtr->a;
                 resVal->type = VT_Reference;
                 break;
 
