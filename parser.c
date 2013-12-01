@@ -405,15 +405,12 @@ void stmt()
                     // Rule 9
                     tokensIt++;
 
-                    uint32_t exprRes = generalExpr(0, 0);
+                    generalExpr(0, -(currentContext->argumentCount + 1));
                     if (getError())
                         return;
 
-                    if (secondRun) {
-                        // Move result of expression to reserved space for return value
-                        generateInstruction(IST_Mov, -(currentContext->argumentCount+1), exprRes, 0);
+                    if (secondRun)
                         generateInstruction(IST_Return, 0, currentContext->argumentCount, 0);
-                    }
 
                     // Semicolon loaded by expr
                     if (tokensIt->type != STT_Semicolon) {
