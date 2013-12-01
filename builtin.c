@@ -441,7 +441,7 @@ void putString(const Value *base, const Value *constBase, Value *ret, int count)
                 break;
 
             case VT_Reference:
-                item = base + it->data.ref;
+                item += it->data.ref;
                 continue;
 
             case VT_ConstReference:

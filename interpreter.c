@@ -11,13 +11,13 @@ uint8_t fillValuePtrs(Value *base, const Value *constBase, Value **res, const Va
     if (res != NULL) {
         *res = base + ires;
         if ((*res)->type == VT_Reference)
-            *res = base + (*res)->data.ref;
+            *res += (*res)->data.ref;
     }
 
     if (a != NULL) {
         *a = base + ia;
         if ((*a)->type == VT_Reference)
-            *a = base + (*a)->data.ref;
+            *a += (*a)->data.ref;
         else if ((*a)->type == VT_ConstReference)
             *a = constBase + (*a)->data.ref;
         else if ((*a)->type == VT_Undefined) {
@@ -29,7 +29,7 @@ uint8_t fillValuePtrs(Value *base, const Value *constBase, Value **res, const Va
     if (b != NULL) {
         *b = base + ib;
         if ((*b)->type == VT_Reference)
-            *b = base + (*b)->data.ref;
+            *b += (*b)->data.ref;
         else if ((*b)->type == VT_ConstReference)
             *b = constBase + (*b)->data.ref;
         else if ((*b)->type == VT_Undefined) {
@@ -64,9 +64,8 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 aVal = base + instructionPtr->a;
 
                 // Dereference to prevent linked references.
-                if (aVal->type == VT_Reference) {
-                    aVal = base + aVal->data.ref;
-                }
+                if (aVal->type == VT_Reference)
+                    aVal += aVal->data.ref;
 
                 if (!fillValuePtrs(base, cCtIt, &resVal, NULL, NULL,
                         instructionPtr->res, 0, 0))
@@ -113,7 +112,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
                 // Dereference to prevent linked references.
                 if (aVal->type == VT_Reference)
-                    vectorPushIndexValue(stack, stackPtr + aVal->data.ref);
+                    vectorPushIndexValue(stack, stackPtr + instructionPtr->a + aVal->data.ref);
                 else
                     vectorPushIndexValue(stack, stackPtr + instructionPtr->a);
 

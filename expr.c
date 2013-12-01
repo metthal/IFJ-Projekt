@@ -199,7 +199,7 @@ static inline void modifyExprInstResult(uint32_t instIndex, uint32_t resultOffse
             break;
         case IST_Reserve:
             inst->code = IST_PushRef;
-            inst->a = -(lastFuncParamCount + currentStackPos) + resultOffset;
+            inst->a = resultOffset - (currentStackPos - 1);
             break;
         case IST_Add:
         case IST_Subtract:
