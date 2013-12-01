@@ -213,6 +213,8 @@ static inline void modifyExprInstResult(uint32_t instIndex, uint32_t resultOffse
         case IST_Greater:
         case IST_GreaterEq:
         case IST_Or:
+        case IST_And:
+        case IST_Not:
             inst->res = resultOffset;
             break;
         default:

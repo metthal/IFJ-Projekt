@@ -15,11 +15,11 @@ typedef const Value* ConstValueVectorIterator;
 #undef VECTOR_ITEM
 #undef VECTOR_STRUCT_ITEM
 
-static inline void vectorPushIndexValue(Vector *vec, uint32_t index)
+static inline ValueVectorIterator vectorPushIndexValue(Vector *vec, uint32_t index)
 {
     if (index >= vec->size) {
         setError(ERR_Range);
-        return;
+        return NULL;
     }
 
     if (vec->size == vec->capacity) {
@@ -28,12 +28,13 @@ static inline void vectorPushIndexValue(Vector *vec, uint32_t index)
         else
             vectorReserve(vec, vec->capacity * VectorResizeIncRate);
         if (getError())
-            return;
+            return NULL;
     }
 
     copyValue((const Value*)(vec->data + index * vec->itemSize), (Value*)vec->end);
     vec->size++;
     vec->end += vec->itemSize;
+    return vec->end - vec->itemSize;
 }
 
 #endif

@@ -63,16 +63,18 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 Value *base = vectorAt(stack, stackPtr);
                 aVal = base + instructionPtr->a;
 
-                // Dereference to prevent linked references.
-                if (aVal->type == VT_Reference)
-                    aVal += aVal->data.ref;
-
                 if (!fillValuePtrs(base, cCtIt, &resVal, NULL, NULL,
                         instructionPtr->res, 0, 0))
                     break;
 
-                deleteValue(resVal);
-                copyValue(aVal, resVal);
+                if (aVal != resVal) {
+                    deleteValue(resVal);
+                    copyValue(aVal, resVal);
+
+                    // Reference needs to be updated
+                    if (aVal->type == VT_Reference)
+                        resVal->data.ref += (aVal - resVal);
+                }
                 break;
             }
 
@@ -108,13 +110,12 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
             }
 
             case IST_Push:
-                aVal = vectorAt(stack, stackPtr + instructionPtr->a);
+                resVal = vectorPushIndexValue(stack, stackPtr + instructionPtr->a);
 
-                // Dereference to prevent linked references.
-                if (aVal->type == VT_Reference)
-                    vectorPushIndexValue(stack, stackPtr + instructionPtr->a + aVal->data.ref);
-                else
-                    vectorPushIndexValue(stack, stackPtr + instructionPtr->a);
+                if (resVal->type == VT_Reference) {
+                    // Reference needs to be updated
+                    resVal->data.ref += (instructionPtr->a - (vectorSize(stack) - 1));
+                }
 
                 break;
 
@@ -490,19 +491,38 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                     break;
                 }
 
-                // Copy aVal to resVal
-                initStringSet(&(resVal->data.s), &(aVal->data.s));
+                // If resVal == aVal, we can just add bVal
+                if (resVal != aVal) {
+                    if (resVal == bVal && bVal->type == VT_String) {
+                        // Special case, aVal can be just added before bVal
+                        stringFrontAdd(&(bVal->data.s), &(aVal->data.s));
+                        break;
+                    }
+                }
 
                 // Add bVal, thus concatenating
-                if (bVal->type == VT_String)
+                if (bVal->type == VT_String) {
+                    // This will work even if resVal == aVal == bVal
                     stringAdd(&(resVal->data.s), &(bVal->data.s));
+                }
                 else {
+                    // First, bVal needs to be converted
                     String tmp;
                     valueToString(bVal, &tmp);
                     if (getError())
                         return;
 
+                    // Then, having temporary string, we can initialize resVal
+                    // but only if it's not aVal
+                    if (resVal != aVal) {
+                        deleteValue(resVal);
+                        initStringSet(&(resVal->data.s), &(aVal->data.s));
+                    }
+
+                    // And perform concatenation
                     stringAdd(&(resVal->data.s), &tmp);
+
+                    // Finally, delete temporary string
                     deleteString(&tmp);
                 }
 
@@ -527,14 +547,13 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                             resVal->type = VT_Bool;
                             break;
 
-                        case VT_String:
-                            if (stringCompare(&aVal->data.s,&bVal->data.s) == 0)
-                                resVal->data.b = 1;
-                            else
-                                resVal->data.b = 0;
+                        case VT_String: {
+                            uint8_t tmp = stringCompare(&aVal->data.s, &bVal->data.s) == 0;
+                            deleteValue(resVal);
+                            resVal->data.b = tmp;
                             resVal->type = VT_Bool;
-
                             break;
+                        }
 
                         case VT_Bool:
                             resVal->data.b = aVal->data.b == bVal->data.b;
@@ -573,10 +592,13 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                             resVal->type = VT_Bool;
                             break;
 
-                        case VT_String:
-                            resVal->data.b = stringCompare(&(aVal->data.s), &(bVal->data.s)) != 0;
+                        case VT_String: {
+                            uint8_t tmp = stringCompare(&aVal->data.s, &bVal->data.s) != 0;
+                            deleteValue(resVal);
+                            resVal->data.b = tmp;
                             resVal->type = VT_Bool;
                             break;
+                        }
 
                         case VT_Bool:
                             resVal->data.b = aVal->data.b != bVal->data.b;
@@ -615,14 +637,13 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                             resVal->type = VT_Bool;
                             break;
 
-                        case VT_String:
-                            if (stringCompare(&aVal->data.s,&bVal->data.s) == -1)
-                                resVal->data.b = 1;
-                            else
-                                resVal->data.b = 0;
+                        case VT_String: {
+                            uint8_t tmp = stringCompare(&aVal->data.s, &bVal->data.s) == -1;
+                            deleteValue(resVal);
+                            resVal->data.b = tmp;
                             resVal->type = VT_Bool;
-
                             break;
+                        }
 
                         case VT_Bool:
                             resVal->data.b = aVal->data.b < bVal->data.b;
@@ -660,14 +681,13 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                             resVal->type = VT_Bool;
                             break;
 
-                        case VT_String:
-                            if (stringCompare(&aVal->data.s,&bVal->data.s) <= 0)
-                                resVal->data.b = 1;
-                            else
-                                resVal->data.b = 0;
+                        case VT_String: {
+                            uint8_t tmp = stringCompare(&aVal->data.s, &bVal->data.s) <= 0;
+                            deleteValue(resVal);
+                            resVal->data.b = tmp;
                             resVal->type = VT_Bool;
-
                             break;
+                        }
 
                         case VT_Bool:
                             resVal->data.b = aVal->data.b <= bVal->data.b;
@@ -705,14 +725,13 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                             resVal->type = VT_Bool;
                             break;
 
-                        case VT_String:
-                            if (stringCompare(&aVal->data.s,&bVal->data.s) == 1)
-                                resVal->data.b = 1;
-                            else
-                                resVal->data.b = 0;
+                        case VT_String: {
+                            uint8_t tmp = stringCompare(&aVal->data.s, &bVal->data.s) == 1;
+                            deleteValue(resVal);
+                            resVal->data.b = tmp;
                             resVal->type = VT_Bool;
-
                             break;
+                        }
 
                         case VT_Bool:
                             resVal->data.b = aVal->data.b > bVal->data.b;
@@ -750,14 +769,13 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                             resVal->type = VT_Bool;
                             break;
 
-                        case VT_String:
-                            if (stringCompare(&aVal->data.s,&bVal->data.s) >= 0)
-                                resVal->data.b = 1;
-                            else
-                                resVal->data.b = 0;
+                        case VT_String: {
+                            uint8_t tmp = stringCompare(&aVal->data.s, &bVal->data.s) >= 0;
+                            deleteValue(resVal);
+                            resVal->data.b = tmp;
                             resVal->type = VT_Bool;
-
                             break;
+                        }
 
                         case VT_Bool:
                             resVal->data.b = aVal->data.b >= bVal->data.b;
@@ -777,29 +795,35 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
                 break;
 
-            case IST_And:
+            case IST_And: {
                 vectorPushDefaultValue(stack);
                 if (!fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
                         instructionPtr->res, instructionPtr->a, instructionPtr->b))
                     break;
 
-                resVal->data.b = valueToBool(aVal) && valueToBool(bVal);
+                uint8_t tmp = valueToBool(aVal) && valueToBool(bVal);
+                deleteValue(resVal);
+                resVal->data.b = tmp;
                 resVal->type = VT_Bool;
 
                 break;
+            }
 
-            case IST_Or:
+            case IST_Or: {
                 vectorPushDefaultValue(stack);
                 if (!fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
                         instructionPtr->res, instructionPtr->a, instructionPtr->b))
                     break;
 
-                resVal->data.b = valueToBool(aVal) || valueToBool(bVal);
+                uint8_t tmp = valueToBool(aVal) || valueToBool(bVal);
+                deleteValue(resVal);
+                resVal->data.b = tmp;
                 resVal->type = VT_Bool;
 
                 break;
+            }
 
-            case IST_Not:
+            case IST_Not: {
                 vectorPushDefaultValue(stack);
                 if (!fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, NULL,
                         instructionPtr->res, instructionPtr->a, 0))
@@ -811,10 +835,13 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 // A is FALSE(0) and B is TRUE(1) = 0 ^ 1 = TRUE(1)
                 // A is TRUE(1) and B is FALSE(0) = 1 ^ 0 = TRUE(1)
                 // A is FALSE(0) and B is FALSE(0) = 0 ^ 0 = FALSE(0)
-                resVal->data.b = valueToBool(aVal) ^ instructionPtr->b;
+                uint8_t tmp = valueToBool(aVal) ^ instructionPtr->b;
+                deleteValue(resVal);
+                resVal->data.b = tmp;
                 resVal->type = VT_Bool;
 
                 break;
+            }
 
             default:
                 break;

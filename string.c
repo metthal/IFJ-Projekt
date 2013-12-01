@@ -370,7 +370,8 @@ void stringAdd(String *dest, const String *src)
             return;
         }
     }
-    memcpy(dest->data + dest->length - 1, src->data, src->length);
+    memcpy(dest->data + dest->length - 1, src->data, src->length - 1);
+    dest->data[newLength - 1] = '\0';
     dest->length = newLength;
 }
 
@@ -393,6 +394,55 @@ void stringAddS(String *dest, const char *src, uint32_t len)
     memcpy(dest->data + dest->length - 1, src, len);
     dest->length = newLength;
     dest->data[dest->length - 1] = '\0';
+}
+
+/**
+ * Concatenates source string into destination string,
+ * so that source string precedes destination string.
+ * Sets ERR_Allocation if memory couldn't be allocated.
+ *
+ * @param  dest  Destination string
+ * @param  src   Source string
+ */
+void stringFrontAdd(String *dest, const String *src)
+{
+    // Calculate required space
+    uint32_t newLength = dest->length + src->length - 1;
+    // Create new memory place
+    char *data = malloc(sizeof(char) * newLength);
+    if (data == NULL) {
+        setError(ERR_Allocation);
+        return;
+    }
+
+    // Copy old data to offset
+    memcpy(data + src->length - 1, dest->data, dest->length);
+    // Copy new data to string beginning, without trailing zero
+    memcpy(data, src->data, src->length - 1);
+
+    free(dest->data);
+    dest->data = data;
+    dest->size = newLength;
+    dest->length = newLength;
+}
+
+/**
+ * Moves data of source string to destination string
+ * without copying, leaving source string in uninitialized
+ * state.
+ *
+ * @param  dest  Destination string
+ * @param  src   Source string
+ */
+void stringMove(String *dest, String *src)
+{
+    deleteString(dest);
+    dest->data = src->data;
+    dest->length = src->length;
+    dest->size = src->size;
+    src->data = NULL;
+    src->length = 0;
+    src->size = 0;
 }
 
 /**
