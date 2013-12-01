@@ -112,7 +112,7 @@ void freeInstruction(Instruction **ppt);
 
 void copyInstruction(const Instruction *src, Instruction *dest);
 
-void generateCall(const Symbol *symbol, BuiltinCode builtinCode, uint32_t paramCount);
+uint32_t generateCall(const Symbol *symbol, BuiltinCode builtinCode, uint32_t paramCount);
 
 void generateInstruction(InstructionCode code, int32_t res, int32_t a, int32_t b);
 

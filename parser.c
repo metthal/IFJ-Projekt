@@ -1046,22 +1046,21 @@ void assignment(ConstTokenVectorIterator varid, uint8_t skip)
 
     tokensIt++;
 
-    // TODO here send resultOffset to generalExpr
-    uint32_t exprRes = generalExpr(skip, 0);
-    if (getError())
-        return;
-
     if (secondRun && !skip) {
         // Symbol should be already in table after first run
         Symbol *symbol = symbolTableFind(currentContext->localTable, &(varid->str));
         if (getError())
            return;
 
-        // TODO remove this
-        // Move result of expression to variable
-        //generateInstruction(IST_Mov, symbol->data->var.relativeIndex, exprRes, 0);
+        generalExpr(skip, symbol->data->var.relativeIndex);
+    }
+    else
+        generalExpr(skip, 0);
 
+    if (getError())
+        return;
 
+    if (secondRun && !skip) {
         // Clear generated expression space
         generateInstruction(IST_ClearExpr, 0, currentContext->exprStart, 0);
     }

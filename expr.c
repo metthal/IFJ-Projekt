@@ -20,6 +20,7 @@ static Vector *exprVector = NULL;   ///< Bottom-up parser stack for @ref ExprVec
 static ExprToken endToken;          ///< Token that should be located on the bottom of the stack, used when stack has no topmost terminal token
 static uint32_t currentStackPos;    ///< Current position in the local stack frame
 static uint32_t lastResultInstIndex;
+static uint32_t lastFuncParamCount;
 
 // used as helper variables for function call generation
 static BuiltinCode currentFuncBuiltinCode;  ///< BuiltinCode for currently processed function
@@ -198,7 +199,7 @@ static inline void modifyExprInstResult(uint32_t instIndex, uint32_t resultOffse
             break;
         case IST_Reserve:
             inst->code = IST_PushRef;
-            inst->a = resultOffset;
+            inst->a = -(lastFuncParamCount + currentStackPos) + resultOffset;
             break;
         case IST_Add:
         case IST_Subtract:
@@ -440,7 +441,7 @@ uint8_t reduce(ExprToken *topTerm)
                         if (getError())
                             return 0;
 
-                        generateCall(currentFuncSymbol, currentFuncBuiltinCode, 0);
+                        lastFuncParamCount = generateCall(currentFuncSymbol, currentFuncBuiltinCode, 0);
                         if (getError())
                             return 0;
 
@@ -482,7 +483,7 @@ uint8_t reduce(ExprToken *topTerm)
                             return 0;
                         }
 
-                        generateCall(currentFuncSymbol, currentFuncBuiltinCode, paramCount);
+                        lastFuncParamCount = generateCall(currentFuncSymbol, currentFuncBuiltinCode, paramCount);
                         if (getError())
                             return 0;
 
@@ -513,7 +514,7 @@ uint8_t reduce(ExprToken *topTerm)
                                         return 0;
                                 }
 
-                                generateCall(currentFuncSymbol, currentFuncBuiltinCode, currentFuncParamLimit == 0 ? 0 : 1);
+                                lastFuncParamCount = generateCall(currentFuncSymbol, currentFuncBuiltinCode, currentFuncParamLimit == 0 ? 0 : 1);
                                 if (getError())
                                     return 0;
 
@@ -625,7 +626,7 @@ uint32_t expr(uint32_t resultOffset)
                 if (resultOffset) {
                     if (!lastResultInstIndex)
                         generateInstruction(IST_Mov, resultOffset, ((ExprToken*)vectorBack(exprVector))->stackOffset, 0);
-                    else if (lastResultInstIndex > 1)
+                    else
                         modifyExprInstResult(lastResultInstIndex, resultOffset);
 
                     if (getError())

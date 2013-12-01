@@ -24,7 +24,7 @@ typedef union {
     int i;
     const void* ip;
     uint32_t sp;
-    uint32_t ref;
+    int64_t ref;
     int8_t b;
 } ValueData;
 
