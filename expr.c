@@ -318,7 +318,6 @@ uint8_t reduce(ExprToken *topTerm)
 
             topTerm->type = NonTerminal;
             topTerm->stackOffset = symbol->data->var.relativeIndex;
-            lastResultInstIndex = 1;
             break;
         }
         case STT_Not: {
