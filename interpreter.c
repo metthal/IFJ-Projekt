@@ -159,16 +159,6 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                         resVal->type = VT_StrongReference;
                         break;
 
-                    case VT_WeakReference:
-                        resVal->data.ref = aVal->data.ref + instructionPtr->a;
-                        resVal->type = VT_WeakReference;
-                        break;
-
-                    case VT_ConstReference:
-                        resVal->data.ref = aVal->data.ref;
-                        resVal->type = VT_ConstReference;
-                        break;
-
                     default:
                         resVal->data.ref = instructionPtr->a;
                         resVal->type = VT_StrongReference;
