@@ -10,7 +10,7 @@ STD_C99 = -std=c99
 STD_GNU99 = -std=gnu99
 
 CFLAGS = -Wall -Wextra -c -Wno-unused-function
-CFLAGS_RELEASE = -O2 -s
+CFLAGS_RELEASE = -O3 -s
 CFLAGS_DEBUG = -O0 -g -DDEBUG
 CFLAGS_PROFILE = $(CFLAGS_DEBUG) -pg
 
