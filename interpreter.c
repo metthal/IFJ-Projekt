@@ -498,14 +498,20 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 // If resVal == aVal, we can just add bVal
                 if (resVal != aVal) {
                     if (resVal == bVal && bVal->type == VT_String) {
-                        // Special case, aVal can be just added before bVal
-                        stringFrontAdd(&(bVal->data.s), &(aVal->data.s));
+                        // Special case, aVal can be just added before resVal == bVal
+                        stringFrontAdd(&(resVal->data.s), &(aVal->data.s));
                         break;
                     }
                 }
 
                 // Add bVal, thus concatenating
                 if (bVal->type == VT_String) {
+                    // Initialize result if it's not already set to aVal
+                    if (resVal != aVal) {
+                        deleteValue(resVal);
+                        initStringSet(&(resVal->data.s), &(aVal->data.s));
+                    }
+
                     // This will work even if resVal == aVal == bVal
                     stringAdd(&(resVal->data.s), &(bVal->data.s));
                 }

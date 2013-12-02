@@ -34,7 +34,7 @@ static inline ValueVectorIterator vectorPushIndexValue(Vector *vec, uint32_t ind
     copyValue((const Value*)(vec->data + index * vec->itemSize), (Value*)vec->end);
     vec->size++;
     vec->end += vec->itemSize;
-    return vec->end - vec->itemSize;
+    return ((Value*)vec->end) - 1;
 }
 
 #endif
