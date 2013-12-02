@@ -351,6 +351,11 @@ SHOULD_EQUAL("GetToken - keywordType - Function", token->keywordType, KTT_Functi
 token = nextToken();
 SHOULD_EQUAL("GetToken - keywordType - Null", token->type, STT_Null);
 
+overwriteFile(filePath, "/* non terminated multiline comment");
+token = nextToken();
+SHOULD_EQUAL("GetToken - multiline comment error", token, NULL);
+SHOULD_EQUAL("GetToken - mutliline comment error code", getError(), ERR_LexFile);
+
 // @todo need tests for symbol table.
 
 if (token)

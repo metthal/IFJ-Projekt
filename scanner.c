@@ -550,8 +550,7 @@ void scannerFillToken(Token *token)
                     state = SS_BlockCommentFinish;
                 }
                 else if (symbol == EOF) {
-                    // @TODO , IS IT MISTAKE OR NOT ?
-                    token->type = STT_EOF;
+                    setError(ERR_LexFile);
                     return;
                 }
                 else {
@@ -564,8 +563,7 @@ void scannerFillToken(Token *token)
                     state = SS_Empty;
                 }
                 else if (symbol == EOF) {
-                    // @TODO , IS IT MISTAKE OR NOT ?
-                    token->type = STT_EOF;
+                    setError(ERR_LexFile);
                     return;
                 }
                 else {
