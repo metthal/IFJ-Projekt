@@ -32,9 +32,16 @@ static inline ValueVectorIterator vectorPushIndexValue(Vector *vec, uint32_t ind
     }
 
     copyValue((const Value*)(vec->data + index * vec->itemSize), (Value*)vec->end);
+    Value *ret = (Value*)vec->end;
+
+    if (ret->type == VT_StrongReference || ret->type == VT_WeakReference) {
+        // Reference needs to be updated
+        ret->data.ref += ((int64_t)index - vec->size);
+    }
+
     vec->size++;
     vec->end += vec->itemSize;
-    return ((Value*)vec->end) - 1;
+    return ret;
 }
 
 #endif

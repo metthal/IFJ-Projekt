@@ -237,8 +237,12 @@ void printState(char *fileName)
                 fprintf(file, "%s\n", "N");
                 break;
 
-            case VT_Reference:
-                fprintf(file, "%s\t%ld\n", "R", ctIt->data.ref);
+            case VT_StrongReference:
+                fprintf(file, "%s\t%ld\n", "SR", ctIt->data.ref);
+                break;
+
+            case VT_WeakReference:
+                fprintf(file, "%s\t%ld\n", "WR", ctIt->data.ref);
                 break;
 
             case VT_ConstReference:

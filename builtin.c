@@ -460,7 +460,8 @@ void putString(const Value *base, const Value *constBase, Value *ret, int count)
                 printf("%s", item->data.s.data);
                 break;
 
-            case VT_Reference:
+            case VT_StrongReference:
+            case VT_WeakReference:
                 item += it->data.ref;
                 continue;
 

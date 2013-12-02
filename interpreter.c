@@ -5,36 +5,50 @@
 
 #include <stdint.h>
 
+#define DEFAULT_STACK_CAPACITY 5000
+
 uint8_t fillValuePtrs(Value *base, const Value *constBase, Value **res, const Value **a, const Value **b,
         int32_t ires, int32_t ia, int32_t ib)
 {
     if (res != NULL) {
         *res = base + ires;
-        if ((*res)->type == VT_Reference)
+        if ((*res)->type == VT_StrongReference)
             *res += (*res)->data.ref;
     }
 
     if (a != NULL) {
         *a = base + ia;
-        if ((*a)->type == VT_Reference)
-            *a += (*a)->data.ref;
-        else if ((*a)->type == VT_ConstReference)
-            *a = constBase + (*a)->data.ref;
-        else if ((*a)->type == VT_Undefined) {
-            setError(ERR_UndefVariable);
-            return 0;
+        switch ((*a)->type){
+            case VT_StrongReference:
+            case VT_WeakReference:
+                *a += (*a)->data.ref;
+                break;
+            case VT_ConstReference:
+                *a = constBase + (*a)->data.ref;
+                break;
+            case VT_Undefined:
+                setError(ERR_UndefVariable);
+                return 0;
+            default:
+                break;
         }
     }
 
     if (b != NULL) {
         *b = base + ib;
-        if ((*b)->type == VT_Reference)
-            *b += (*b)->data.ref;
-        else if ((*b)->type == VT_ConstReference)
-            *b = constBase + (*b)->data.ref;
-        else if ((*b)->type == VT_Undefined) {
-            setError(ERR_UndefVariable);
-            return 0;
+        switch ((*b)->type){
+            case VT_StrongReference:
+            case VT_WeakReference:
+                *b += (*b)->data.ref;
+                break;
+            case VT_ConstReference:
+                *b = constBase + (*b)->data.ref;
+                break;
+            case VT_Undefined:
+                setError(ERR_UndefVariable);
+                return 0;
+            default:
+                break;
         }
     }
 
@@ -60,8 +74,15 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
     while (running) {
         switch (instructionPtr->code) {
             case IST_Mov: {
+                // Don't dereference, as we can just move
+                // reference and update it.
                 Value *base = vectorAt(stack, stackPtr);
                 aVal = base + instructionPtr->a;
+
+                // There's exception with WeakReference, which
+                // must be dereferenced
+                if (aVal->type == VT_WeakReference)
+                    aVal += aVal->data.ref;
 
                 if (!fillValuePtrs(base, cCtIt, &resVal, NULL, NULL,
                         instructionPtr->res, 0, 0))
@@ -72,7 +93,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                     copyValue(aVal, resVal);
 
                     // Reference needs to be updated
-                    if (aVal->type == VT_Reference)
+                    if (aVal->type == VT_StrongReference)
                         resVal->data.ref += (aVal - resVal);
                 }
                 break;
@@ -109,15 +130,19 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 continue;
             }
 
-            case IST_Push:
-                resVal = vectorPushIndexValue(stack, stackPtr + instructionPtr->a);
-
-                if (resVal->type == VT_Reference) {
-                    // Reference needs to be updated
-                    resVal->data.ref += (instructionPtr->a - (vectorSize(stack) - 1));
+            case IST_Push: {
+                if (((Value*)vectorAt(stack, stackPtr + instructionPtr->a))->type == VT_String) {
+                    resVal = vectorPushDefaultValue(stack);
+                    resVal->data.ref = ((int64_t)stackPtr + instructionPtr->a - (vectorSize(stack) - 1));
+                    resVal->type = VT_WeakReference;
+                }
+                else {
+                    // Reference gets updated automatically
+                    resVal = vectorPushIndexValue(stack, stackPtr + instructionPtr->a);
                 }
 
                 break;
+            }
 
             case IST_PushC:
                 resVal = vectorPushDefaultValue(stack);
@@ -128,11 +153,27 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
             case IST_PushRef:
                 resVal = vectorPushDefaultValue(stack);
                 aVal = resVal + instructionPtr->a;
-                if (aVal->type == VT_Reference)
-                    resVal->data.ref = aVal->data.ref + instructionPtr->a;
-                else
-                    resVal->data.ref = instructionPtr->a;
-                resVal->type = VT_Reference;
+                switch(aVal->type) {
+                    case VT_StrongReference:
+                        resVal->data.ref = aVal->data.ref + instructionPtr->a;
+                        resVal->type = VT_StrongReference;
+                        break;
+
+                    case VT_WeakReference:
+                        resVal->data.ref = aVal->data.ref + instructionPtr->a;
+                        resVal->type = VT_WeakReference;
+                        break;
+
+                    case VT_ConstReference:
+                        resVal->data.ref = aVal->data.ref;
+                        resVal->type = VT_ConstReference;
+                        break;
+
+                    default:
+                        resVal->data.ref = instructionPtr->a;
+                        resVal->type = VT_StrongReference;
+                        break;
+                }
                 break;
 
             case IST_Reserve:
@@ -868,6 +909,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 void interpret(const Instruction *firstInstruction, const Vector *constTable, const Vector *addressTable)
 {
     Vector *stack = newValueVector();
+    vectorReserve(stack, DEFAULT_STACK_CAPACITY);
 
     // Reserve space for global return value
     vectorPushDefaultValue(stack);
