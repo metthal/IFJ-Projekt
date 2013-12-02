@@ -25,13 +25,13 @@ INT_TO_STRING_TEST("Zero", 0);
 
 INT_TO_STRING_TEST("Generic", 1234567);
 
-INT_TO_STRING_TEST("Negative", -1234567);
+INT_TO_STRING_TEST("Negative", 0);
 
 DOUBLE_TO_STRING_TEST("Zero", 0.0);
 
 DOUBLE_TO_STRING_TEST("Generic", 1234567.8901234);
 
-DOUBLE_TO_STRING_TEST("Negative", -1234567.8901234);
+DOUBLE_TO_STRING_TEST("Negative", 0.0);
 
 DOUBLE_TO_STRING_TEST("Exponent", 234.56e-34);
 
@@ -48,7 +48,7 @@ DOUBLE_TO_STRING_TEST("Exponent", 234.56e-34);
 
 STRING_TO_INT_TEST("Generic", "42", 42);
 
-STRING_TO_INT_TEST("Negative", "-42", -42);
+STRING_TO_INT_TEST("Negative", "-42", 0);
 
 STRING_TO_INT_TEST("Whitespaces", " \t\n42", 42);
 
@@ -60,7 +60,7 @@ STRING_TO_INT_TEST("Empty", "", 0);
 
 STRING_TO_DOUBLE_TEST("Generic", "42.42", 42.42);
 
-STRING_TO_DOUBLE_TEST("Negative", "-42.42", -42.42);
+STRING_TO_DOUBLE_TEST("Negative", "-42.42", 0.0);
 
 STRING_TO_DOUBLE_TEST("Integral", "42", 42.0);
 
@@ -74,11 +74,19 @@ SHOULD_EQUAL("stringToDouble() Chars - Error Type", getError(), ERR_None);
 
 clearError();
 STRING_TO_DOUBLE_TEST("Chars", "abc42.42", 0.0);
-SHOULD_EQUAL("stringToDouble() Chars - Error Type", getError(), ERR_Convert);
+SHOULD_EQUAL("stringToDouble() Chars - Error Type", getError(), ERR_None);
 
 clearError();
 STRING_TO_DOUBLE_TEST("Empty", " ", 0.0);
 SHOULD_EQUAL("stringToDouble() Chars - Error Type", getError(), ERR_None);
+
+clearError();
+STRING_TO_DOUBLE_TEST("Wrong dec. point", "42.abc", 0.0);
+SHOULD_EQUAL("stringToDouble() Chars - Error Type", getError(), ERR_Convert);
+
+clearError();
+STRING_TO_DOUBLE_TEST("Wrong exponent", "42.42e+abc", 0.0);
+SHOULD_EQUAL("stringToDouble() Chars - Error Type", getError(), ERR_Convert);
 clearError();
 
 TEST_SUITE_END

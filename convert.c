@@ -3,28 +3,100 @@
 
 #include <stdlib.h>
 
+typedef enum
+{
+    CS_Start,
+    CS_Number,
+    CS_DecimalPoint,
+    CS_Decimal,
+    CS_Exponent,
+    CS_ExponentSign
+} ConvertState;
+
 int stringToInt(const String *str)
 {
-    return strtol(str->data, NULL, 10);
+    const char *directStr = str->data;
+    while (isspace(*directStr))
+        directStr++;
+
+    // we don't support unary minus
+    if (*directStr == '-')
+        return 0;
+
+    return strtol(directStr, NULL, 10);
 }
 
 double stringToDouble(const String *str)
 {
-    char *endptr = NULL;
-    double tmp = strtod(str->data, &endptr);
+    uint32_t charPos = 0;
+    uint8_t state = CS_Start;
+    while (charPos < str->length) {
+        char currentChar = str->data[charPos++];
 
-    // error code is set only if it found as first non-digit character
-    // in case *endptr == 0, we had just string full of whitespaces or empty one what means 0.0
-    if (endptr == str->data) {
-        // skip whitespaces at the beginning
-        while (isspace(*endptr))
-            endptr++;
+        switch (state) {
+            case CS_Start:
+                if (isspace(currentChar))
+                    ;
+                else if ('0' <= currentChar && currentChar <= '9')
+                    state = CS_Number;
+                else
+                    return 0.0;
+                break;
 
-        if (*endptr != '\0')
-            setError(ERR_Convert);
+            case CS_Number:
+                if ('0' <= currentChar && currentChar <= '9')
+                    ;
+                else if (currentChar == '.')
+                    state = CS_DecimalPoint;
+                else if (currentChar == 'e' || currentChar == 'E')
+                    state = CS_Exponent;
+                else
+                    return strtod(str->data, NULL);
+                break;
+
+            case CS_DecimalPoint:
+                if ('0' <= currentChar && currentChar <= '9')
+                    state = CS_Decimal;
+                else {
+                    setError(ERR_Convert);
+                    return 0.0;
+                }
+                break;
+
+            case CS_Decimal:
+                if ('0' <= currentChar && currentChar <= '9')
+                    ;
+                else if (currentChar == 'e' || currentChar == 'E')
+                    state = CS_Exponent;
+                else
+                    return strtod(str->data, NULL);
+                break;
+
+            case CS_Exponent:
+                // we are now completely sure that there is correct double number
+                if ('0' <= currentChar && currentChar <= '9')
+                    return strtod(str->data, NULL);
+                else if (currentChar == '+' || currentChar == '-')
+                    state = CS_ExponentSign;
+                else {
+                    setError(ERR_Convert);
+                    return 0.0;
+                }
+                break;
+
+            case CS_ExponentSign:
+                // we are now completely sure that there is correct double number
+                if ('0' <= currentChar && currentChar <= '9')
+                    return strtod(str->data, NULL);
+                else {
+                    setError(ERR_Convert);
+                    return 0.0;
+                }
+                break;
+        }
     }
 
-    return tmp;
+    return 0.0;
 }
 
 String* intToString(int num)
