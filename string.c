@@ -312,23 +312,7 @@ char stringPop(String *ps)
  * @param  src   Source string
  * @param  dest  Destination string
  */
-void stringCopy(const String *src, String *dest)
-{
-    if (!_stringResizeRaw(dest, src->length)) {
-        return;
-    }
-    memcpy(dest->data, src->data, src->length);
-    dest->length = src->length;
-}
-
-/**
- * Sets destination string value to source string value.
- * Sets ERR_Allocation if memory couldn't be allocated.
- *
- * @param  dest  Destination string
- * @param  src   Source string
- */
-void stringSet(String *dest, String *src)
+void copyString(const String *src, String *dest)
 {
     if (!_stringResizeRaw(dest, src->length)) {
         return;
@@ -341,11 +325,11 @@ void stringSet(String *dest, String *src)
  * Sets string to C string value.
  * Sets ERR_Allocation if memory couldn't be allocated.
  *
- * @param  dest  String to set
  * @param  str   C string
  * @param  len   C string length
+ * @param  dest  String to set
  */
-void stringSetS(String *dest, const char *str, uint32_t len)
+void copyStringS(const char *str, uint32_t len, String *dest)
 {
     if (!_stringResizeRaw(dest, len + 1)) {
         return;

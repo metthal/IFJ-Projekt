@@ -23,7 +23,7 @@ void copyValue(const Value *src, Value *dest)
             return;
 
         case VT_String:
-            stringCopy(&(src->data.s), &(dest->data.s));
+            copyString(&(src->data.s), &(dest->data.s));
             break;
 
         default:
@@ -47,7 +47,7 @@ void tokenToValue(const Token *src, Value *dest)
         case STT_String:
             dest->type = VT_String;
             initString(&(dest->data.s));
-            stringCopy(&(src->str), &(dest->data.s));
+            copyString(&(src->str), &(dest->data.s));
             break;
 
         case STT_Bool:

@@ -83,7 +83,7 @@ key1 = newString();
 for (size_t i = 0; i < ENTRIES_COUNT; i++) {
     keys[i] = newString();
     stringPush(key1, 'A' + (i % 25));
-    stringSet(keys[i], key1);
+    copyString(key1, keys[i]);
     s1 = symbolTableAdd(st, keys[i]);
     if (!s1) {
         SHOULD_BE_TRUE("symbolTableAdd() Resize ptr", s1);

@@ -68,15 +68,15 @@ stringEmpty(a);
 SHOULD_EQUAL("stringEmpty() Length", a->length, 1);
 SHOULD_EQUAL_STR("stringEmpty() Data", a->data, "");
 
-// stringSet()
-stringSet(a, c);
-SHOULD_EQUAL("stringSet() Length", a->length, c->length);
-SHOULD_EQUAL_STR("stringSet() Data", a->data, c->data);
+// copyString()
+copyString(c, a);
+SHOULD_EQUAL("copyString() Length", a->length, c->length);
+SHOULD_EQUAL_STR("copyString() Data", a->data, c->data);
 
-// stringSetS()
-stringSetS(c, CSTR_ARG("Bye Bye World!"));
-SHOULD_EQUAL("stringSet() Length", c->length, 15);
-SHOULD_EQUAL_STR("stringSetS() Data", c->data, "Bye Bye World!");
+// copyStringS()
+copyStringS(CSTR_ARG("Bye Bye World!"), c);
+SHOULD_EQUAL("copyStringS() Length", c->length, 15);
+SHOULD_EQUAL_STR("copyStringS() Data", c->data, "Bye Bye World!");
 
 // stringPush()
 stringEmpty(a);
@@ -90,57 +90,61 @@ SHOULD_EQUAL("stringPush() Length", a->length, 53);
 SHOULD_EQUAL_STR("stringPush() Data", a->data, "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz");
 
 // stringPop() Resize
-stringSetS(a, CSTR_ARG("abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"));
+copyStringS(CSTR_ARG("abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"), a);
 for (uint8_t i = 0; i < 35; i++) {
     stringPop(a);
 }
 SHOULD_EQUAL("stringPop() Resize Length", a->length, 18);
 SHOULD_EQUAL_STR("stringPop() Resize Data", a->data, "abcdefghijklmnopq");
 // stringPop() Minimal
-stringSetS(a, CSTR_ARG("abcdefghijklmnopq"));
+copyStringS(CSTR_ARG("abcdefghijklmnopq"), a);
 for (uint8_t i = 0; i < 13; i++) {
     stringPop(a);
 }
 SHOULD_EQUAL("stringPop() Minimal Length", a->length, 5);
 SHOULD_EQUAL_STR("stringPop() Minimal Data", a->data, "abcd");
 
-// stringCopy()
-stringCopy(c, b);
-SHOULD_EQUAL("stringCopy() Length", b->length, c->length);
-SHOULD_EQUAL_STR("stringCopy() Data", b->data, c->data);
+// copyString()
+copyString(c, b);
+SHOULD_EQUAL("copyString() Length", b->length, c->length);
+SHOULD_EQUAL_STR("copyString() Data", b->data, c->data);
 
 // stringAddS()
-stringSetS(b, CSTR_ARG("Hello World!"));
+copyStringS(CSTR_ARG("Hello World!"), b);
 stringAddS(b, CSTR_ARG(" "));
 SHOULD_EQUAL("stringAddS() Length", b->length, 14);
 SHOULD_EQUAL_STR("stringAddS() Data", b->data, "Hello World! ");
 
 // stringAdd()
-stringSetS(b, CSTR_ARG("Hello World! "));
-stringSetS(c, CSTR_ARG("Bye Bye World!"));
+copyStringS(CSTR_ARG("Hello World! "), b);
+copyStringS(CSTR_ARG("Bye Bye World!"), c);
 stringAdd(b, c);
 SHOULD_EQUAL("stringAdd() Length", b->length, 28);
 SHOULD_EQUAL_STR("stringAdd() Data", b->data, "Hello World! Bye Bye World!");
 
+stringAdd(c, c);
+SHOULD_EQUAL("stringAdd() Same String Length", c->length, 29);
+SHOULD_EQUAL_STR("stringAdd() Same String Data", c->data, "Bye Bye World!Bye Bye World!");
+
 // stringLength()
-stringSetS(b, CSTR_ARG("Hello World! Bye Bye World!"));
+copyStringS(CSTR_ARG("Hello World! Bye Bye World!"), b);
 SHOULD_EQUAL("stringLength()", stringLength(b), 27);
 
 // stringCompare()
-stringSetS(a, CSTR_ARG("a"));
-stringSetS(b, CSTR_ARG("ab"));
+copyStringS(CSTR_ARG("a"), a);
+copyStringS(CSTR_ARG("ab"), b);
 SHOULD_BE_LESS("stringCompare() 1", stringCompare(a, b), 0);
 SHOULD_BE_GRT("stringCompare() 2", stringCompare(b, a), 0);
-stringSetS(a, CSTR_ARG("ab"));
+copyStringS(CSTR_ARG("ab"), a);
 SHOULD_EQUAL("stringCompare() 3", stringCompare(b, a), 0);
 stringEmpty(a);
 SHOULD_BE_LESS("stringCompare() 4", stringCompare(a, b), 0);
 SHOULD_BE_GRT("stringCompare() 5", stringCompare(b, a), 0);
 
 // stringCompareS()
-stringSetS(a, CSTR_ARG("a"));
+copyStringS(CSTR_ARG("a"), a);
 SHOULD_EQUAL("stringCompareS() 1", stringCompareS(a, CSTR_ARG("a")), 0);
-stringSetS(a, CSTR_ARG("ab"));
+copyStringS(CSTR_ARG("ab"), a);
 SHOULD_BE_GRT("stringCompareS() 2", stringCompareS(a, CSTR_ARG("a")), 0);
 SHOULD_BE_LESS("stringCompareS() 3", stringCompareS(a, CSTR_ARG("abc")), 0);
 

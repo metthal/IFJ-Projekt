@@ -49,7 +49,7 @@ void copyToken(const Token *src, Token *dest)
     if(src->type == STT_Variable   ||
        src->type == STT_Identifier ||
        src->type == STT_String){
-        stringCopy(&src->str, &dest->str);
+        copyString(&src->str, &dest->str);
     }
     else if(src->type == STT_Double)
         dest->d = src->d;
