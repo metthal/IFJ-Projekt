@@ -76,7 +76,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
             case IST_Mov: {
                 // Don't dereference, as we can just move
                 // reference and update it.
-                Value *base = vectorAt(stack, stackPtr);
+                Value *base = vectorFastAtValue(stack, stackPtr);
                 aVal = base + instructionPtr->a;
 
                 // There's exception with WeakReference, which
@@ -100,7 +100,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
             }
 
             case IST_MovC:
-                resVal = vectorAt(stack, stackPtr + instructionPtr->res);
+                resVal = vectorFastAtValue(stack, stackPtr + instructionPtr->res);
                 resVal->data.ref = instructionPtr->a;
                 resVal->type = VT_ConstReference;
                 break;
@@ -110,7 +110,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 continue;
 
             case IST_Jmpz: {
-                if (!fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, NULL, NULL, &bVal,
+                if (!fillValuePtrs(vectorFastAtValue(stack, stackPtr), cCtIt, NULL, NULL, &bVal,
                         0, 0, instructionPtr->b))
                     break;
 
@@ -131,7 +131,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
             }
 
             case IST_Push: {
-                if (((Value*)vectorAt(stack, stackPtr + instructionPtr->a))->type == VT_String) {
+                if ((vectorFastAtValue(stack, stackPtr + instructionPtr->a))->type == VT_String) {
                     resVal = vectorPushDefaultValue(stack);
                     resVal->data.ref = ((int64_t)stackPtr + instructionPtr->a - (vectorSize(stack) - 1));
                     resVal->type = VT_WeakReference;
@@ -210,7 +210,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
             case IST_Return:
                 // Load old instruction pointer
-                aVal = vectorAt(stack, stackPtr + 1);
+                aVal = vectorFastAtValue(stack, stackPtr + 1);
                 uint32_t paramCount = instructionPtr->a;
                 if (aVal->type == VT_Null) {
                     // End interpretation
@@ -222,14 +222,14 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
                 // Load old stack pointer
                 uint32_t oldStackPtr = stackPtr;
-                aVal = vectorAt(stack, stackPtr);
+                aVal = vectorFastAtValue(stack, stackPtr);
                 stackPtr = aVal->data.sp;
 
                 vectorResizeValue(stack, oldStackPtr - paramCount);
                 continue;
 
             case IST_Nullify:
-                if (!fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, NULL, NULL,
+                if (!fillValuePtrs(vectorFastAtValue(stack, stackPtr), cCtIt, &resVal, NULL, NULL,
                         instructionPtr->a, 0, 0))
                     break;
 
@@ -359,7 +359,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
             case IST_Add:
                 vectorPushDefaultValue(stack);
-                if (!fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
+                if (!fillValuePtrs(vectorFastAtValue(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
                         instructionPtr->res, instructionPtr->a, instructionPtr->b))
                     break;
 
@@ -398,7 +398,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
             case IST_Subtract:
                 vectorPushDefaultValue(stack);
-                if (!fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
+                if (!fillValuePtrs(vectorFastAtValue(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
                         instructionPtr->res, instructionPtr->a, instructionPtr->b))
                     break;
 
@@ -437,7 +437,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
             case IST_Multiply:
                 vectorPushDefaultValue(stack);
-                if (!fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
+                if (!fillValuePtrs(vectorFastAtValue(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
                         instructionPtr->res, instructionPtr->a, instructionPtr->b))
                     break;
 
@@ -476,7 +476,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
             case IST_Divide:
                 vectorPushDefaultValue(stack);
-                if (!fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
+                if (!fillValuePtrs(vectorFastAtValue(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
                         instructionPtr->res, instructionPtr->a, instructionPtr->b))
                     break;
 
@@ -526,7 +526,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
             case IST_Concat:
                 vectorPushDefaultValue(stack);
-                if (!fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
+                if (!fillValuePtrs(vectorFastAtValue(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
                         instructionPtr->res, instructionPtr->a, instructionPtr->b))
                     break;
 
@@ -582,7 +582,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
             case IST_Equal:
                 vectorPushDefaultValue(stack);
-                if (!fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
+                if (!fillValuePtrs(vectorFastAtValue(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
                         instructionPtr->res, instructionPtr->a, instructionPtr->b))
                     break;
 
@@ -627,7 +627,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
             case IST_NotEqual:
                 vectorPushDefaultValue(stack);
-                if (!fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
+                if (!fillValuePtrs(vectorFastAtValue(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
                         instructionPtr->res, instructionPtr->a, instructionPtr->b))
                     break;
 
@@ -672,7 +672,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
             case IST_Less:
                 vectorPushDefaultValue(stack);
-                if (!fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
+                if (!fillValuePtrs(vectorFastAtValue(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
                         instructionPtr->res, instructionPtr->a, instructionPtr->b))
                     break;
 
@@ -716,7 +716,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
             case IST_LessEq:
                 vectorPushDefaultValue(stack);
-                if (!fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
+                if (!fillValuePtrs(vectorFastAtValue(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
                         instructionPtr->res, instructionPtr->a, instructionPtr->b))
                     break;
 
@@ -760,7 +760,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
             case IST_Greater:
                 vectorPushDefaultValue(stack);
-                if (!fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
+                if (!fillValuePtrs(vectorFastAtValue(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
                         instructionPtr->res, instructionPtr->a, instructionPtr->b))
                     break;
 
@@ -804,7 +804,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
             case IST_GreaterEq:
                 vectorPushDefaultValue(stack);
-                if (!fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
+                if (!fillValuePtrs(vectorFastAtValue(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
                         instructionPtr->res, instructionPtr->a, instructionPtr->b))
                     break;
 
@@ -848,7 +848,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
             case IST_And: {
                 vectorPushDefaultValue(stack);
-                if (!fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
+                if (!fillValuePtrs(vectorFastAtValue(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
                         instructionPtr->res, instructionPtr->a, instructionPtr->b))
                     break;
 
@@ -862,7 +862,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
             case IST_Or: {
                 vectorPushDefaultValue(stack);
-                if (!fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
+                if (!fillValuePtrs(vectorFastAtValue(stack, stackPtr), cCtIt, &resVal, &aVal, &bVal,
                         instructionPtr->res, instructionPtr->a, instructionPtr->b))
                     break;
 
@@ -876,7 +876,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
 
             case IST_Not: {
                 vectorPushDefaultValue(stack);
-                if (!fillValuePtrs(vectorAt(stack, stackPtr), cCtIt, &resVal, &aVal, NULL,
+                if (!fillValuePtrs(vectorFastAtValue(stack, stackPtr), cCtIt, &resVal, &aVal, NULL,
                         instructionPtr->res, instructionPtr->a, 0))
                     break;
 

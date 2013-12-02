@@ -21,5 +21,5 @@ function printAllPermutations($str, $prefix) {
 }
 
 $res = put_string("String to permute:\n");
-$str = "abcdef";
+$str = "abcdefghi";
 $res = printAllPermutations($str, "");

@@ -44,4 +44,9 @@ static inline ValueVectorIterator vectorPushIndexValue(Vector *vec, uint32_t ind
     return ret;
 }
 
+static inline ValueVectorIterator vectorFastAtValue(Vector *vec, uint32_t index)
+{
+    return ((Value*)vec->data) + index;
+}
+
 #endif
