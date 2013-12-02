@@ -41,6 +41,9 @@ void stringSet(String *dest, String *src);
 void stringSetS(String *dest, const char *src, uint32_t len);
 void stringAdd(String *dest, const String *src);
 void stringAddS(String *dest, const char *src, uint32_t len);
+void stringFrontAdd(String *dest, const String *src);
+
+void stringMove(String *dest, String *src);
 
 uint32_t stringLength(const String *ps);
 

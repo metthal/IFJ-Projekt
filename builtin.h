@@ -24,6 +24,7 @@ int64_t getBuiltinParamCount(BuiltinCode code);
 
 uint8_t valueToBool(const Value *val);
 int valueToInt(const Value *val);
+double valueToDouble(const Value *val);
 void valueToString(const Value *val, String *str);
 
 // Ret must be initialized

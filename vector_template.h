@@ -121,7 +121,7 @@ static void TEMPLATE(vectorPush)(Vector *vec, const PUSH_BACK_ITEM item)
  * Sets error flag on error.
  * @param vec Vector to operate on.
  */
-static void TEMPLATE(vectorPushDefault)(Vector *vec)
+static VECTOR_ITERATOR TEMPLATE(vectorPushDefault)(Vector *vec)
 {
     if (vec->size == vec->capacity) {
         if (vec->capacity == 0)
@@ -129,12 +129,14 @@ static void TEMPLATE(vectorPushDefault)(Vector *vec)
         else
             vectorReserve(vec, vec->capacity * VectorResizeIncRate);
         if (getError())
-            return;
+            return NULL;
     }
 
     INIT_ITEM(vec->end);
+    VECTOR_ITERATOR retItem = (VECTOR_ITERATOR)vec->end;
     vec->size++;
     vec->end += vec->itemSize;
+    return retItem;
 }
 
 /**

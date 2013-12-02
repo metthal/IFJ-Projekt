@@ -89,7 +89,7 @@ void processDefaultArg(Context *context, uint32_t *paramCount)
     }
 }
 
-void generateCall(const Symbol *symbol, BuiltinCode builtinCode, uint32_t paramCount)
+uint32_t generateCall(const Symbol *symbol, BuiltinCode builtinCode, uint32_t paramCount)
 {
     Instruction inst;
     initInstruction(&inst);
@@ -134,6 +134,8 @@ void generateCall(const Symbol *symbol, BuiltinCode builtinCode, uint32_t paramC
         inst.code = builtinToInstruction(builtinCode);
         vectorPushInstruction(instructions, &inst);
     }
+
+    return paramCount;
 }
 
 void generateInstruction(InstructionCode code, int32_t res, int32_t a, int32_t b)

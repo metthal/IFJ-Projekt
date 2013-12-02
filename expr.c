@@ -14,10 +14,13 @@
 extern ConstTokenVectorIterator tokensIt;
 extern Context *currentContext;
 extern Vector *constantsTable;
+extern Vector *instructions;
 
 static Vector *exprVector = NULL;   ///< Bottom-up parser stack for @ref ExprVector
 static ExprToken endToken;          ///< Token that should be located on the bottom of the stack, used when stack has no topmost terminal token
 static uint32_t currentStackPos;    ///< Current position in the local stack frame
+static uint32_t lastResultInstIndex;
+static uint32_t lastFuncParamCount;
 
 // used as helper variables for function call generation
 static BuiltinCode currentFuncBuiltinCode;  ///< BuiltinCode for currently processed function
@@ -185,6 +188,41 @@ static inline uint8_t tokenTypeToInstruction(uint8_t tokenType)
     }
 }
 
+static inline void modifyExprInstResult(uint32_t instIndex, uint32_t resultOffset)
+{
+    Instruction *inst = vectorAt(instructions, instIndex);
+
+    switch (inst->code) {
+        case IST_PushC:
+            inst->code = IST_MovC;
+            inst->res = resultOffset;
+            break;
+        case IST_Reserve:
+            inst->code = IST_PushRef;
+            inst->a = resultOffset - (currentStackPos - 1);
+            break;
+        case IST_Add:
+        case IST_Subtract:
+        case IST_Multiply:
+        case IST_Divide:
+        case IST_Concat:
+        case IST_Equal:
+        case IST_NotEqual:
+        case IST_Less:
+        case IST_LessEq:
+        case IST_Greater:
+        case IST_GreaterEq:
+        case IST_Or:
+        case IST_And:
+        case IST_Not:
+            inst->res = resultOffset;
+            break;
+        default:
+            setError(ERR_Internal);
+            break;
+    }
+}
+
 /**
  * Reduces expression for multiparameter functions recursively.
  *
@@ -271,6 +309,7 @@ uint8_t reduce(ExprToken *topTerm)
 
             topTerm->type = NonTerminal;
             topTerm->stackOffset = currentStackPos++;
+            lastResultInstIndex = vectorSize(instructions) - 1;
             break;
         case STT_Variable: {
             Symbol *symbol = symbolTableFind(currentContext->localTable, &(topTerm->token->str));
@@ -326,6 +365,9 @@ uint8_t reduce(ExprToken *topTerm)
             notOperator->type = NonTerminal;
             notOperator->stackOffset = currentStackPos++;
             generateInstruction(IST_Not, notOperator->stackOffset, operand->stackOffset, notCount & 1); // same as notCount % 2
+            if (getError())
+                return 0;
+
             vectorPopNExprToken(exprVector, notCount);
             break;
         }
@@ -370,6 +412,7 @@ uint8_t reduce(ExprToken *topTerm)
             if (getError())
                 return 0;
 
+            lastResultInstIndex = vectorSize(instructions) - 1;
             operand1->stackOffset = currentStackPos++;
             vectorPopNExprToken(exprVector, 2);
             break;
@@ -391,11 +434,15 @@ uint8_t reduce(ExprToken *topTerm)
                     if (nextTerm->type == Terminal && nextTerm->token->type == STT_Identifier) {
                         uint32_t retValStackPos = currentStackPos++;
                         generateInstruction(IST_Reserve, 0, 1, 0);
+                        if (getError())
+                            return 0;
+
+                        lastResultInstIndex = vectorSize(instructions) - 1;
                         currentFuncSymbol = fillInstFuncInfo(nextTerm->token, &currentFuncBuiltinCode, &currentFuncParamLimit);
                         if (getError())
                             return 0;
 
-                        generateCall(currentFuncSymbol, currentFuncBuiltinCode, 0);
+                        lastFuncParamCount = generateCall(currentFuncSymbol, currentFuncBuiltinCode, 0);
                         if (getError())
                             return 0;
 
@@ -425,6 +472,7 @@ uint8_t reduce(ExprToken *topTerm)
                         if (getError())
                             return 0;
 
+                        lastResultInstIndex = vectorSize(instructions) - 1;
                         uint32_t paramCount = 0, totalParamCount = 0;
                         if (!reduceMultiparamFunc(stackPos, &paramCount, &totalParamCount))
                             return 0;
@@ -436,7 +484,7 @@ uint8_t reduce(ExprToken *topTerm)
                             return 0;
                         }
 
-                        generateCall(currentFuncSymbol, currentFuncBuiltinCode, paramCount);
+                        lastFuncParamCount = generateCall(currentFuncSymbol, currentFuncBuiltinCode, paramCount);
                         if (getError())
                             return 0;
 
@@ -452,10 +500,14 @@ uint8_t reduce(ExprToken *topTerm)
                                 // return value
                                 uint32_t retValStackPos = currentStackPos++;
                                 generateInstruction(IST_Reserve, 0, 1, 0);
+                                if (getError())
+                                    return 0;
 
+                                lastResultInstIndex = vectorSize(instructions) - 1;
                                 currentFuncSymbol = fillInstFuncInfo(nextTerm->token, &currentFuncBuiltinCode, &currentFuncParamLimit);
                                 if (getError())
                                     return 0;
+
                                 // if there is no parameter limit or it is higher than 0
                                 if (currentFuncParamLimit == -1 || currentFuncParamLimit > 0) {
                                     generateInstruction(IST_Push, 0, exprBackup->stackOffset, 0);
@@ -463,7 +515,7 @@ uint8_t reduce(ExprToken *topTerm)
                                         return 0;
                                 }
 
-                                generateCall(currentFuncSymbol, currentFuncBuiltinCode, currentFuncParamLimit == 0 ? 0 : 1);
+                                lastFuncParamCount = generateCall(currentFuncSymbol, currentFuncBuiltinCode, currentFuncParamLimit == 0 ? 0 : 1);
                                 if (getError())
                                     return 0;
 
@@ -544,13 +596,14 @@ void copyExprToken(const ExprToken *src, ExprToken *dest)
  *
  * @return Offset in the local stack frame where the result is stored, in case of error 0
  **/
-uint32_t expr()
+uint32_t expr(uint32_t resultOffset)
 {
     // insert bottom of the stack (special kind of token) to the stack
     uint8_t endOfInput = 0;
     const Token *currentToken = NULL;
     vectorClearExprToken(exprVector);
     currentStackPos = currentContext->exprStart;
+    lastResultInstIndex = 0;
 
     while (1) {
         if (!endOfInput) {
@@ -567,13 +620,22 @@ uint32_t expr()
         // no terminal found
         if (!topToken) {
             // there is just one non-terminal on the stack, we succeeded
-            if (endOfInput && vectorSize(exprVector) == 1)
-                return ((ExprToken*)vectorBack(exprVector))->stackOffset;
-
+            // OR
             // if there is no topmost terminal and input is right bracket, end successfuly
             // top-down parser will take care of bad input, since he will assume I loaded first token after expression
-            if (currentToken->type == STT_RightBracket && vectorSize(exprVector) == 1)
+            if ((endOfInput || currentToken->type == STT_RightBracket) && vectorSize(exprVector) == 1) {
+                if (resultOffset) {
+                    if (!lastResultInstIndex)
+                        generateInstruction(IST_Mov, resultOffset, ((ExprToken*)vectorBack(exprVector))->stackOffset, 0);
+                    else
+                        modifyExprInstResult(lastResultInstIndex, resultOffset);
+
+                    if (getError())
+                        return 0;
+                }
+
                 return ((ExprToken*)vectorBack(exprVector))->stackOffset;
+            }
 
             topToken = &endToken;
         }

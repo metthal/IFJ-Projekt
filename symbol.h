@@ -12,7 +12,8 @@ typedef enum {
     VT_String,
     VT_Bool,
     VT_Null,
-    VT_Reference,
+    VT_StrongReference,
+    VT_WeakReference,
     VT_ConstReference,
     VT_InstructionPtr,
     VT_StackPtr
@@ -24,7 +25,7 @@ typedef union {
     int i;
     const void* ip;
     uint32_t sp;
-    uint32_t ref;
+    int64_t ref;
     int8_t b;
 } ValueData;
 

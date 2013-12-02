@@ -28,7 +28,7 @@ void forStmt1(uint8_t skip);
 uint8_t forStmt2(uint32_t *cond);
 
 // Forward declaration of helper functions
-uint32_t generalExpr(uint8_t skip);
+uint32_t generalExpr(uint8_t skip, uint32_t resultOffset);
 uint32_t condition();
 void stmtListBracketed();
 void assignment(ConstTokenVectorIterator varid, uint8_t skip);
@@ -405,15 +405,12 @@ void stmt()
                     // Rule 9
                     tokensIt++;
 
-                    uint32_t exprRes = generalExpr(0);
+                    generalExpr(0, -(currentContext->argumentCount + 1));
                     if (getError())
                         return;
 
-                    if (secondRun) {
-                        // Move result of expression to reserved space for return value
-                        generateInstruction(IST_Mov, -(currentContext->argumentCount+1), exprRes, 0);
+                    if (secondRun)
                         generateInstruction(IST_Return, 0, currentContext->argumentCount, 0);
-                    }
 
                     // Semicolon loaded by expr
                     if (tokensIt->type != STT_Semicolon) {
@@ -921,7 +918,7 @@ uint8_t forStmt2(uint32_t *cond)
 
         default:
             // Rule 26
-            *cond = generalExpr(0);
+            *cond = generalExpr(0, 0);
             if(getError())
                 break;
 
@@ -931,10 +928,10 @@ uint8_t forStmt2(uint32_t *cond)
     return 0;
 }
 
-uint32_t generalExpr(uint8_t skip)
+uint32_t generalExpr(uint8_t skip, uint32_t resultOffset)
 {
     if (secondRun && !skip) {
-        return expr();
+        return expr(resultOffset);
     }
     else {
         // Skips expression.
@@ -1001,7 +998,7 @@ uint32_t condition()
 
     tokensIt++;
 
-    uint32_t exprRes = generalExpr(0);
+    uint32_t exprRes = generalExpr(0, 0);
     if (getError())
         return 0;
 
@@ -1046,19 +1043,21 @@ void assignment(ConstTokenVectorIterator varid, uint8_t skip)
 
     tokensIt++;
 
-    uint32_t exprRes = generalExpr(skip);
-    if (getError())
-        return;
-
     if (secondRun && !skip) {
         // Symbol should be already in table after first run
         Symbol *symbol = symbolTableFind(currentContext->localTable, &(varid->str));
         if (getError())
            return;
 
-        // Move result of expression to variable
-        generateInstruction(IST_Mov, symbol->data->var.relativeIndex, exprRes, 0);
+        generalExpr(skip, symbol->data->var.relativeIndex);
+    }
+    else
+        generalExpr(skip, 0);
 
+    if (getError())
+        return;
+
+    if (secondRun && !skip) {
         // Clear generated expression space
         generateInstruction(IST_ClearExpr, 0, currentContext->exprStart, 0);
     }
