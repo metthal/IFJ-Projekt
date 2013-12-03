@@ -94,12 +94,22 @@ typedef enum
     IST_Not          //!< IST_Not
 } InstructionCode;
 
+typedef enum
+{
+    ISM_NoConst = 0,
+    ISM_FirstConst = 1,
+    ISM_SecondConst = 2,
+    ISM_AllConst = 3
+} InstructionMode;
+
 typedef struct
 {
     InstructionCode code;
+    InstructionMode mode;
     int32_t a;
     int32_t b;
     int32_t res;
+
 } Instruction;
 
 Instruction* newInstruction();
