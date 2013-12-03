@@ -185,7 +185,7 @@ static void TEMPLATE(vectorResize)(Vector *vec, uint32_t size)
         uint32_t newCapacity = vec->capacity;
 
         if (vec->capacity == 0)
-            vec->capacity = VectorDefaultCapacity;
+            newCapacity = VectorDefaultCapacity;
 
         while (size > newCapacity)
             newCapacity *= VectorResizeIncRate;

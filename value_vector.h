@@ -44,6 +44,42 @@ static inline ValueVectorIterator vectorPushIndexValue(Vector *vec, uint32_t ind
     return ret;
 }
 
+static inline void vectorPushDefaultNValue(Vector *vec, uint32_t count)
+{
+    if (vec->size + count > vec->capacity) {
+        uint32_t newCapacity = vec->capacity;
+
+        if (vec->capacity == 0)
+            newCapacity = VectorDefaultCapacity;
+
+        while (vec->size + count > newCapacity)
+            newCapacity *= VectorResizeIncRate;
+
+        vectorReserve(vec, newCapacity);
+        if (getError())
+            return;
+    }
+
+    // Initialize values
+    memset(vec->end, 0, count * sizeof(Value));
+
+    vec->size += count;
+    vec->end += count * sizeof(Value);
+}
+
+static inline void vectorDownsizeValue(Vector *vec, uint32_t size)
+{
+    if (size == vec->size)
+        return;
+
+    Value *newEnd = ((Value *)vec->data) + size;
+    for (Value *it = newEnd; it != ((Value *)vec->end); it++)
+        deleteValue(it);
+
+    vec->size = size;
+    vec->end = (uint8_t*)newEnd;
+}
+
 static inline ValueVectorIterator vectorFastAtValue(Vector *vec, uint32_t index)
 {
     return ((Value*)vec->data) + index;
