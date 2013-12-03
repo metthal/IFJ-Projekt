@@ -47,12 +47,12 @@ void vectorShrinkToFit(Vector *vec)
     }
 }
 
-uint32_t vectorCapacity(Vector *vec)
+uint32_t vectorCapacity(const Vector *vec)
 {
     return vec->capacity;
 }
 
-uint32_t vectorSize(Vector *vec)
+uint32_t vectorSize(const Vector *vec)
 {
     return vec->size;
 }

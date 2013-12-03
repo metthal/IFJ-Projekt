@@ -161,7 +161,9 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
     uint32_t stackPtr = 1;
 
     // Pointer on first constant for fast access
-    const Value *cCtIt = vectorAtConst(constTable, 0);
+    const Value *cCtIt = NULL;
+    if (vectorSize(constTable) > 0)
+        cCtIt = vectorAtConst(constTable, 0);
 
     const Instruction *instructionPtr = firstInstruction;
     uint8_t running = 1;
@@ -178,6 +180,10 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 // must be dereferenced
                 if (aVal->type == VT_WeakReference)
                     aVal += aVal->data.ref;
+                else if (aVal->type == VT_Undefined) {
+                    setError(ERR_UndefVariable);
+                    break;
+                }
 
                 fillResValuePtr(base, &resVal, instructionPtr->res);
 

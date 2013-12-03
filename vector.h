@@ -42,14 +42,14 @@ void vectorShrinkToFit(Vector *vec);
  * @param vec Vector to query.
  * @return Capacity of vector.
  */
-uint32_t vectorCapacity(Vector *vec);
+uint32_t vectorCapacity(const Vector *vec);
 
 /**
  * Returns current vector size.
  * @param vec Vector to query.
  * @return Size of vector.
  */
-uint32_t vectorSize(Vector *vec);
+uint32_t vectorSize(const Vector *vec);
 
 /**
  * Returns pointer to item at specified index.
