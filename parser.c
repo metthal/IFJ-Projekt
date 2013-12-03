@@ -28,7 +28,7 @@ void forStmt1(uint8_t skip);
 uint8_t forStmt2(uint32_t *cond);
 
 // Forward declaration of helper functions
-uint32_t generalExpr(uint8_t skip, uint32_t resultOffset);
+uint32_t generalExpr(uint8_t skip, uint32_t resultOffset, uint32_t *maxStackPosUsed);
 uint32_t condition();
 void stmtListBracketed();
 void assignment(ConstTokenVectorIterator varid, uint8_t skip);
@@ -405,7 +405,7 @@ void stmt()
                     // Rule 9
                     tokensIt++;
 
-                    generalExpr(0, -(currentContext->argumentCount + 1));
+                    generalExpr(0, -(currentContext->argumentCount + 1), NULL);
                     if (getError())
                         return;
 
@@ -918,7 +918,7 @@ uint8_t forStmt2(uint32_t *cond)
 
         default:
             // Rule 26
-            *cond = generalExpr(0, 0);
+            *cond = generalExpr(0, 0, NULL);
             if(getError())
                 break;
 
@@ -928,10 +928,10 @@ uint8_t forStmt2(uint32_t *cond)
     return 0;
 }
 
-uint32_t generalExpr(uint8_t skip, uint32_t resultOffset)
+uint32_t generalExpr(uint8_t skip, uint32_t resultOffset, uint32_t *maxStackPosUsed)
 {
     if (secondRun && !skip) {
-        return expr(resultOffset);
+        return expr(resultOffset, maxStackPosUsed);
     }
     else {
         // Skips expression.
@@ -998,7 +998,7 @@ uint32_t condition()
 
     tokensIt++;
 
-    uint32_t exprRes = generalExpr(0, 0);
+    uint32_t exprRes = generalExpr(0, 0, NULL);
     if (getError())
         return 0;
 
@@ -1043,21 +1043,22 @@ void assignment(ConstTokenVectorIterator varid, uint8_t skip)
 
     tokensIt++;
 
+    uint32_t maxStackPosUsed = currentContext->exprStart;
     if (secondRun && !skip) {
         // Symbol should be already in table after first run
         Symbol *symbol = symbolTableFind(currentContext->localTable, &(varid->str));
         if (getError())
            return;
 
-        generalExpr(skip, symbol->data->var.relativeIndex);
+        generalExpr(skip, symbol->data->var.relativeIndex, &maxStackPosUsed);
     }
     else
-        generalExpr(skip, 0);
+        generalExpr(skip, 0, NULL);
 
     if (getError())
         return;
 
-    if (secondRun && !skip) {
+    if (secondRun && !skip && maxStackPosUsed > currentContext->exprStart) {
         // Clear generated expression space
         generateInstruction(IST_ClearExpr, 0, currentContext->exprStart, 0);
     }

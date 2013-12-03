@@ -196,6 +196,7 @@ static inline void modifyExprInstResult(uint32_t instIndex, uint32_t resultOffse
         case IST_PushC:
             inst->code = IST_MovC;
             inst->res = resultOffset;
+            currentStackPos--;
             break;
         case IST_Reserve:
             inst->code = IST_PushRef;
@@ -215,6 +216,8 @@ static inline void modifyExprInstResult(uint32_t instIndex, uint32_t resultOffse
         case IST_Or:
         case IST_And:
         case IST_Not:
+            if (inst->res > inst->a && inst->res > inst->b)
+                currentStackPos--;
             inst->res = resultOffset;
             break;
         default:
@@ -363,7 +366,10 @@ uint8_t reduce(ExprToken *topTerm)
             }
 
             notOperator->type = NonTerminal;
-            notOperator->stackOffset = currentStackPos++;
+            if (operand->stackOffset >= currentContext->exprStart)
+                notOperator->stackOffset = operand->stackOffset;
+            else
+                notOperator->stackOffset = currentStackPos++;
             generateInstruction(IST_Not, notOperator->stackOffset, operand->stackOffset, notCount & 1); // same as notCount % 2
             if (getError())
                 return 0;
@@ -408,12 +414,21 @@ uint8_t reduce(ExprToken *topTerm)
                 return 0;
             }
 
-            generateInstruction(tokenTypeToInstruction(operator->token->type), currentStackPos, operand1->stackOffset, operand2->stackOffset);
+            if (operand1->stackOffset >= currentContext->exprStart)
+                generateInstruction(tokenTypeToInstruction(operator->token->type), operand1->stackOffset, operand1->stackOffset, operand2->stackOffset);
+            else if (operand2->stackOffset >= currentContext->exprStart) {
+                generateInstruction(tokenTypeToInstruction(operator->token->type), operand2->stackOffset, operand1->stackOffset, operand2->stackOffset);
+                operand1->stackOffset = operand2->stackOffset;
+            }
+            else {
+                generateInstruction(tokenTypeToInstruction(operator->token->type), currentStackPos, operand1->stackOffset, operand2->stackOffset);
+                operand1->stackOffset = currentStackPos++;
+            }
+
             if (getError())
                 return 0;
 
             lastResultInstIndex = vectorSize(instructions) - 1;
-            operand1->stackOffset = currentStackPos++;
             vectorPopNExprToken(exprVector, 2);
             break;
         }
@@ -596,7 +611,7 @@ void copyExprToken(const ExprToken *src, ExprToken *dest)
  *
  * @return Offset in the local stack frame where the result is stored, in case of error 0
  **/
-uint32_t expr(uint32_t resultOffset)
+uint32_t expr(uint32_t resultOffset, uint32_t *maxStackPosUsed)
 {
     // insert bottom of the stack (special kind of token) to the stack
     uint8_t endOfInput = 0;
@@ -634,6 +649,8 @@ uint32_t expr(uint32_t resultOffset)
                         return 0;
                 }
 
+                if (maxStackPosUsed)
+                    *maxStackPosUsed = currentStackPos;
                 return ((ExprToken*)vectorBack(exprVector))->stackOffset;
             }
 
