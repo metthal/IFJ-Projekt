@@ -24,7 +24,7 @@ typedef struct
 
 void initExpr();
 void deinitExpr();
-uint32_t expr(uint32_t resultOffset);
+uint32_t expr(uint32_t resultOffset, uint32_t *maxStackPosUsed);
 
 void initExprToken(ExprToken *token);
 void deleteExprToken(ExprToken *token);
