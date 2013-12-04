@@ -1015,8 +1015,7 @@ int64_t condition(uint8_t skip)
     }
 
     tokensIt++;
-    //TODO why exprRes is giving wrong index?
-    return -currentContext->argumentCount - 1;
+    return exprRes;
 }
 
 void stmtListBracketed()

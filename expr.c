@@ -180,14 +180,21 @@ static inline uint8_t tokenTypeToInstruction(uint8_t tokenType)
     }
 }
 
-static inline void modifyExprInstResult(uint32_t instIndex, int64_t resultOffset)
+static inline void modifyExprInstResult(ExprToken *expr, uint32_t instIndex, int64_t resultOffset)
 {
+    if (!lastResultInstIndex) {
+        generateInstruction(expr->subtype == Const ? IST_MovC : IST_Mov, ISM_NoConst, resultOffset, expr->offset, 0);
+        expr->offset = resultOffset;
+        return;
+    }
+
     Instruction *inst = vectorAt(instructions, instIndex);
 
     switch (inst->code) {
         case IST_Reserve:
             inst->code = IST_PushRef;
             inst->a = resultOffset - (currentStackPos - 1);
+            expr->offset = resultOffset;
             break;
         case IST_Add:
         case IST_Subtract:
@@ -202,11 +209,17 @@ static inline void modifyExprInstResult(uint32_t instIndex, int64_t resultOffset
         case IST_GreaterEq:
         case IST_Or:
         case IST_And:
-        case IST_Not:
             // currentStackPos points to the first free stack position, decrement it so we can properly set maxStackPos for top-down parser
             if (inst->res > inst->a && inst->res > inst->b)
                 currentStackPos--;
             inst->res = resultOffset;
+            expr->offset = resultOffset;
+            break;
+        case IST_Not:
+            if (inst->res > inst->a)
+                currentStackPos--;
+            inst->res = resultOffset;
+            expr->offset = resultOffset;
             break;
         default:
             setError(ERR_Internal);
@@ -374,6 +387,7 @@ uint8_t reduce(ExprToken *topTerm)
                 return 0;
 
             notOperator->type = NonTerminal;
+            lastResultInstIndex = vectorSize(instructions) - 1;
             vectorPopNExprToken(exprVector, notCount);
             break;
         }
@@ -655,10 +669,7 @@ int64_t expr(int64_t resultOffset, uint32_t *maxStackPosUsed)
             if ((endOfInput || currentToken->type == STT_RightBracket) && vectorSize(exprVector) == 1) {
                 ExprToken *expr = vectorBack(exprVector);
                 if (resultOffset) {
-                    if (!lastResultInstIndex)
-                        generateInstruction(expr->subtype == Const ? IST_MovC : IST_Mov, ISM_NoConst, resultOffset, expr->offset, 0);
-                    else
-                        modifyExprInstResult(lastResultInstIndex, resultOffset);
+                    modifyExprInstResult(expr, lastResultInstIndex, resultOffset);
 
                     if (getError())
                         return 0;
