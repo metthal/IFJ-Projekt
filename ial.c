@@ -291,7 +291,7 @@ int64_t stringSubstrSearchSSO(const char *haystack, uint32_t haystackLen, const 
     return _stringSubstrSearchSSO(haystack, haystackLen, needle, needleLen, offset);
 }
 
-void stringCharSortMerge(char arr[], char temp[], uint32_t length)
+static inline void _stringCharSortMerge(char arr[], char temp[], uint32_t length)
 {
     uint32_t leftIndex = 0,
         leftMax = length / 2,
@@ -323,12 +323,12 @@ void stringCharSortMerge(char arr[], char temp[], uint32_t length)
 void stringCharSortDivide(char arr[], char temp[], uint32_t length)
 {
     uint32_t offset = length / 2;
-    if (offset != 0) {
+    if (length > 2) {
         stringCharSortDivide(temp, arr, offset);
         stringCharSortDivide(temp + offset, arr + offset, length - offset);
     }
 
-    stringCharSortMerge(arr, temp, length);
+    _stringCharSortMerge(arr, temp, length);
 }
 
 void stringCharSort(const String *s)

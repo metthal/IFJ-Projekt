@@ -149,7 +149,17 @@ SHOULD_EQUAL("stringSubstrSearchSSO() 5", stringSubstrSearchSSO(CSTR_ARG("Mama m
 // stringCharSort() Basic
 ps = newStringS(CSTR_ARG("DCBA"));
 stringCharSort(ps);
-SHOULD_EQUAL_STR("stringCharSort() Basic", ps->data, "ABCD");
+SHOULD_EQUAL_STR("stringCharSort() Basic1", ps->data, "ABCD");
+freeString(&ps);
+
+ps = newStringS(CSTR_ARG("ba"));
+stringCharSort(ps);
+SHOULD_EQUAL_STR("stringCharSort() Basic2", ps->data, "ab");
+freeString(&ps);
+
+ps = newStringS(CSTR_ARG("bca"));
+stringCharSort(ps);
+SHOULD_EQUAL_STR("stringCharSort() Basic3", ps->data, "abc");
 freeString(&ps);
 
 // stringCharSort() Normal
