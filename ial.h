@@ -37,12 +37,12 @@ void deleteSymbolTable(SymbolTable *st);
 Symbol* symbolTableFind(SymbolTable *st, const String *key);
 Symbol* symbolTableAdd(SymbolTable *st, const String *key);
 
-uint32_t stringSubstrSearch(const String *haystack, const String *needle);
-uint32_t stringSubstrSearchO(String *haystack, String *needle, uint32_t offset);
-uint32_t stringSubstrSearchS(String *haystack, const char *needle, uint32_t needleLen);
-uint32_t stringSubstrSearchSO(String *haystack, const char *needle, uint32_t needleLen, uint32_t offset);
-uint32_t stringSubstrSearchSS(const char *haystack, uint32_t haystackLen, const char *needle, uint32_t needleLen);
-uint32_t stringSubstrSearchSSO(const char *haystack, uint32_t haystackLen, const char *needle, uint32_t needleLen, uint32_t offset);
+int64_t stringSubstrSearch(const String *haystack, const String *needle);
+int64_t stringSubstrSearchO(String *haystack, String *needle, uint32_t offset);
+int64_t stringSubstrSearchS(String *haystack, const char *needle, uint32_t needleLen);
+int64_t stringSubstrSearchSO(String *haystack, const char *needle, uint32_t needleLen, uint32_t offset);
+int64_t stringSubstrSearchSS(const char *haystack, uint32_t haystackLen, const char *needle, uint32_t needleLen);
+int64_t stringSubstrSearchSSO(const char *haystack, uint32_t haystackLen, const char *needle, uint32_t needleLen, uint32_t offset);
 
 void stringCharSort(const String *s);
 

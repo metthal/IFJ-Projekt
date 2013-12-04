@@ -133,7 +133,7 @@ freeString(&ps2);
 // stringSubstrSearchS()
 String *ps = newStringS(CSTR_ARG("Hello World! Bye Bye World!"));
 SHOULD_EQUAL("stringSubstrSearchS()", stringSubstrSearchS(ps, CSTR_ARG("Bye Bye")), 13);
-SHOULD_EQUAL("stringSubstrSearchS()", stringSubstrSearchS(ps, CSTR_ARG("Not Found")), (uint32_t)-1);
+SHOULD_EQUAL("stringSubstrSearchS()", stringSubstrSearchS(ps, CSTR_ARG("Not Found")), -1);
 SHOULD_EQUAL("stringSubstrSearchSO()", stringSubstrSearchSO(ps, CSTR_ARG("World"), 7), 21);
 freeString(&ps);
 

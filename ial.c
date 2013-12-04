@@ -231,9 +231,10 @@ uint32_t* stringSubstrSearchBuildTable(const char *str, uint32_t len)
     return table;
 }
 
-static inline uint32_t _stringSubstrSearchSSO(const char *haystack, uint32_t haystackLen, const char *needle, uint32_t needleLen, uint32_t offset)
+static inline int64_t _stringSubstrSearchSSO(const char *haystack, uint32_t haystackLen, const char *needle, uint32_t needleLen, uint32_t offset)
 {
-    uint32_t haystackIndex = offset, needleIndex = 0, result = (uint32_t)-1;
+    int64_t result = -1;
+    uint32_t haystackIndex = offset, needleIndex = 0;
     uint32_t *table = stringSubstrSearchBuildTable(needle, needleLen);
     if (!table) {
         return result;
@@ -260,32 +261,32 @@ static inline uint32_t _stringSubstrSearchSSO(const char *haystack, uint32_t hay
     return result;
 }
 
-uint32_t stringSubstrSearch(const String *haystack, const String *needle)
+int64_t stringSubstrSearch(const String *haystack, const String *needle)
 {
     return _stringSubstrSearchSSO(haystack->data, haystack->length - 1, needle->data, needle->length - 1, 0);
 }
 
-uint32_t stringSubstrSearchO(String *haystack, String *needle, uint32_t offset)
+int64_t stringSubstrSearchO(String *haystack, String *needle, uint32_t offset)
 {
     return _stringSubstrSearchSSO(haystack->data, haystack->length - 1, needle->data, needle->length - 1, offset);
 }
 
-uint32_t stringSubstrSearchS(String *haystack, const char *needle, uint32_t needleLen)
+int64_t stringSubstrSearchS(String *haystack, const char *needle, uint32_t needleLen)
 {
     return _stringSubstrSearchSSO(haystack->data, haystack->length - 1, needle, needleLen, 0);
 }
 
-uint32_t stringSubstrSearchSO(String *haystack, const char *needle, uint32_t needleLen, uint32_t offset)
+int64_t stringSubstrSearchSO(String *haystack, const char *needle, uint32_t needleLen, uint32_t offset)
 {
     return _stringSubstrSearchSSO(haystack->data, haystack->length - 1, needle, needleLen, offset);
 }
 
-uint32_t stringSubstrSearchSS(const char *haystack, uint32_t haystackLen, const char *needle, uint32_t needleLen)
+int64_t stringSubstrSearchSS(const char *haystack, uint32_t haystackLen, const char *needle, uint32_t needleLen)
 {
     return _stringSubstrSearchSSO(haystack, haystackLen, needle, needleLen, 0);
 }
 
-uint32_t stringSubstrSearchSSO(const char *haystack, uint32_t haystackLen, const char *needle, uint32_t needleLen, uint32_t offset)
+int64_t stringSubstrSearchSSO(const char *haystack, uint32_t haystackLen, const char *needle, uint32_t needleLen, uint32_t offset)
 {
     return _stringSubstrSearchSSO(haystack, haystackLen, needle, needleLen, offset);
 }
