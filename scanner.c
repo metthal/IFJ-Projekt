@@ -480,10 +480,10 @@ void scannerFillToken(Token *token)
                             token->type = STT_Null;
                         }
                         else if (keywordType == KTT_And) {
-                            token->type = STT_And;
+                            token->type = STT_AndLow;
                         }
                         else if (keywordType == KTT_Or) {
-                            token->type = STT_Or;
+                            token->type = STT_OrLow;
                         }
                         else {
                             token->type = STT_Keyword;

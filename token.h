@@ -39,6 +39,8 @@ typedef enum
     STT_NotEqual,
     STT_And,
     STT_Or,
+    STT_AndLow,
+    STT_OrLow,
     STT_Not,
     STT_LeftBracket,
     STT_RightBracket,

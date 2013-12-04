@@ -14,6 +14,7 @@ $y = 6;
 // no
 // yes
 // yes
+// no
 
 if ($x && $y)
 {
@@ -97,6 +98,15 @@ else
 }
 
 if (!($x === 1))
+{
+    $tmp = put_string("yes\n");
+}
+else
+{
+    $tmp = put_string("no\n");
+}
+
+if (!$x and $y || $y)
 {
     $tmp = put_string("yes\n");
 }

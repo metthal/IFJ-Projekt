@@ -44,27 +44,29 @@ typedef enum
  **/
 static uint8_t precedenceTable[STT_Semicolon][STT_Semicolon] =
 {
-//      +       -       *       /       .       <       >       <=      >=      ===     !==     &&      ||      !       (       )       func    ,       $       var
-    {   High,   High,   Low,    Low,    Low,    High,   High,   High,   High,   High,   High,   High,   High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // +
-    {   High,   High,   Low,    Low,    Low,    High,   High,   High,   High,   High,   High,   High,   High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // -
-    {   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // *
-    {   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // /
-    {   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // .
-    {   Low,    Low,    Low,    Low,    Low,    High,   High,   High,   High,   High,   High,   High,   High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // <
-    {   Low,    Low,    Low,    Low,    Low,    High,   High,   High,   High,   High,   High,   High,   High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // >
-    {   Low,    Low,    Low,    Low,    Low,    High,   High,   High,   High,   High,   High,   High,   High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // <=
-    {   Low,    Low,    Low,    Low,    Low,    High,   High,   High,   High,   High,   High,   High,   High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // >=
-    {   Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    High,   High,   High,   High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // ===
-    {   Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    High,   High,   High,   High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // !==
-    {   Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    High,   High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // &&
-    {   Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // ||
-    {   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // !
-    {   Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Equal,  Low,    Equal,  Error,  Low   },  // (
-    {   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   Error,  High,   Error,  High,   High,   Error },  // )
-    {   Error,  Error,  Error,  Error,  Error,  Error,  Error,  Error,  Error,  Error,  Error,  Error,  Error,  Error,  Equal,  Error,  Error,  Error,  Error,  Error },  // func
-    {   Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Equal,  Low,    Equal,  Error,  Low   },  // ,
-    {   Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Error,  Low,    Error,  Error,  Low   },  // $
-    {   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   Error,  Error,  High,   Error,  High,   High,   Error }   // var
+//      +       -       *       /       .       <       >       <=      >=      ===     !==     &&      ||      and     or      !       (       )       func    ,       $       var
+    {   High,   High,   Low,    Low,    Low,    High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // +
+    {   High,   High,   Low,    Low,    Low,    High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // -
+    {   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // *
+    {   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // /
+    {   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // .
+    {   Low,    Low,    Low,    Low,    Low,    High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // <
+    {   Low,    Low,    Low,    Low,    Low,    High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // >
+    {   Low,    Low,    Low,    Low,    Low,    High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // <=
+    {   Low,    Low,    Low,    Low,    Low,    High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // >=
+    {   Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    High,   High,   High,   High,   High,   High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // ===
+    {   Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    High,   High,   High,   High,   High,   High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // !==
+    {   Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    High,   High,   High,   High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // &&
+    {   Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    High,   High,   High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // ||
+    {   Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    High,   High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // and
+    {   Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // or
+    {   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   Low,    Low,    High,   Low,    High,   High,   Low   },  // !
+    {   Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Equal,  Low,    Equal,  Error,  Low   },  // (
+    {   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   Error,  High,   Error,  High,   High,   Error },  // )
+    {   Error,  Error,  Error,  Error,  Error,  Error,  Error,  Error,  Error,  Error,  Error,  Error,  Error,  Error,  Error,  Error,  Equal,  Error,  Error,  Error,  Error,  Error },  // func
+    {   Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Equal,  Low,    Equal,  Error,  Low   },  // ,
+    {   Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Low,    Error,  Low,    Error,  Error,  Low   },  // $
+    {   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   High,   Error,  Error,  High,   Error,  High,   High,   Error }   // var
 };
 
 /**
@@ -170,9 +172,11 @@ static inline uint8_t tokenTypeToInstruction(uint8_t tokenType)
             return IST_GreaterEq;
 
         case STT_And:
+        case STT_AndLow:
             return IST_And;
 
         case STT_Or:
+        case STT_OrLow:
             return IST_Or;
 
         default:
@@ -372,6 +376,7 @@ uint8_t reduce(ExprToken *topTerm)
                     notOperator->offset = currentStackPos++;
 
                 generateInstruction(IST_Not, ISM_NoConst, notOperator->offset, operand->offset, notCount & 1); // same as notCount % 2
+                notOperator->subtype = NonConst;
             }
             else {
                 Value *constVal = vectorAt(constantsTable, operand->offset);
@@ -391,8 +396,6 @@ uint8_t reduce(ExprToken *topTerm)
             vectorPopNExprToken(exprVector, notCount);
             break;
         }
-        case STT_And:
-        case STT_Or:
         case STT_Equal:
         case STT_NotEqual:
         case STT_Less:
@@ -403,7 +406,11 @@ uint8_t reduce(ExprToken *topTerm)
         case STT_Multiply:
         case STT_Divide:
         case STT_Dot:
-        case STT_Plus: {
+        case STT_Plus:
+        case STT_And:
+        case STT_Or:
+        case STT_AndLow:
+        case STT_OrLow: {
             uint32_t stackSize = vectorSize(exprVector);
             if (stackSize < 3) {
                 setError(ERR_Syntax);
