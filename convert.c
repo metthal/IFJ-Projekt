@@ -20,7 +20,7 @@ int stringToInt(const String *str)
         directStr++;
 
     // we don't support unary minus
-    if (*directStr == '-')
+    if (*directStr == '-' || *directStr == '+')
         return 0;
 
     return strtol(directStr, NULL, 10);
