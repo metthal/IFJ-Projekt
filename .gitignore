@@ -8,6 +8,8 @@ ini*
 
 # Doxydoc
 doxydoc
+documentation.*
+texput.log
 
 # Hidden files
 .*
