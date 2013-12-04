@@ -363,8 +363,12 @@ void getSubstring(const Value *val, Value *ret, int start, int end)
     }
 
     int len = -1;
-    String str;
-    const String *workingStr = NULL;
+    // Need to check so we won't delete our original value
+    if (ret != val) {
+        deleteValue(ret);
+    }
+
+    String *workingStr = &(ret->data.s);
 
     switch (val->type) {
         case VT_Null:
@@ -373,8 +377,7 @@ void getSubstring(const Value *val, Value *ret, int start, int end)
 
         case VT_Bool:
             if (val->data.b) {
-                initStringS(&str, "1", 1);
-                workingStr = &str;
+                initStringS(workingStr, "1", 1);
                 len = 1;
             }
             else
@@ -382,19 +385,19 @@ void getSubstring(const Value *val, Value *ret, int start, int end)
             break;
 
         case VT_Integer: {
-            len = intToStringE(val->data.i, &str);
-            workingStr = &str;
+            len = intToStringE(val->data.i, workingStr);
             break;
         }
 
         case VT_Double: {
-            len = doubleToStringE(val->data.d, &str);
-            workingStr = &str;
+            len = doubleToStringE(val->data.d, workingStr);
             break;
         }
 
         case VT_String:
-            workingStr = &(val->data.s);
+            if (ret != val) {
+                copyString(&(val->data.s), workingStr);
+            }
             len = stringLength(workingStr);
             break;
 
@@ -413,17 +416,9 @@ void getSubstring(const Value *val, Value *ret, int start, int end)
     }
 
     if (!getError()) {
-        String *substr = stringSubstr(workingStr, start, end - start);
-        if (!getError()) {
-            deleteValue(ret);
-            stringMove(&(ret->data.s), substr);
-            freeString(&substr);
-            ret->type = VT_String;
-        }
+        stringSubstrI(workingStr, start, end - start);
+        ret->type = VT_String;
     }
-
-    if (workingStr == &str)
-        deleteString(&str);
 }
 
 void intval(const Value *val, Value *ret)

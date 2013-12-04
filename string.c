@@ -255,6 +255,25 @@ String* stringSubstr(const String *ps, uint32_t offset, uint32_t length)
 }
 
 /**
+ * Reduces string to substring.
+ * Sets ERR_Allocation if memory couldn't be allocated.
+ *
+ * @param   ps      String to reduce
+ * @param   offset  Starts from 0
+ * @param   length  Length of substring
+ */
+void stringSubstrI(String *ps, uint32_t offset, uint32_t length)
+{
+    ps->length = length + 1;
+    memmove(ps->data, ps->data + offset, length);
+    ps->data[length] = '\0';
+    if ((ps->length > STRING_DEFAULT_SIZE) &&
+            (ps->length <= ps->size / STRING_RESIZE_DEC_RATE)) {
+        _stringResizeRaw(ps, ps->length);
+    }
+}
+
+/**
  * Empties string.
  *
  * @param  ps  String to empty

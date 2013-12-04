@@ -32,6 +32,7 @@ void freeString(String **pps);
 void stringResize(String *ps, uint32_t size);
 String* stringClone(String *ps);
 String* stringSubstr(const String *ps, uint32_t offset, uint32_t length);
+void stringSubstrI(String *ps, uint32_t offset, uint32_t length);
 
 void stringEmpty(String *ps);
 void stringPush(String *ps, char c);
