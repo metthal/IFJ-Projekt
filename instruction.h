@@ -96,10 +96,10 @@ typedef enum
 
 typedef enum
 {
-    ISM_NoConst = 0,
-    ISM_FirstConst = 1,
+    ISM_NoConst     = 0,
+    ISM_FirstConst  = 1,
     ISM_SecondConst = 2,
-    ISM_AllConst = 3
+    ISM_AllConst    = 3
 } InstructionMode;
 
 typedef struct
@@ -109,7 +109,6 @@ typedef struct
     int32_t a;
     int32_t b;
     int32_t res;
-
 } Instruction;
 
 Instruction* newInstruction();
@@ -124,7 +123,7 @@ void copyInstruction(const Instruction *src, Instruction *dest);
 
 uint32_t generateCall(const Symbol *symbol, BuiltinCode builtinCode, uint32_t paramCount);
 
-void generateInstruction(InstructionCode code, int32_t res, int32_t a, int32_t b);
+void generateInstruction(InstructionCode code, InstructionMode mode, int32_t res, int32_t a, int32_t b);
 
 uint32_t generateEmptyInstruction();
 

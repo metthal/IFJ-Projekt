@@ -28,15 +28,6 @@ static int64_t currentFuncParamLimit;       ///< Max. parameters pushed on stack
 static Symbol *currentFuncSymbol;           ///< Symbol in SymbolTable for currently processed function
 
 /**
- * Defines type of the token located on the bottom-up parser stack
- **/
-typedef enum
-{
-    Terminal,   ///< Terminal token
-    NonTerminal ///< Non-terminal token
-} ExprTokenType;
-
-/**
  * Defines priority between tokens on the stack and input token
  **/
 typedef enum
@@ -85,6 +76,7 @@ void initExpr()
     endToken.token = newToken();
     endToken.token->type = STT_EOF;
     endToken.type = Terminal;
+    endToken.subtype = Const;
 }
 
 
@@ -193,11 +185,6 @@ static inline void modifyExprInstResult(uint32_t instIndex, uint32_t resultOffse
     Instruction *inst = vectorAt(instructions, instIndex);
 
     switch (inst->code) {
-        case IST_PushC:
-            inst->code = IST_MovC;
-            inst->res = resultOffset;
-            currentStackPos--;
-            break;
         case IST_Reserve:
             inst->code = IST_PushRef;
             inst->a = resultOffset - (currentStackPos - 1);
@@ -216,6 +203,7 @@ static inline void modifyExprInstResult(uint32_t instIndex, uint32_t resultOffse
         case IST_Or:
         case IST_And:
         case IST_Not:
+            // currentStackPos points to the first free stack position, decrement it so we can properly set maxStackPos for top-down parser
             if (inst->res > inst->a && inst->res > inst->b)
                 currentStackPos--;
             inst->res = resultOffset;
@@ -275,7 +263,7 @@ uint8_t reduceMultiparamFunc(uint32_t stackPos, uint32_t *paramCount, uint32_t *
 
     // if it doesn't matter on parameter count or we reached the limit
     if (currentFuncParamLimit == -1 || *paramCount < currentFuncParamLimit) {
-        generateInstruction(IST_Push, 0, first->stackOffset, 0);
+        generateInstruction(first->subtype == Const ? IST_PushC : IST_Push, ISM_NoConst, 0, first->offset, 0);
         if (getError())
             return 0;
 
@@ -306,13 +294,9 @@ uint8_t reduce(ExprToken *topTerm)
             if (getError())
                 return 0;
 
-            generateInstruction(IST_PushC, 0, vectorSize(constantsTable) - 1, 0);
-            if (getError())
-                return 0;
-
             topTerm->type = NonTerminal;
-            topTerm->stackOffset = currentStackPos++;
-            lastResultInstIndex = vectorSize(instructions) - 1;
+            topTerm->subtype = Const;
+            topTerm->offset = vectorSize(constantsTable) - 1;
             break;
         case STT_Variable: {
             Symbol *symbol = symbolTableFind(currentContext->localTable, &(topTerm->token->str));
@@ -322,7 +306,8 @@ uint8_t reduce(ExprToken *topTerm)
             }
 
             topTerm->type = NonTerminal;
-            topTerm->stackOffset = symbol->data->var.relativeIndex;
+            topTerm->subtype = NonConst;
+            topTerm->offset = symbol->data->var.relativeIndex;
             break;
         }
         case STT_Not: {
@@ -365,15 +350,30 @@ uint8_t reduce(ExprToken *topTerm)
                 notCount += (stackSize - 3 - stackPos);
             }
 
-            notOperator->type = NonTerminal;
-            if (operand->stackOffset >= currentContext->exprStart)
-                notOperator->stackOffset = operand->stackOffset;
-            else
-                notOperator->stackOffset = currentStackPos++;
-            generateInstruction(IST_Not, notOperator->stackOffset, operand->stackOffset, notCount & 1); // same as notCount % 2
+            // for non-const generate IST_Not instructions
+            // for const perform NOT right here and store it in the const table
+            if (operand->subtype == NonConst) {
+                if (operand->offset >= currentContext->exprStart)
+                    notOperator->offset = operand->offset;
+                else
+                    notOperator->offset = currentStackPos++;
+
+                generateInstruction(IST_Not, ISM_NoConst, notOperator->offset, operand->offset, notCount & 1); // same as notCount % 2
+            }
+            else {
+                Value *constVal = vectorAt(constantsTable, operand->offset);
+                uint8_t tmp = valueToBool(constVal) ^ (notCount & 1); // this mechanism explained in interpreter.c case IST_Not
+                deleteValue(constVal);
+                constVal->type = VT_Bool;
+                constVal->data.b = tmp;
+                notOperator->offset = operand->offset;
+                notOperator->subtype = Const;
+            }
+
             if (getError())
                 return 0;
 
+            notOperator->type = NonTerminal;
             vectorPopNExprToken(exprVector, notCount);
             break;
         }
@@ -414,20 +414,29 @@ uint8_t reduce(ExprToken *topTerm)
                 return 0;
             }
 
-            if (operand1->stackOffset >= currentContext->exprStart)
-                generateInstruction(tokenTypeToInstruction(operator->token->type), operand1->stackOffset, operand1->stackOffset, operand2->stackOffset);
-            else if (operand2->stackOffset >= currentContext->exprStart) {
-                generateInstruction(tokenTypeToInstruction(operator->token->type), operand2->stackOffset, operand1->stackOffset, operand2->stackOffset);
-                operand1->stackOffset = operand2->stackOffset;
+            uint8_t modMask = ISM_NoConst;
+            if (operand1->subtype == Const)
+                modMask |= ISM_FirstConst;
+
+            if (operand2->subtype == Const)
+                modMask |= ISM_SecondConst;
+
+            if (!(modMask & ISM_FirstConst) && operand1->offset >= currentContext->exprStart) {
+                generateInstruction(tokenTypeToInstruction(operator->token->type), modMask, operand1->offset, operand1->offset, operand2->offset);
+            }
+            else if (!(modMask & ISM_SecondConst) && operand2->offset >= currentContext->exprStart) {
+                generateInstruction(tokenTypeToInstruction(operator->token->type), modMask, operand2->offset, operand1->offset, operand2->offset);
+                operand1->offset = operand2->offset;
             }
             else {
-                generateInstruction(tokenTypeToInstruction(operator->token->type), currentStackPos, operand1->stackOffset, operand2->stackOffset);
-                operand1->stackOffset = currentStackPos++;
+                generateInstruction(tokenTypeToInstruction(operator->token->type), modMask, currentStackPos, operand1->offset, operand2->offset);
+                operand1->offset = currentStackPos++;
             }
 
             if (getError())
                 return 0;
 
+            operand1->subtype = NonConst;
             lastResultInstIndex = vectorSize(instructions) - 1;
             vectorPopNExprToken(exprVector, 2);
             break;
@@ -448,7 +457,7 @@ uint8_t reduce(ExprToken *topTerm)
 
                     if (nextTerm->type == Terminal && nextTerm->token->type == STT_Identifier) {
                         uint32_t retValStackPos = currentStackPos++;
-                        generateInstruction(IST_Reserve, 0, 1, 0);
+                        generateInstruction(IST_Reserve, ISM_NoConst, 0, 1, 0);
                         if (getError())
                             return 0;
 
@@ -462,7 +471,8 @@ uint8_t reduce(ExprToken *topTerm)
                             return 0;
 
                         nextTerm->type = NonTerminal;
-                        nextTerm->stackOffset = retValStackPos;
+                        nextTerm->subtype = NonConst;
+                        nextTerm->offset = retValStackPos;
                         vectorPopNExprToken(exprVector, 2);
                     }
                     else {
@@ -483,7 +493,7 @@ uint8_t reduce(ExprToken *topTerm)
                         }
 
                         uint32_t retValStackPos = currentStackPos++;
-                        generateInstruction(IST_Reserve, 0, 1, 0);
+                        generateInstruction(IST_Reserve, ISM_NoConst, 0, 1, 0);
                         if (getError())
                             return 0;
 
@@ -504,7 +514,8 @@ uint8_t reduce(ExprToken *topTerm)
                             return 0;
 
                         nextTerm->type = NonTerminal;
-                        nextTerm->stackOffset = retValStackPos;
+                        nextTerm->subtype = NonConst;
+                        nextTerm->offset = retValStackPos;
                     }
                     else if (nextTerm->type == Terminal && nextTerm->token->type == STT_LeftBracket) { // it's (E) and we don't know if it is single param func or just (E)
                         if (stackSize >= 4) {
@@ -514,7 +525,7 @@ uint8_t reduce(ExprToken *topTerm)
                             if (nextTerm->type == Terminal && nextTerm->token->type == STT_Identifier) { // we have id(E) and it's function
                                 // return value
                                 uint32_t retValStackPos = currentStackPos++;
-                                generateInstruction(IST_Reserve, 0, 1, 0);
+                                generateInstruction(IST_Reserve, ISM_NoConst, 0, 1, 0);
                                 if (getError())
                                     return 0;
 
@@ -525,7 +536,7 @@ uint8_t reduce(ExprToken *topTerm)
 
                                 // if there is no parameter limit or it is higher than 0
                                 if (currentFuncParamLimit == -1 || currentFuncParamLimit > 0) {
-                                    generateInstruction(IST_Push, 0, exprBackup->stackOffset, 0);
+                                    generateInstruction(exprBackup->subtype == Const ? IST_PushC : IST_Push, ISM_NoConst, 0, exprBackup->offset, 0);
                                     if (getError())
                                         return 0;
                                 }
@@ -535,18 +546,21 @@ uint8_t reduce(ExprToken *topTerm)
                                     return 0;
 
                                 nextTerm->type = NonTerminal;
-                                nextTerm->stackOffset = retValStackPos;
+                                nextTerm->subtype = NonConst;
+                                nextTerm->offset = retValStackPos;
                                 vectorPopNExprToken(exprVector, 3);
                             }
                             else { // it's just (E)
                                 leftBracketBackup->type = NonTerminal;
-                                leftBracketBackup->stackOffset = exprBackup->stackOffset;
+                                leftBracketBackup->subtype = exprBackup->subtype;
+                                leftBracketBackup->offset = exprBackup->offset;
                                 vectorPopNExprToken(exprVector, 2);
                             }
                         }
                         else { // it can only be (E) if we have just 3 items on the stack
                             nextTerm->type = NonTerminal;
-                            nextTerm->stackOffset = exprBackup->stackOffset;
+                            nextTerm->subtype = exprBackup->subtype;
+                            nextTerm->offset = exprBackup->offset;
                             vectorPopNExprToken(exprVector, 2);
                         }
                     }
@@ -639,9 +653,10 @@ uint32_t expr(uint32_t resultOffset, uint32_t *maxStackPosUsed)
             // if there is no topmost terminal and input is right bracket, end successfuly
             // top-down parser will take care of bad input, since he will assume I loaded first token after expression
             if ((endOfInput || currentToken->type == STT_RightBracket) && vectorSize(exprVector) == 1) {
+                ExprToken *expr = vectorBack(exprVector);
                 if (resultOffset) {
                     if (!lastResultInstIndex)
-                        generateInstruction(IST_Mov, resultOffset, ((ExprToken*)vectorBack(exprVector))->stackOffset, 0);
+                        generateInstruction(expr->subtype == Const ? IST_MovC : IST_Mov, ISM_NoConst, resultOffset, expr->offset, 0);
                     else
                         modifyExprInstResult(lastResultInstIndex, resultOffset);
 
@@ -651,7 +666,7 @@ uint32_t expr(uint32_t resultOffset, uint32_t *maxStackPosUsed)
 
                 if (maxStackPosUsed)
                     *maxStackPosUsed = currentStackPos;
-                return ((ExprToken*)vectorBack(exprVector))->stackOffset;
+                return expr->offset;
             }
 
             topToken = &endToken;
@@ -664,6 +679,7 @@ uint32_t expr(uint32_t resultOffset, uint32_t *maxStackPosUsed)
                 ExprToken *exprToken = vectorBack(exprVector);
                 exprToken->token = (Token*)currentToken;
                 exprToken->type = Terminal;
+                exprToken->subtype = Const;
                 break;
             }
             case High:

@@ -10,6 +10,21 @@
 #include "token.h"
 
 /**
+ * Defines type of the token located on the bottom-up parser stack
+ **/
+typedef enum
+{
+    Terminal,   ///< Terminal token
+    NonTerminal ///< Non-terminal token
+} ExprTokenType;
+
+typedef enum
+{
+    NonConst,
+    Const
+} ExprTokenSubtype;
+
+/**
  * Expression token used in bottom-up parsing
  **/
 typedef struct
@@ -17,9 +32,10 @@ typedef struct
     union
     {
         Token *token;
-        int64_t stackOffset;
+        int64_t offset;
     };
-    uint8_t type;
+    ExprTokenType type;
+    ExprTokenSubtype subtype;
 } ExprToken;
 
 void initExpr();

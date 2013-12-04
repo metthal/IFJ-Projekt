@@ -41,6 +41,7 @@ void freeInstruction(Instruction **ppt)
 void copyInstruction(const Instruction *src, Instruction *dest)
 {
     dest->code = src->code;
+    dest->mode = src->mode;
     dest->res = src->res;
     dest->a = src->a;
     dest->b = src->b;
@@ -83,7 +84,7 @@ void processDefaultArg(Context *context, uint32_t *paramCount)
         // which are in constant table in opposite order (last is first)
         int64_t index = context->defaultStart + missingCount - 1;
         for (; index >= context->defaultStart; index--)
-            generateInstruction(IST_PushC, 0, index, 0);
+            generateInstruction(IST_PushC, ISM_NoConst, 0, index, 0);
 
         *paramCount += missingCount;
     }
@@ -138,7 +139,7 @@ uint32_t generateCall(const Symbol *symbol, BuiltinCode builtinCode, uint32_t pa
     return paramCount;
 }
 
-void generateInstruction(InstructionCode code, int32_t res, int32_t a, int32_t b)
+void generateInstruction(InstructionCode code, InstructionMode mode, int32_t res, int32_t a, int32_t b)
 {
     if (code == IST_Call) {
         setError(ERR_ISTGenerator);
@@ -147,6 +148,7 @@ void generateInstruction(InstructionCode code, int32_t res, int32_t a, int32_t b
 
     Instruction inst;
     inst.code = code;
+    inst.mode = mode;
     inst.res = res;
     inst.a = a;
     inst.b = b;
