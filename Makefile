@@ -91,4 +91,9 @@ ctags:
 doc:
 	@doxygen $(DOXYFILE)
 
+statistics:
+	@echo -n "Lines of code: " && wc -l $(SRC_FILES) $(TEST_SRC_FILES) $(HEADER_FILES) $(TEST_HEADER_FILES) | tail -n 1 | cut -d' ' -f 3
+	@echo -n "Size of code: " && du -hsc $(SRC_FILES) $(TEST_SRC_FILES) $(HEADER_FILES) $(TEST_HEADER_FILES) | tail -n 1 | cut -f 1
+	@test -e ini && echo -n "Size of executable: " && du -hs ini | cut -f 1 || echo "Executable not found."
+
 .PHONY: build release debug profile clean pack analyze analyzeAll callgraph test ctags doc
