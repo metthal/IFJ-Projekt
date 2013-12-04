@@ -245,7 +245,7 @@ String* stringClone(String *ps)
  */
 String* stringSubstr(const String *ps, uint32_t offset, uint32_t length)
 {
-    String *nps = newStringSize(ps->size);
+    String *nps = newStringSize(length + 1);
     if (nps) {
         nps->length = length + 1;
         memcpy(nps->data, ps->data + offset, length);
@@ -268,7 +268,7 @@ void stringSubstrI(String *ps, uint32_t offset, uint32_t length)
     memmove(ps->data, ps->data + offset, length);
     ps->data[length] = '\0';
     if ((ps->length > STRING_DEFAULT_SIZE) &&
-            (ps->length <= ps->size / STRING_RESIZE_DEC_RATE)) {
+            (ps->length << STRING_RESIZE_DEC_RATE <= ps->size)) {
         _stringResizeRaw(ps, ps->length);
     }
 }
@@ -294,7 +294,7 @@ void stringEmpty(String *ps)
 void stringPush(String *ps, char c)
 {
     if (!(ps->length < ps->size)) {
-        if (!_stringResizeRaw(ps, STRING_RESIZE_INC_RATE * ps->size)) {
+        if (!_stringResizeRaw(ps, ps->size << STRING_RESIZE_INC_RATE)) {
             return;
         }
     }
@@ -316,12 +316,19 @@ char stringPop(String *ps)
     char c = ps->data[ps->length - 2];
     ps->data[ps->length - 2] = '\0';
     ps->length--;
-    if (ps->length > STRING_DEFAULT_SIZE) {
-        if (ps->length <= ps->size / STRING_RESIZE_DEC_RATE) {
-            _stringResizeRaw(ps, ps->length);
-        }
+    if ((ps->length > STRING_DEFAULT_SIZE) &&
+            (ps->length << STRING_RESIZE_DEC_RATE <= ps->size)) {
+        _stringResizeRaw(ps, ps->length);
     }
     return c;
+}
+
+static inline void* _stringSetsizeRaw(String *dest, uint32_t size)
+{
+    free(dest->data);
+    dest->data = malloc(sizeof(char) * size);
+    dest->size = size;
+    return dest->data;
 }
 
 /**
@@ -333,8 +340,13 @@ char stringPop(String *ps)
  */
 void copyString(const String *src, String *dest)
 {
-    if (!_stringResizeRaw(dest, src->length)) {
-        return;
+    if ((dest->size < src->length)
+        || ((src->length > STRING_DEFAULT_SIZE)
+            && (dest->size >= src->length << STRING_RESIZE_DEC_RATE))) {
+        if (!_stringSetsizeRaw(dest, src->length)) {
+            setError(ERR_Allocation);
+            return;
+        }
     }
     memcpy(dest->data, src->data, src->length);
     dest->length = src->length;
@@ -350,12 +362,18 @@ void copyString(const String *src, String *dest)
  */
 void copyStringS(const char *str, uint32_t len, String *dest)
 {
-    if (!_stringResizeRaw(dest, len + 1)) {
-        return;
+    uint32_t srcLen = len + 1;
+    if ((dest->size < srcLen)
+        || ((srcLen > STRING_DEFAULT_SIZE)
+            && (dest->size >= srcLen << STRING_RESIZE_DEC_RATE))) {
+        if (!_stringSetsizeRaw(dest, srcLen)) {
+            setError(ERR_Allocation);
+            return;
+        }
     }
     memcpy(dest->data, str, len);
     dest->data[len] = '\0';
-    dest->length = len + 1;
+    dest->length = srcLen;
 }
 
 /**
