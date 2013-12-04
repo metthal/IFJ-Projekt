@@ -396,7 +396,7 @@ void getSubstring(const Value *val, Value *ret, int start, int end)
 
         case VT_String:
             if (ret != val) {
-                copyString(&(val->data.s), workingStr);
+                initStringSet(workingStr, &(val->data.s));
             }
             len = stringLength(workingStr);
             break;
