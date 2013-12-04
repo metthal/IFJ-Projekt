@@ -14,8 +14,8 @@ typedef struct
     char *data;
 } String;
 
-static uint8_t const STRING_RESIZE_INC_RATE = 2;
-static uint8_t const STRING_RESIZE_DEC_RATE = 3;
+static uint8_t const STRING_RESIZE_INC_RATE = 1;
+static uint8_t const STRING_RESIZE_DEC_RATE = 2;
 static uint16_t const STRING_DEFAULT_SIZE = 16;
 
 void initString(String *ps);
