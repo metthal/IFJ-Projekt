@@ -1,0 +1,107 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% Dokumentacia k projektu 'Interpret pre jazyk IFJ 2013'
+%%
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[12pt,a4paper,titlepage,final]{article}
+
+% jazyk
+\usepackage[slovak]{babel}
+\usepackage[utf8]{inputenc}
+% balicky prr odkazy
+\usepackage[bookmarksopen,colorlinks,plainpages=false,urlcolor=blue,unicode]{hyperref}
+\usepackage{url}
+% obrazky
+\usepackage[dvipdf]{graphicx}
+% velikost stranky
+\usepackage[top=3.5cm, left=2.5cm, text={17cm, 24cm}, ignorefoot]{geometry}
+
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% titulní strana
+
+
+\def\author{Marek Milkovič, Lukáš Vrabec, Ján Spišiak, Ivan Ševčík, Marek Bertovič}
+\def\email{}
+\def\projname{Dokumentácia}
+
+
+\begin{titlepage}
+
+% \vspace*{1cm}
+\begin{figure}[!h]
+  \centering
+  \includegraphics[height=5cm]{doc/img/logo.eps}
+\end{figure}
+
+\vfill
+
+\begin{center}
+\bigskip
+\begin{Huge}
+\projname\\
+\end{Huge}
+\begin{large}
+Projekt IFJ 2013
+\end{large}
+\end{center}
+
+\vfill
+
+\begin{center}
+\begin{Large}
+\today
+\end{Large}
+\end{center}
+
+\vfill
+
+\begin{flushleft}
+\begin{large}
+\begin{tabular}{ll}
+Autori: & \author, \url{\email} \\
+ \\
+ & Fakulta Informačních Technologií \\
+ & Vysoké Učení Technické v~Brně \\
+\end{tabular}
+\end{large}
+\end{flushleft}
+\end{titlepage}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% obsah
+\pagestyle{plain}
+\pagenumbering{roman}
+\setcounter{page}{1}
+\tableofcontents
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% textova zprava
+\newpage
+\pagestyle{plain}
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% sablona
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Sablona} \label{uvod}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{center}
+\end{center}
+SABLONA
+
+
+%=============================================================================
+\subsection{subsablona}
+sablona
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% koniec dokumentace
+\end{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

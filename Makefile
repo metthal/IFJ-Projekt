@@ -28,7 +28,9 @@ TAR_FILE = xmilko01.tgz
 PACKED_FILES = $(SRC_FILES) $(HEADER_FILES) Makefile
 TEMP_FILES = gmon.out
 DOXYFILE = doxyconfig
-DOC_DIR = doxydoc
+DOXY_DIR = doxydoc
+DOC_FILES = texput.log documentation.dvi documentation.aux documentation.toc documentation.log documentation.out documentation.pdf
+DOC_DIR = doc
 
 ANALYZE_FLAGS = --enable=all --std=c99
 ANALYZE_FILTER = 2>&1 | grep --color=always -Ev "\-\-check\-config|never used" 1>&2 | true
@@ -69,7 +71,7 @@ else
 endif
 
 clean:
-	$(RM) $(PROJECT) $(PROJECT_TEST) $(OBJ_FILES) $(TAR_FILE) $(TEMP_FILES) $(TEST_OBJ_FILES) $(DOC_DIR)
+	$(RM) $(PROJECT) $(PROJECT_TEST) $(OBJ_FILES) $(TAR_FILE) $(TEMP_FILES) $(TEST_OBJ_FILES) $(DOXY_DIR) $(DOC_FILES)
 
 pack:
 	$(TAR) $(TAR_FILE) $(PACKED_FILES)
@@ -90,6 +92,10 @@ ctags:
 
 doc:
 	@doxygen $(DOXYFILE)
+	@make -C $(DOC_DIR)/img
+	@latex $(DOC_DIR)/documentation.tex
+	@latex $(DOC_DIR)/documentation.tex
+	@dvipdf documentation.dvi
 
 statistics:
 	@echo -n "Lines of code: " && wc -l $(SRC_FILES) $(TEST_SRC_FILES) $(HEADER_FILES) $(TEST_HEADER_FILES) | tail -n 1 | cut -d' ' -f 3
