@@ -145,10 +145,10 @@ void prog()
 
             if (secondRun) {
                 // First instruction should reserve space on stack
-                generateInstruction(IST_Reserve, 0, currentContext->exprStart, 0);
+                generateInstruction(IST_Reserve, ISM_NoConst, 0, currentContext->exprStart, 0);
                 // Nullify pointers to mark program end
-                generateInstruction(IST_Nullify, 0, 0, 0);
-                generateInstruction(IST_Nullify, 0, 1, 0);
+                generateInstruction(IST_Nullify, ISM_NoConst, 0, 0, 0);
+                generateInstruction(IST_Nullify, ISM_NoConst, 0, 1, 0);
             }
 
             body();
@@ -166,8 +166,8 @@ void body()
         case STT_EOF:
             // Rule 4
             if (secondRun) {
-                generateInstruction(IST_Nullify, 0, -1, 0);
-                generateInstruction(IST_Return, 0, 0, 0);
+                generateInstruction(IST_Nullify, ISM_NoConst, 0, -1, 0);
+                generateInstruction(IST_Return, ISM_NoConst, 0, 0, 0);
             }
             break;
 
@@ -305,7 +305,7 @@ void func()
 
         // Instruction to reserve stack space for locals
         if (currentContext->localVariableCount > 0)
-            generateInstruction(IST_Reserve, 0, currentContext->localVariableCount, 0);
+            generateInstruction(IST_Reserve, ISM_NoConst, 0, currentContext->localVariableCount, 0);
     }
     else {
         // Initialize exprStart in case of no local variables
@@ -318,8 +318,8 @@ void func()
 
     if (secondRun) {
         // Create instruction that will return null at the end of each function
-        generateInstruction(IST_Nullify, 0, -(currentContext->argumentCount+1), 0);
-        generateInstruction(IST_Return, 0, currentContext->argumentCount, 0);
+        generateInstruction(IST_Nullify, ISM_NoConst, 0, -(currentContext->argumentCount+1), 0);
+        generateInstruction(IST_Return, ISM_NoConst, 0, currentContext->argumentCount, 0);
         instructions = mainInstructions;
     }
 
@@ -410,7 +410,7 @@ void stmt()
                         return;
 
                     if (secondRun)
-                        generateInstruction(IST_Return, 0, currentContext->argumentCount, 0);
+                        generateInstruction(IST_Return, ISM_NoConst, 0, currentContext->argumentCount, 0);
 
                     // Semicolon loaded by expr
                     if (tokensIt->type != STT_Semicolon) {
@@ -438,7 +438,7 @@ void stmt()
 
                     if (secondRun) {
                         vectorPushUint32(toBeModifiedIST, vectorSize(instructions));
-                        generateInstruction(IST_Break, 0, 0, 0);
+                        generateInstruction(IST_Break, ISM_NoConst, 0, 0, 0);
                     }
 
                     tokensIt++;
@@ -461,7 +461,7 @@ void stmt()
 
                     if (secondRun) {
                         vectorPushUint32(toBeModifiedIST, vectorSize(instructions));
-                        generateInstruction(IST_Continue, 0, 0, 0);
+                        generateInstruction(IST_Continue, ISM_NoConst, 0, 0, 0);
                     }
 
                     tokensIt++;
@@ -527,7 +527,7 @@ void stmt()
 
                     if (secondRun) {
                         // Jump before condition for another iteration
-                        generateInstruction(IST_Jmp, 0, ptr1 - vectorSize(instructions), 0);
+                        generateInstruction(IST_Jmp, ISM_NoConst, 0, ptr1 - vectorSize(instructions), 0);
 
                         // Fills the reserved space with correct jump value
                         fillInstruction(ptr2, IST_Jmpz, currentContext->exprStart, vectorSize(instructions) - ptr2, cond);
@@ -630,7 +630,7 @@ void stmt()
                         tokensIt = afterForBlock;
 
                         // Jump before condition for another iteration
-                        generateInstruction(IST_Jmp, 0, ptr1 - vectorSize(instructions), 0);
+                        generateInstruction(IST_Jmp, ISM_NoConst, 0, ptr1 - vectorSize(instructions), 0);
 
                         if (for2Used) {
                             // Fills the reserved space with correct jump value
@@ -1060,7 +1060,7 @@ void assignment(ConstTokenVectorIterator varid, uint8_t skip)
 
     if (secondRun && !skip && maxStackPosUsed > currentContext->exprStart) {
         // Clear generated expression space
-        generateInstruction(IST_ClearExpr, 0, currentContext->exprStart, 0);
+        generateInstruction(IST_ClearExpr, ISM_NoConst, 0, currentContext->exprStart, 0);
     }
     else {
         addLocalVariable(varid);
