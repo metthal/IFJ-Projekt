@@ -487,35 +487,43 @@ void putString(const Value *base, const Value *constBase, Value *ret, int count)
 
 void sortString(const Value *val, Value *ret)
 {
-    String tmp;
+    String *workingStr = &(ret->data.s);
+
+    // Need to check so we won't delete our original value
+    if (val != ret) {
+        deleteValue(ret);
+    }
 
     switch (val->type) {
         case VT_Null:
-            initString(&tmp);
+            initString(workingStr);
             break;
 
         case VT_Bool:
             if (val->data.b)
-                initStringS(&tmp, "1", 1);
+                initStringS(workingStr, "1", 1);
             else
-                initString(&tmp);
+                initString(workingStr);
             break;
 
         case VT_Integer: {
-            intToStringE(val->data.i, &tmp);
-            stringCharSort(&tmp);
+            intToStringE(val->data.i, workingStr);
+            stringCharSort(workingStr);
             break;
         }
 
         case VT_Double: {
-            doubleToStringE(val->data.d, &tmp);
-            stringCharSort(&tmp);
+            doubleToStringE(val->data.d, workingStr);
+            stringCharSort(workingStr);
             break;
         }
 
         case VT_String:
-            initStringSet(&tmp, &(val->data.s));
-            stringCharSort(&tmp);
+            // We need to check so we won't accidentaly delete val->data.s string
+            if (val != ret) {
+                initStringSet(workingStr, &(val->data.s));
+            }
+            stringCharSort(workingStr);
             break;
 
         case VT_Undefined:
@@ -527,8 +535,6 @@ void sortString(const Value *val, Value *ret)
             return;
     }
 
-    deleteValue(ret);
-    stringMove(&(ret->data.s), &tmp);
     ret->type = VT_String;
 }
 
