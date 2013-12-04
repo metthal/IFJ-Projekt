@@ -8,7 +8,12 @@ ini*
 
 # Doxydoc
 doxydoc
-documentation.*
+documentation.dvi
+documentation.aux
+documentation.toc
+documentation.log
+documentation.out
+documentation.pdf
 texput.log
 
 # Hidden files
