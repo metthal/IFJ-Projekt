@@ -180,7 +180,7 @@ static inline uint8_t tokenTypeToInstruction(uint8_t tokenType)
     }
 }
 
-static inline void modifyExprInstResult(uint32_t instIndex, uint32_t resultOffset)
+static inline void modifyExprInstResult(uint32_t instIndex, int64_t resultOffset)
 {
     Instruction *inst = vectorAt(instructions, instIndex);
 
@@ -222,7 +222,7 @@ static inline void modifyExprInstResult(uint32_t instIndex, uint32_t resultOffse
  *
  * @return Returns 1 in case of success, otherwise 0
  **/
-uint8_t reduceMultiparamFunc(uint32_t stackPos, uint32_t *paramCount, uint32_t *totalParamCount)
+uint8_t reduceMultiparamFunc(int64_t stackPos, uint32_t *paramCount, uint32_t *totalParamCount)
 {
     if (stackPos == 0 || paramCount == NULL)
         return 0;
@@ -625,7 +625,7 @@ void copyExprToken(const ExprToken *src, ExprToken *dest)
  *
  * @return Offset in the local stack frame where the result is stored, in case of error 0
  **/
-uint32_t expr(uint32_t resultOffset, uint32_t *maxStackPosUsed)
+int64_t expr(int64_t resultOffset, uint32_t *maxStackPosUsed)
 {
     // insert bottom of the stack (special kind of token) to the stack
     uint8_t endOfInput = 0;

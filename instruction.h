@@ -54,6 +54,7 @@ typedef enum
     IST_MovC,        //!< IST_MovC
     IST_Jmp,         //!< IST_Jmp
     IST_Jmpz,        //!< IST_Jmpz
+    IST_Jmpnz,       //!< IST_Jmpnz
     IST_Push,        //!< IST_Push
     IST_PushC,       //!< IST_PushC
     IST_PushRef,     //!< IST_PushRef

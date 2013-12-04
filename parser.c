@@ -28,8 +28,8 @@ void forStmt1(uint8_t skip);
 uint8_t forStmt2(uint32_t *cond);
 
 // Forward declaration of helper functions
-uint32_t generalExpr(uint8_t skip, uint32_t resultOffset, uint32_t *maxStackPosUsed);
-uint32_t condition();
+int64_t generalExpr(uint8_t skip, int64_t resultOffset, uint32_t *maxStackPosUsed);
+int64_t condition(uint8_t skip);
 void stmtListBracketed();
 void assignment(ConstTokenVectorIterator varid, uint8_t skip);
 Symbol* addLocalVariable(ConstTokenVectorIterator varid);
@@ -472,7 +472,7 @@ void stmt()
                     // Rule 12
                     tokensIt++;
 
-                    uint32_t cond = condition();
+                    int64_t cond = condition(0);
                     if (getError())
                         return;
 
@@ -507,30 +507,35 @@ void stmt()
                     // Rule 13 (almost same as Rule 12, missing just elseif call)
                     tokensIt++;
 
-                    uint32_t ptr1 = 0, ptr2 = 0;
-                    if (secondRun)
-                        ptr1 = vectorSize(instructions);
-
-                    uint32_t cond = condition();
-                    if (getError())
-                        return;
-
+                    uint32_t ptr1 = 0;
                     if (secondRun) {
                         // Reserves space for instruction that jumps
-                        // behind while block
-                        ptr2 = generateEmptyInstruction();
+                        // to while's condition
+                        ptr1 = generateEmptyInstruction();
                     }
+
+                    ConstTokenVectorIterator beforeCond = tokensIt;
+
+                    condition(1);
+                    if (getError())
+                        return;
 
                     stmtListBracketed();
                     if (getError())
                         return;
 
-                    if (secondRun) {
-                        // Jump before condition for another iteration
-                        generateInstruction(IST_Jmp, ISM_NoConst, 0, ptr1 - vectorSize(instructions), 0);
+                    ConstTokenVectorIterator afterWhileBlock = tokensIt;
 
+                    if (secondRun) {
                         // Fills the reserved space with correct jump value
-                        fillInstruction(ptr2, IST_Jmpz, currentContext->exprStart, vectorSize(instructions) - ptr2, cond);
+                        fillInstruction(ptr1, IST_Jmp, 0, vectorSize(instructions) - ptr1, 0);
+
+                        tokensIt = beforeCond;
+                        int64_t cond = condition(0);
+                        tokensIt = afterWhileBlock;
+
+                        // Conditional jump to beginning of while cycle.
+                        generateInstruction(IST_Jmpnz, ISM_NoConst, currentContext->exprStart, ptr1 + 1 - vectorSize(instructions), cond);
                     }
 
                     break;
@@ -700,7 +705,7 @@ uint8_t elseifStmt()
                         ptr1 = generateEmptyInstruction();
                     }
 
-                    uint32_t cond = condition();
+                    int64_t cond = condition(0);
                     if (getError())
                         return 0;
 
@@ -928,7 +933,7 @@ uint8_t forStmt2(uint32_t *cond)
     return 0;
 }
 
-uint32_t generalExpr(uint8_t skip, uint32_t resultOffset, uint32_t *maxStackPosUsed)
+int64_t generalExpr(uint8_t skip, int64_t resultOffset, uint32_t *maxStackPosUsed)
 {
     if (secondRun && !skip) {
         return expr(resultOffset, maxStackPosUsed);
@@ -989,7 +994,7 @@ uint32_t generalExpr(uint8_t skip, uint32_t resultOffset, uint32_t *maxStackPosU
     return 0;
 }
 
-uint32_t condition()
+int64_t condition(uint8_t skip)
 {
     if (tokensIt->type != STT_LeftBracket) {
         setError(ERR_Syntax);
@@ -998,7 +1003,8 @@ uint32_t condition()
 
     tokensIt++;
 
-    uint32_t exprRes = generalExpr(0, 0, NULL);
+    // Use return value as temporary place for result of condition
+    int64_t exprRes = generalExpr(skip, -currentContext->argumentCount - 1, NULL);
     if (getError())
         return 0;
 
@@ -1009,7 +1015,8 @@ uint32_t condition()
     }
 
     tokensIt++;
-    return exprRes;
+    //TODO why exprRes is giving wrong index?
+    return -currentContext->argumentCount - 1;
 }
 
 void stmtListBracketed()
