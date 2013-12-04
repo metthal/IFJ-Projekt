@@ -480,9 +480,6 @@ void putString(const Value *base, const Value *constBase, Value *ret, int count)
     deleteValue(ret);
     ret->data.i = count;
     ret->type = VT_Integer;
-
-    // Force printing to output
-    fflush(stdout);
 }
 
 void sortString(const Value *val, Value *ret)

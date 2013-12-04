@@ -894,4 +894,7 @@ void interpret(const Instruction *firstInstruction, const Vector *constTable, co
     interpretationLoop(firstInstruction, constTable, addressTable, stack);
 
     freeValueVector(&stack);
+
+    // Force printing to output
+    fflush(stdout);
 }
