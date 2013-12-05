@@ -573,7 +573,7 @@ void stmt()
                         bcCounter = vectorSize(toBeModifiedIST);
                     }
 
-                    uint32_t cond;
+                    uint32_t cond = 0;
                     uint8_t for2Used = forStmt2(&cond);
                     // Check if 2nd statement weren't omitted.
                     if (secondRun && for2Used) {
@@ -924,7 +924,7 @@ uint8_t forStmt2(uint32_t *cond)
         default:
             // Rule 26
             *cond = generalExpr(0, 0, NULL);
-            if(getError())
+            if (getError())
                 break;
 
             return 1;
