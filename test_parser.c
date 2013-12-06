@@ -7,6 +7,50 @@
 #include "address_vector.h"
 #include "scanner.h"
 
+const char *ISTString[] = {
+    "IST_Noop",
+    "IST_Mov",
+    "IST_MovC",
+    "IST_Jmp",
+    "IST_Jmpz",
+    "IST_Jmpnz",
+    "IST_Push",
+    "IST_PushC",
+    "IST_PushRef",
+    "IST_Reserve",
+    "IST_Pop",
+    "IST_ClearExpr",
+    "IST_Call",
+    "IST_Return",
+    "IST_Nullify",
+    "IST_BoolVal",
+    "IST_DoubleVal",
+    "IST_FindString",
+    "IST_GetString",
+    "IST_GetSubstring",
+    "IST_IntVal",
+    "IST_PutString",
+    "IST_SortString",
+    "IST_StrLen",
+    "IST_StrVal",
+    "IST_Break",
+    "IST_Continue",
+    "IST_Add",
+    "IST_Subtract",
+    "IST_Multiply",
+    "IST_Divide",
+    "IST_Concat",
+    "IST_Equal",
+    "IST_NotEqual",
+    "IST_Less",
+    "IST_LessEq",
+    "IST_Greater",
+    "IST_GreaterEq",
+    "IST_And",
+    "IST_Or",
+    "IST_Not"
+};
+
 extern Vector *mainInstructions;
 extern Vector *constantsTable;
 extern Vector *functionsInstructions;
@@ -92,16 +136,24 @@ void testInstructions(Vector *genInstrVector, Vector *expectedInstrVector)
     itr1 = vectorBeginInstruction(genInstrVector);
     itr2 = vectorBeginInstruction(expectedInstrVector);
     uint8_t allOk = 1;
+    uint8_t listMax = 5;
 
-    if (vectorSize(genInstrVector) != vectorSize(expectedInstrVector))
-        return;
+    //if (vectorSize(genInstrVector) != vectorSize(expectedInstrVector))
+    //	return;
 
     uint32_t count = 0;
     for ( ; (itr1 != end1) && (itr2 != end2); ++itr1, ++itr2, ++count) {
         if (!INSTRUCTIONS_EQ(itr1, itr2)) {
+            if (allOk) {
+                printf("\n Nr. Generated        RES   A   B  | Expected         RES   A   B\n");
+                allOk = 0;
+            }
             // COMMENT OUT THIS LINE IF YOU WANT TO COMPARE INSTRUCTIONS
-            printf("(Generated/Expected) (%d) %d(RES: %d, A: %d, B: %d) / %d(RES: %d, A: %d, B: %d)\n", count, itr1->code, itr1->res, itr1->a, itr1->b, itr2->code, itr2->res, itr2->a, itr2->b);
-            allOk = 0;
+            printf("%3d. %16s(%3d,%3d,%3d) | %16s(%3d,%3d,%3d)\n", count, ISTString[itr1->code], itr1->res, itr1->a, itr1->b, ISTString[itr2->code], itr2->res, itr2->a, itr2->b);
+            listMax--;
+            if (!listMax) {
+                break;
+            }
         }
     }
 
@@ -123,6 +175,8 @@ void printInstruction(FILE *file, int line, Instruction *ist)
             fprintf(file, "%15s", "Jmp"); break;
         case IST_Jmpz:
             fprintf(file, "%15s", "Jmpz"); break;
+        case IST_Jmpnz:
+            fprintf(file, "%15s", "Jmpnz"); break;
         case IST_Push:
             fprintf(file, "%15s", "Push"); break;
         case IST_PushC:
