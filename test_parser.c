@@ -374,10 +374,8 @@ ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 0, 0);
 ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 1, 0);
 // $a = 10;
 ADD_MAIN_INSTRUCTION(IST_MovC, localVarStart + 0, 0, 0);
-ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
 // $b = $a;
 ADD_MAIN_INSTRUCTION(IST_Mov, localVarStart + 1, localVarStart + 0, 0);
-ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
 // end
 ADD_MAIN_INSTRUCTION(IST_Nullify, 0, -1, 0);
 ADD_MAIN_INSTRUCTION(IST_Return, 0, 0, 0);
@@ -394,47 +392,34 @@ ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 0, 0);
 ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 1, 0);
 // $a = 10;
 ADD_MAIN_INSTRUCTION(IST_MovC, localVarStart + 0, 0, 0);
-ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
 // $b = 10.0;
 ADD_MAIN_INSTRUCTION(IST_MovC, localVarStart + 1, 1, 0);
-ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
 // $c = $a + $b;
 ADD_MAIN_INSTRUCTION(IST_Add, localVarStart + 2, localVarStart + 0, localVarStart + 1);
-ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
 // $d = $a - $b;
 ADD_MAIN_INSTRUCTION(IST_Subtract, localVarStart + 3, localVarStart + 0, localVarStart + 1);
-ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
 // $e = $a * $b;
 ADD_MAIN_INSTRUCTION(IST_Multiply, localVarStart + 4, localVarStart + 0, localVarStart + 1);
-ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
 // $f = $a / $b;
 ADD_MAIN_INSTRUCTION(IST_Divide, localVarStart + 5, localVarStart + 0, localVarStart + 1);
-ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
 // $g = $a === $b;
 ADD_MAIN_INSTRUCTION(IST_Equal, localVarStart + 6, localVarStart + 0, localVarStart + 1);
-ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
 // $h = $a !== $b;
 ADD_MAIN_INSTRUCTION(IST_NotEqual, localVarStart + 7, localVarStart + 0, localVarStart + 1);
-ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
 // $i = $c > $d;
 ADD_MAIN_INSTRUCTION(IST_Greater, localVarStart + 8, localVarStart + 2, localVarStart + 3);
-ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
 // $j = $e < $f;
 ADD_MAIN_INSTRUCTION(IST_Less, localVarStart + 9, localVarStart + 4, localVarStart + 5);
-ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
 // $k = $c >= $d;
 ADD_MAIN_INSTRUCTION(IST_GreaterEq, localVarStart + 10, localVarStart + 2, localVarStart + 3);
-ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
 // $l = $e <= $f;
 ADD_MAIN_INSTRUCTION(IST_LessEq, localVarStart + 11, localVarStart + 4, localVarStart + 5);
-ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
 // $m = (($a + $b) * $a + $b - $c) <= 190;
 ADD_MAIN_INSTRUCTION(IST_Add, exprStart + 0, localVarStart + 0, localVarStart + 1);
-ADD_MAIN_INSTRUCTION(IST_Multiply, exprStart + 1, exprStart + 0, localVarStart + 0);
-ADD_MAIN_INSTRUCTION(IST_Add, exprStart + 2, exprStart + 1, localVarStart + 1);
-ADD_MAIN_INSTRUCTION(IST_Subtract, exprStart + 3, exprStart + 2, localVarStart + 2);
-ADD_MAIN_INSTRUCTION(IST_PushC, 0, 2, 0);
-ADD_MAIN_INSTRUCTION(IST_LessEq, localVarStart + 12, exprStart + 3, exprStart + 4);
+ADD_MAIN_INSTRUCTION(IST_Multiply, exprStart + 0, exprStart + 0, localVarStart + 0);
+ADD_MAIN_INSTRUCTION(IST_Add, exprStart + 0, exprStart + 0, localVarStart + 1);
+ADD_MAIN_INSTRUCTION(IST_Subtract, exprStart + 0, exprStart + 0, localVarStart + 2);
+ADD_MAIN_INSTRUCTION(IST_LessEq, localVarStart + 12, exprStart + 0, 2);
 ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
 // $n = strval($a) . $b;
 ADD_MAIN_INSTRUCTION(IST_Reserve, 0, 1, 0);
@@ -494,9 +479,9 @@ ADD_MAIN_INSTRUCTION(IST_Call, 0, 3, 0);
 ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
 // $g = defArg12($a + $b * $c);
 ADD_MAIN_INSTRUCTION(IST_Multiply, exprStart + 0, localVarStart + 1, localVarStart + 2);
-ADD_MAIN_INSTRUCTION(IST_Add, exprStart + 1, localVarStart + 0, exprStart + 0);
-ADD_MAIN_INSTRUCTION(IST_PushRef, 0, -(exprStart + 2) + (localVarStart + 6), 0);
-ADD_MAIN_INSTRUCTION(IST_Push, 0, exprStart + 1, 0);
+ADD_MAIN_INSTRUCTION(IST_Add, exprStart + 0, localVarStart + 0, exprStart + 0);
+ADD_MAIN_INSTRUCTION(IST_PushRef, 0, -(exprStart + 1) + (localVarStart + 6), 0);
+ADD_MAIN_INSTRUCTION(IST_Push, 0, exprStart + 0, 0);
 ADD_MAIN_INSTRUCTION(IST_PushC, 0, 2, 0);
 ADD_MAIN_INSTRUCTION(IST_Call, 0, 3, 0);
 ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
@@ -552,12 +537,9 @@ ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 0, 0);
 ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 1, 0);
 // $x = 10;
 ADD_MAIN_INSTRUCTION(IST_MovC, localVarStart + 0, 0, 0);
-ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
 // $x = true === $x < 20;
-ADD_MAIN_INSTRUCTION(IST_PushC, 0, 1, 0);
-ADD_MAIN_INSTRUCTION(IST_PushC, 0, 2, 0);
-ADD_MAIN_INSTRUCTION(IST_Less, exprStart + 2, localVarStart + 0, exprStart + 1);
-ADD_MAIN_INSTRUCTION(IST_Equal, localVarStart + 0, exprStart + 0, exprStart + 2);
+ADD_MAIN_INSTRUCTION(IST_Less, exprStart + 0, localVarStart + 0, 2);
+ADD_MAIN_INSTRUCTION(IST_Equal, localVarStart + 0, 1, exprStart + 0);
 ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
 // end
 ADD_MAIN_INSTRUCTION(IST_Nullify, 0, -1, 0);
@@ -578,71 +560,68 @@ ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 1, 0);
 
 // $a = 0
 ADD_MAIN_INSTRUCTION(IST_MovC, localVarStart + 0, 0, 0);
-ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
 
 // $b = 1.0
 ADD_MAIN_INSTRUCTION(IST_MovC, localVarStart + 1, 1, 0);
-ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
 
 // if ($a)
-ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 2, localVarStart + 0);
+ADD_MAIN_INSTRUCTION(IST_Mov, -1, localVarStart + 0, 0);
+ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 2, -1);
 
 // if ($a) end
-ADD_MAIN_INSTRUCTION(IST_Jmp, 0, 8, 0);
+ADD_MAIN_INSTRUCTION(IST_Jmp, 0, 6, 0);
 
 // elseif ($b)
-ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 4, localVarStart + 1);
+ADD_MAIN_INSTRUCTION(IST_Mov, -1, localVarStart + 1, 0);
+ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 3, -1);
 
 // $c = true
 ADD_MAIN_INSTRUCTION(IST_MovC, localVarStart + 2, 2, 0);
-ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
 
 // elseif ($b) end
-ADD_MAIN_INSTRUCTION(IST_Jmp, 0, 4, 0);
+ADD_MAIN_INSTRUCTION(IST_Jmp, 0, 2, 0);
 
 // else
 // $a = $a + 1
-ADD_MAIN_INSTRUCTION(IST_PushC, 0, 3, 0);
-ADD_MAIN_INSTRUCTION(IST_Add, localVarStart + 0, localVarStart + 0, exprStart + 0);
-ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+ADD_MAIN_INSTRUCTION(IST_Add, localVarStart + 0, localVarStart + 0, 3);
 
 // if ($a)
-ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 2, localVarStart + 0);
+ADD_MAIN_INSTRUCTION(IST_Mov, -1, localVarStart + 0, 0);
+ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 2, -1);
 
 // if ($a) end
 ADD_MAIN_INSTRUCTION(IST_Jmp, 0, 11, 0);
 
 // elseif ($c)
-ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 10, localVarStart + 2);
+ADD_MAIN_INSTRUCTION(IST_Mov, -1, localVarStart + 2, 0);
+ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 9, -1);
 
 // $c = false
 ADD_MAIN_INSTRUCTION(IST_MovC, localVarStart + 2, 4, 0);
-ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
 
 // if ($c)
-ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 2, localVarStart + 2);
+ADD_MAIN_INSTRUCTION(IST_Mov, -1, localVarStart + 2, 0);
+ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 2, -1);
 
 // if ($c) end
-ADD_MAIN_INSTRUCTION(IST_Jmp, 0, 6, 0);
+ADD_MAIN_INSTRUCTION(IST_Jmp, 0, 5, 0);
 
 // elseif ($a)
-ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 2, localVarStart + 0);
+ADD_MAIN_INSTRUCTION(IST_Mov, -1, localVarStart + 0, 0);
+ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 2, -1);
 
 // elseif ($a) end
-ADD_MAIN_INSTRUCTION(IST_Jmp, 0, 4, 0);
+ADD_MAIN_INSTRUCTION(IST_Jmp, 0, 2, 0);
 
 // else
 // $a = $a + 2
-ADD_MAIN_INSTRUCTION(IST_PushC, 0, 5, 0);
-ADD_MAIN_INSTRUCTION(IST_Add, localVarStart + 0, localVarStart + 0, exprStart + 0);
-ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+ADD_MAIN_INSTRUCTION(IST_Add, localVarStart + 0, localVarStart + 0, 5);
 
 // $res = $a === 2
-ADD_MAIN_INSTRUCTION(IST_PushC, 0, 6, 0);
-ADD_MAIN_INSTRUCTION(IST_Equal, localVarStart + 3, localVarStart + 0, exprStart + 0);
-ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+ADD_MAIN_INSTRUCTION(IST_Equal, localVarStart + 3, localVarStart + 0, 6);
 
 // end
+ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, 6, 0);
 ADD_MAIN_INSTRUCTION(IST_Nullify, 0, -1, 0);
 ADD_MAIN_INSTRUCTION(IST_Return, 0, 0, 0);
 
@@ -660,47 +639,40 @@ ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 0, 0);
 ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 1, 0);
 // $i = 0
 ADD_MAIN_INSTRUCTION(IST_MovC, localVarStart + 0, 0, 0);
-ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
 // for
 // for
 // $i = $i + 1
-ADD_MAIN_INSTRUCTION(IST_PushC, 0, 1, 0);
-ADD_MAIN_INSTRUCTION(IST_Add, localVarStart + 0, localVarStart + 0, exprStart + 0);
-ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+ADD_MAIN_INSTRUCTION(IST_Add, localVarStart + 0, localVarStart + 0, 1);
 // if ($i < 10)
-ADD_MAIN_INSTRUCTION(IST_PushC, 0, 2, 0);
-ADD_MAIN_INSTRUCTION(IST_Less, 6, localVarStart + 0, 5);
-ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 2, 6);
+ADD_MAIN_INSTRUCTION(IST_Less, -1, localVarStart + 0, 2);
+ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 2, -1);
 // continue
 ADD_MAIN_INSTRUCTION(IST_Jmp, 0, 2, 0);
 // break
 ADD_MAIN_INSTRUCTION(IST_Jmp, 0, 2, 0);
 // for end
-ADD_MAIN_INSTRUCTION(IST_Jmp, 0, -8, 0);
+ADD_MAIN_INSTRUCTION(IST_Jmp, 0, -5, 0);
 // break
 ADD_MAIN_INSTRUCTION(IST_Jmp, 0, 2, 0);
 // for end
-ADD_MAIN_INSTRUCTION(IST_Jmp, 0, -10, 0);
+ADD_MAIN_INSTRUCTION(IST_Jmp, 0, -7, 0);
 // for
 // $j = 0
 ADD_MAIN_INSTRUCTION(IST_MovC, localVarStart + 1, 3, 0);
-ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
 // $j < $i
-ADD_MAIN_INSTRUCTION(IST_Less, 5, localVarStart + 1, localVarStart + 0);
-ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 11, 5);
+ADD_MAIN_INSTRUCTION(IST_Less, exprStart + 0, localVarStart + 1, localVarStart + 0);
+ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 9, exprStart + 0);
 // $x = put_string($j, "\n")
-ADD_MAIN_INSTRUCTION(IST_PushC, 0, 4, 0);
-ADD_MAIN_INSTRUCTION(IST_PushRef, 0, -(exprStart + 1) + (localVarStart + 2), 0);
+ADD_MAIN_INSTRUCTION(IST_PushRef, 0, -(exprStart + 0) + (localVarStart + 2), 0);
 ADD_MAIN_INSTRUCTION(IST_Push, 0, localVarStart + 1, 0);
-ADD_MAIN_INSTRUCTION(IST_Push, 0, exprStart + 0, 0);
+ADD_MAIN_INSTRUCTION(IST_PushC, 0, 4, 0);
 ADD_MAIN_INSTRUCTION(IST_PutString, 0, 2, 0);
 ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
 // $j = $j + 1
-ADD_MAIN_INSTRUCTION(IST_PushC, 0, 5, 0);
-ADD_MAIN_INSTRUCTION(IST_Add, localVarStart + 1, localVarStart + 1, exprStart + 0);
-ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+ADD_MAIN_INSTRUCTION(IST_Add, localVarStart + 1, localVarStart + 1, 5);
 // for end
-ADD_MAIN_INSTRUCTION(IST_Jmp, 0, -11, 0);
+ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+ADD_MAIN_INSTRUCTION(IST_Jmp, 0, -9, 0);
 // end
 ADD_MAIN_INSTRUCTION(IST_Nullify, 0, -1, 0);
 ADD_MAIN_INSTRUCTION(IST_Return, 0, 0, 0);
@@ -719,22 +691,18 @@ ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 0, 0);
 ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 1, 0);
 // $i = 10
 ADD_MAIN_INSTRUCTION(IST_MovC, localVarStart + 0, 0, 0);
-ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
 // while ($i)
 ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 5, localVarStart + 0);
 // $i = $i - 1
-ADD_MAIN_INSTRUCTION(IST_PushC, 0, 1, 0);
-ADD_MAIN_INSTRUCTION(IST_Subtract, localVarStart + 0, localVarStart + 0, exprStart + 0);
-ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+ADD_MAIN_INSTRUCTION(IST_Subtract, localVarStart + 0, localVarStart + 0, 1);
 // while end
 ADD_MAIN_INSTRUCTION(IST_Jmp, 0, -4, 0);
 // while ($i <= 10)
-ADD_MAIN_INSTRUCTION(IST_PushC, 0, 2, 0);
-ADD_MAIN_INSTRUCTION(IST_LessEq, 4, localVarStart + 0, 3);
-ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 7, 4);
+ADD_MAIN_INSTRUCTION(IST_LessEq, -1, localVarStart + 0, 2);
+ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 7, -1);
 // if (true)
-ADD_MAIN_INSTRUCTION(IST_PushC, 0, 3, 0);
-ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 4, 3);
+ADD_MAIN_INSTRUCTION(IST_MovC, -1, 3, 0);
+ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 4, -1);
 // $i = $i + 5
 ADD_MAIN_INSTRUCTION(IST_PushC, 0, 4, 0);
 ADD_MAIN_INSTRUCTION(IST_Add, localVarStart+ 0, localVarStart + 0, exprStart + 0);
@@ -758,10 +726,8 @@ ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 0, 0);
 ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 1, 0);
 // $a = 2
 ADD_MAIN_INSTRUCTION(IST_MovC, localVarStart + 0, 2, 0);
-ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
 // $x = 1
 ADD_MAIN_INSTRUCTION(IST_MovC, localVarStart + 1, 3, 0);
-ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
 // $res = dummy($x, $a)
 ADD_MAIN_INSTRUCTION(IST_PushRef, 0, -(exprStart + 0) + (localVarStart + 2), 0);
 ADD_MAIN_INSTRUCTION(IST_Push, 0, localVarStart + 1, 0);
@@ -774,11 +740,11 @@ ADD_MAIN_INSTRUCTION(IST_Call, 0, 0, 0);
 ADD_MAIN_INSTRUCTION(IST_Reserve, 0, 1, 0);
 ADD_MAIN_INSTRUCTION(IST_Push, 0, localVarStart + 0, 0);
 ADD_MAIN_INSTRUCTION(IST_Call, 0, 1, 0);
-ADD_MAIN_INSTRUCTION(IST_Add, exprStart + 2, exprStart + 0, exprStart + 1);
+ADD_MAIN_INSTRUCTION(IST_Add, exprStart + 0, exprStart + 0, exprStart + 1);
 ADD_MAIN_INSTRUCTION(IST_Reserve, 0, 1, 0);
 ADD_MAIN_INSTRUCTION(IST_PushC, 0, 0, 0);
 ADD_MAIN_INSTRUCTION(IST_Call, 0, 1, 0);
-ADD_MAIN_INSTRUCTION(IST_Add, localVarStart + 2, exprStart + 2, exprStart + 3);
+ADD_MAIN_INSTRUCTION(IST_Add, localVarStart + 2, exprStart + 0, exprStart + 2);
 ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
 // end
 ADD_MAIN_INSTRUCTION(IST_Nullify, 0, -1, 0);
@@ -789,8 +755,7 @@ ADD_MAIN_INSTRUCTION(IST_Return, 0, 0, 0);
 exprStart = localVarStart + 0;
 // begin
 // return 1
-ADD_FUNC_INSTRUCTION(IST_PushC, 0, 1, 0);
-ADD_FUNC_INSTRUCTION(IST_Mov, -1, 2, 0);
+ADD_FUNC_INSTRUCTION(IST_MovC, -1, 1, 0);
 ADD_FUNC_INSTRUCTION(IST_Return, 0, 0, 0);
 // end
 ADD_FUNC_INSTRUCTION(IST_Nullify, 0, -1, 0);
@@ -801,7 +766,6 @@ exprStart = localVarStart + 0;
 // begin
 // $x = $x * $x
 ADD_FUNC_INSTRUCTION(IST_Multiply, -1, -1, -1);
-ADD_FUNC_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
 // return $x
 ADD_FUNC_INSTRUCTION(IST_Mov, -2, -1, 0);
 ADD_FUNC_INSTRUCTION(IST_Return, 0, 1, 0);
