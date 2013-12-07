@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <stdarg.h>
 #include <assert.h>
+#include <signal.h>
 
 typedef void (*TestEP)();
 
@@ -26,7 +27,8 @@ typedef enum
     None        = 0,
     NotPassed  = 1,
     VerboseOut  = 2,
-    OnlyFailed  = 4
+    OnlyFailed  = 4,
+    BreakOnFail  = 8
 } TestFlags;
 
 static inline void printfc(uint8_t color, uint8_t style, const char *fmt, ...)
@@ -81,6 +83,9 @@ static inline void testResult(uint8_t result, const char *testName, const char *
             printf("Test at %s:%u failed!\n\t%s\n\n", file, line, expr);
         }
         testCountFailed++;
+        if (testFlags & BreakOnFail) {
+            raise(SIGINT);
+        }
     }
 }
 

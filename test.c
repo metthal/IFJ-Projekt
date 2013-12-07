@@ -17,7 +17,7 @@ TEST_SUITE(ParserTests)
 int main(int argc, char **argv)
 {
     int32_t opt;
-    while ((opt = getopt(argc, argv, "hfv")) != -1)
+    while ((opt = getopt(argc, argv, "hfvb")) != -1)
     {
         switch (opt) {
             case 'h':
@@ -27,6 +27,7 @@ int main(int argc, char **argv)
                 printf("    -f                     Don't show passed tests\n");
                 printf("    -ff                    Show only failed tests\n");
                 printf("    -v                     Verbose output\n");
+                printf("    -b                     SIGINT on failed test.\n");
                 return 0;
             case 'f':
                 if (testFlags & NotPassed) {
@@ -37,6 +38,9 @@ int main(int argc, char **argv)
                 break;
             case 'v':
                 testFlags |= VerboseOut;
+                break;
+            case 'b':
+                testFlags |= BreakOnFail;
                 break;
             default:
                 return 1;
