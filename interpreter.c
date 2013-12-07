@@ -665,7 +665,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                             break;
 
                         case VT_String: {
-                            uint8_t tmp = stringCompare(&aVal->data.s, &bVal->data.s) == -1;
+                            uint8_t tmp = stringCompare(&aVal->data.s, &bVal->data.s) < 0;
                             deleteValue(resVal);
                             resVal->data.b = tmp;
                             resVal->type = VT_Bool;
@@ -755,7 +755,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                             break;
 
                         case VT_String: {
-                            uint8_t tmp = stringCompare(&aVal->data.s, &bVal->data.s) == 1;
+                            uint8_t tmp = stringCompare(&aVal->data.s, &bVal->data.s) > 0;
                             deleteValue(resVal);
                             resVal->data.b = tmp;
                             resVal->type = VT_Bool;
