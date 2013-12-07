@@ -377,6 +377,7 @@ uint8_t reduce(ExprToken *topTerm)
 
                 generateInstruction(IST_Not, ISM_NoConst, notOperator->offset, operand->offset, notCount & 1); // same as notCount % 2
                 notOperator->subtype = NonConst;
+                lastResultInstIndex = vectorSize(instructions) - 1;
             }
             else {
                 Value *constVal = vectorAt(constantsTable, operand->offset);
@@ -392,7 +393,6 @@ uint8_t reduce(ExprToken *topTerm)
                 return 0;
 
             notOperator->type = NonTerminal;
-            lastResultInstIndex = vectorSize(instructions) - 1;
             vectorPopNExprToken(exprVector, notCount);
             break;
         }

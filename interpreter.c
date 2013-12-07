@@ -578,8 +578,13 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                         case VT_Bool:
                             resVal->data.b = aVal->data.b == bVal->data.b;
                             resVal->type = VT_Bool;
-
                             break;
+
+                        case VT_Null:
+                            resVal->data.b = 1;
+                            resVal->type = VT_Bool;
+                            break;
+
                         default:
                             resVal->type = VT_Bool;
                             resVal->data.b = 0;
@@ -624,12 +629,12 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                         case VT_Bool:
                             resVal->data.b = aVal->data.b != bVal->data.b;
                             resVal->type = VT_Bool;
-
                             break;
+
                         default:
-                        resVal->type = VT_Bool;
-                        resVal->data.b = 0;
-                        break;
+                            resVal->type = VT_Bool;
+                            resVal->data.b = 0;
+                            break;
                     }
 
                 }
