@@ -691,24 +691,25 @@ ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 0, 0);
 ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 1, 0);
 // $i = 10
 ADD_MAIN_INSTRUCTION(IST_MovC, localVarStart + 0, 0, 0);
-// while ($i)
-ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 5, localVarStart + 0);
+// while begin
+ADD_MAIN_INSTRUCTION(IST_Jmp, 0, 2, 0);
 // $i = $i - 1
 ADD_MAIN_INSTRUCTION(IST_Subtract, localVarStart + 0, localVarStart + 0, 1);
-// while end
-ADD_MAIN_INSTRUCTION(IST_Jmp, 0, -4, 0);
-// while ($i <= 10)
-ADD_MAIN_INSTRUCTION(IST_LessEq, -1, localVarStart + 0, 2);
-ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 7, -1);
+// while condition ($i) and end
+ADD_MAIN_INSTRUCTION(IST_Mov, -1, 2, 0);
+ADD_MAIN_INSTRUCTION(IST_Jmpnz, exprStart, -2, -1);
+// while begin
+ADD_MAIN_INSTRUCTION(IST_Jmp, 0, 5, 0);
 // if (true)
-ADD_MAIN_INSTRUCTION(IST_MovC, -1, 3, 0);
-ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 4, -1);
+ADD_MAIN_INSTRUCTION(IST_MovC, -1, 2, 0);
+ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 3, -1);
 // $i = $i + 5
-ADD_MAIN_INSTRUCTION(IST_PushC, 0, 4, 0);
-ADD_MAIN_INSTRUCTION(IST_Add, localVarStart+ 0, localVarStart + 0, exprStart + 0);
+ADD_MAIN_INSTRUCTION(IST_Add, localVarStart+ 0, localVarStart + 0, 3);
 ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
+// while condition ($i <= 10)
+ADD_MAIN_INSTRUCTION(IST_LessEq, -1, localVarStart + 0, 4);
 // while end
-ADD_MAIN_INSTRUCTION(IST_Jmp, 0, -8, 0);
+ADD_MAIN_INSTRUCTION(IST_Jmpnz, exprStart, -5, -1);
 // end
 ADD_MAIN_INSTRUCTION(IST_Nullify, 0, -1, 0);
 ADD_MAIN_INSTRUCTION(IST_Return, 0, 0, 0);

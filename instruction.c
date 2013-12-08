@@ -119,7 +119,6 @@ uint32_t generateCall(const Symbol *symbol, BuiltinCode builtinCode, uint32_t pa
             break;
 
         default:
-            // TODO will be paramCount equal or greater when too much?
             if (paramCount != getBuiltinParamCount(builtinCode))
                 badParamCount = 1;
 

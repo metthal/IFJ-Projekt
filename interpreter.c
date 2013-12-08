@@ -57,7 +57,7 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
             }
 
             case IST_MovC:
-                resVal = vectorFastAtValue(stack, stackPtr + instructionPtr->res);
+                fillResValuePtr(vectorFastAtValue(stack, stackPtr), &resVal, instructionPtr->res);
                 resVal->data.ref = instructionPtr->a;
                 resVal->type = VT_ConstReference;
                 break;
@@ -70,6 +70,12 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 if (!fillConstValuePtr(vectorFastAtValue(stack, stackPtr), cCtIt, &bVal,
                         instructionPtr->b))
                     break;
+
+                // Need second dereference if constant, as function result can be
+                // referenced through StrongReference
+                if (bVal->type == VT_ConstReference) {
+                    bVal = cCtIt + bVal->data.ref;
+                }
 
                 uint32_t tempRes = instructionPtr->res;
                 if (valueToBool(bVal))
@@ -91,6 +97,12 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 if (!fillConstValuePtr(vectorFastAtValue(stack, stackPtr), cCtIt, &bVal,
                         instructionPtr->b))
                     break;
+
+                // Need second dereference if constant, as function result can be
+                // referenced through StrongReference
+                if (bVal->type == VT_ConstReference) {
+                    bVal = cCtIt + bVal->data.ref;
+                }
 
                 uint32_t tempRes = instructionPtr->res;
                 if (valueToBool(bVal))

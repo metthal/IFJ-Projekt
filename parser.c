@@ -59,9 +59,6 @@ static const uint32_t stackFrameReserved = 2;
 static uint8_t secondRun = 0;
 static uint8_t cycleScope = 0;
 
-// TODO Test all jumping - if, elseif, else, for, while, break, continue...
-// TODO ptr1 in cycles might be called loop, ptr2 endJump
-
 void parse(Vector *tokenVector, uint8_t testRun)
 {
     tokens = tokenVector;
@@ -940,8 +937,6 @@ int64_t generalExpr(uint8_t skip, int64_t resultOffset, uint32_t *maxStackPosUse
     }
     else {
         // Skips expression.
-        // TODO decide if needed (for full expression check)
-        // ConstTokenVectorIterator backup = tokensIt;
         int leftBrackets = 0;
         while (1) {
             switch (tokensIt->type) {
@@ -958,7 +953,6 @@ int64_t generalExpr(uint8_t skip, int64_t resultOffset, uint32_t *maxStackPosUse
                 case STT_Php:
                 case STT_EOF:
                     setError(ERR_Syntax);
-                    // tokensIt = backup;
                     return 0;
 
                 case STT_Keyword:
@@ -969,7 +963,6 @@ int64_t generalExpr(uint8_t skip, int64_t resultOffset, uint32_t *maxStackPosUse
                         // Default is error
                         default:
                             setError(ERR_Syntax);
-                            // tokensIt = backup;
                             return 0;
                     }
                     break;

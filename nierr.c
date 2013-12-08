@@ -120,7 +120,7 @@ void printErrorF(const char *str)
                 niErr.file, niErr.line, niErr.fun, str);
     }
 
-    if (niErr.type == ERR_Syntax && (tokensIt != NULL)) {
+    if ((niErr.type == ERR_Syntax || niErr.type == ERR_UndefVariable) && (tokensIt != NULL)) {
         fprintf(stderr, "Tokens around error:\n");
         ConstTokenVectorIterator beginIt = tokensIt;
         ConstTokenVectorIterator endIt = tokensIt;
