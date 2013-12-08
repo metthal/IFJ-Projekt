@@ -682,6 +682,11 @@ void scannerFillToken(Token *token)
                         break;
                     }
                     default: {
+                        if (symbol < MIN_STRING_CHAR_ASCII) {
+                            setError(ERR_LexFile);
+                            return;
+                        }
+
                         state = SS_String;
                         stringPush(tokenStr, '\\');
                         stringPush(tokenStr, symbol);
