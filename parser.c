@@ -54,7 +54,7 @@ static Context mainContext;
 Context *currentContext;
 
 // Space reserved at stack frame for Stack and Instruction Pointers
-static const uint32_t stackFrameReserved = 2;
+static const uint32_t stackFrameReserved = 3;
 
 static uint8_t secondRun = 0;
 static uint8_t cycleScope = 0;
@@ -300,7 +300,7 @@ void func()
                 vectorAt(addressTable, symbol->data->func.functionAddressIndex);
         (*cipvi) = (InstructionPtr)((size_t)vectorSize(functionsInstructions));
 
-        // Instruction to reserve stack space for locals
+        // Instruction to reserve stack space for condition and locals
         if (currentContext->localVariableCount > 0)
             generateInstruction(IST_Reserve, ISM_NoConst, 0, currentContext->localVariableCount, 0);
     }
@@ -920,7 +920,7 @@ uint8_t forStmt2(uint32_t *cond)
 
         default:
             // Rule 26
-            *cond = generalExpr(0, 0, NULL);
+            *cond = generalExpr(0, stackFrameReserved - 1, NULL);
             if (getError())
                 break;
 
@@ -996,8 +996,8 @@ int64_t condition(uint8_t skip)
 
     tokensIt++;
 
-    // Use return value as temporary place for result of condition
-    int64_t exprRes = generalExpr(skip, -currentContext->argumentCount - 1, NULL);
+    // Use dedicated place for result of condition
+    int64_t exprRes = generalExpr(skip, stackFrameReserved - 1, NULL);
     if (getError())
         return 0;
 

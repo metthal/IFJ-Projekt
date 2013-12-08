@@ -1,0 +1,345 @@
+<?php
+
+function isnan($x)
+{
+    return false;
+}
+
+function isinf($x)
+{
+    return false;
+}
+
+function m_equal($x, $y)
+{
+    $DBL_EPSILON = 2.2204460492503131e-16;
+    $x = doubleval($x);
+    $y = doubleval($y);
+    $absX = m_abs($x);
+    $absY = m_abs($y);
+    if ($absX < $absY) {$smaller = $absX;}
+    else {$smaller = $absY;} 
+    $smaller = $smaller * $DBL_EPSILON;
+    return m_abs($x-$y) <= $smaller;
+}
+
+function m_signOf($x){
+    $x = doubleval($x);
+    if ($x < 0.0) { return 0.0-1.0; }
+    elseif ($x > 0.0) { return 1.0; }
+    else { return 0.0; } 
+}
+
+function m_abs($x)
+{
+    $x = doubleval($x);
+    if ($x >= 0.0) { return $x; }
+    else {return 0.0 - $x;}
+}
+
+function m_modulo($x, $y)
+{
+    return $x - intval($x / $y) * $y;
+}
+
+//Pouzita takzvana babylonska metoda, odvoditelna z Newtonovej.
+//Velmi dobre konverguje - pocet platnych cislic sa v kazdom kroku
+//priblizne zdvojnasobuje
+function m_sqrt($x, $eps)
+{
+    $NAN = 0.0;
+    $INFINITY = 1.0e100;
+    if(isnan($x)) {return $NAN;}
+    if(isinf($x)) {return $INFINITY;}
+    if(m_equal($x, 0.0)) {return 0.0;}
+    if(m_equal($x, 1.0)) {return 1.0;}
+    if($x < 0.0) {return $NAN;}
+
+    $nextMem = 1.0;
+    $y = $nextMem;
+    $nextMem = ($y + $x/$y) * 0.5;
+    while(m_abs($nextMem - $y) > m_abs($eps*$y))
+    {
+        $y = $nextMem;
+        $nextMem = ($y + $x/$y) * 0.5;
+    }
+    return $y;
+}
+
+//Matematicka implementacia binarneho logaritmu je
+//pomerne pomala. Pri pouziti znalosti o zapise
+//desatinneho cisla by bolo mozne dosiahnut ovela
+//lepsiu efektivitu.
+function m_log2($x, $eps)
+{
+    $NAN = 0.0;
+    $INFINITY = 1.0e100;
+    if(isnan($x)) {return $NAN;}
+    if(isinf($x)) {return $INFINITY;}
+    if($x <= 0.0) {return $NAN;}
+    if(m_equal($x, 1.0)) {return 0.0;}
+
+    $y = 0.0;
+    $nextMem = 0.0;
+    $fraction = 1.0;
+    //najdi celociselnu cast logaritmu
+    while($x >= 2.0){
+        $x = $x * 0.5;
+        $y = $y + 1.0;
+    }
+    while($x < 1.0){
+        $x = $x * 2.0;
+        $y = $y + 1.0;
+    }
+
+    //najdi logaritmus desatinnej casti ( x patri <1,2) )
+    $nextMem = 0.0;
+    $y = $y + $nextMem;
+
+    //skontroluj, ci x == 1 (nasledoval by nekonecny cyklus)
+    if(m_equal($x, 1.0)) {return $y;}
+
+    //umocnuj x pokym nie je z intervalu <2,4)
+    while($x < 2.0){
+        $x = $x * $x;
+        $fraction = $fraction * 0.5;
+    }
+    $nextMem = $fraction;
+
+    //vrat x do intervalu <1,2)
+    $x = $x * 0.5;
+    while(m_abs($nextMem) > m_abs($eps * $y))
+    {
+        $y = $y + $nextMem;
+
+        //skontroluj, ci x == 1 (nasledoval by nekonecny cyklus)
+        if(m_equal($x, 1.0)) {return $y;}
+
+        //umocnuj x pokym nie je z intervalu <2,4)
+        while($x < 2.0){
+            $x = $x * $x;
+            $fraction = $fraction * 0.5;
+        }
+        $nextMem = $fraction;
+
+        //vrat x do intervalu <1,2)
+        $x = $x * 0.5;
+    }
+
+    return $y;
+}
+
+function m_ln($x, $eps)
+{
+    $NAN = 0.0;
+    $INFINITY = 1.0e100;
+    $IZP_E = 2.7182818284590452354; // e
+    if(isnan($x)) {return $NAN;}
+    if(isinf($x)) {return $INFINITY;}
+    if($x <= 0.0) {return $NAN;}
+    if(m_equal($x, 1)) {return 0;}
+
+    //x treba upravit do intervalu konvergencie
+    //rozvoj konverguje v rozsahu (0, 2) a najlepsie
+    //okolo bodu x = 1
+    $add = 0;
+    while($x > 1.5){
+        $x = $x / $IZP_E;
+        $add = $add + 1.0;
+    }
+    while($x < 0.5){
+        $x = $x * $IZP_E;
+        $add = $add - 1.0;
+    }
+
+    $y = 0;
+    $b = ($x-1)/($x+1);
+    $a = $b*$b;
+    $nextMem = 0;
+    $n = 1.0;
+    $y = $y + $nextMem;
+    $nextMem = $b / $n;
+    $b = $b * $a;
+    $n = $n + 2.0;
+    while(m_abs($nextMem) > m_abs($eps * $y))
+    {
+        $y = $y + $nextMem;
+        $nextMem = $b / $n;
+        $b = $b * $a;
+        $n = $n + 2.0;
+    }
+
+    return (2 * $y) + $add;
+}
+
+function m_pow($x, $exp, $eps)
+{
+    $NAN = 0.0;
+    $INFINITY = 1.0e100;
+    $IZP_E = 2.7182818284590452354; // e
+    if(m_equal($exp, 0.0)) {return 1;}
+    if(isnan($x)) {return $NAN;}
+    if(m_equal($x, 1.0)) {return 1;}
+    if(isnan($exp)) {return $NAN;}
+    if(m_equal($x, 0.0)){
+        if($exp < 0.0) {return $INFINITY;}
+        else {return 0;}
+    }
+    if($exp === $INFINITY){
+        if(m_equal($x, 0-1)) {return 1;}
+        else {return $INFINITY;}
+    }
+    if($exp === 0-$INFINITY){
+        if($x < 0.0 && !isinf($x)) {return $NAN;}
+        else {return 0;}
+    }
+    if(m_equal($exp, 1)) {return $x;}
+    if(isinf($x)){
+        if($exp < 0.0) {return 0.0;}
+        else {return $INFINITY;}
+    }
+
+    $neg = false;
+    if($x < 0.0){
+        //test na celociselnost exponentu
+        //ak je cislo rovne zaokruhlenemu cislu, tak je cele
+        if(m_equal($exp, intval($exp+m_signOf($exp)*0.5))){
+            $x = 0 - $x;
+            $neg = m_modulo(intval($exp), 2);
+        }
+        else { return $NAN; }
+    }
+
+    //vypocet exponencialnej funckie
+    $multiplier = 1.0;
+    $exp = $exp * m_ln($x, $eps);
+
+    //vypocet celej casti exponentu
+    while($exp > 1.0){
+        $multiplier = $multiplier * $IZP_E;
+        if(isinf($multiplier)) {return $INFINITY;}
+        $exp = $exp - 1;
+    }
+    while($exp < 0-1.0){
+        $multiplier = $multiplier / $IZP_E;
+        if($multiplier === 0) { return 0; }
+        $exp = $exp + 1;
+    }
+
+    //dopocitanie desatinnej casti pomocou rozvoja
+    $y = 0.0;
+    $nextMem = 1.0;
+    $n = 1.0;
+    
+    $y = $y + $nextMem;
+    $nextMem = $nextMem * ($exp / $n);
+    $n = $n + 1;
+    while(m_abs($nextMem) > m_abs($eps * $y))
+    {
+        $y = $y + $nextMem;
+        $nextMem = $nextMem * ($exp / $n);
+        $n = $n + 1;
+    }
+
+    $y = $y * $multiplier;
+    
+    if ($neg) {return 0 - $y;}
+    else {return $y;}
+}
+
+function m_atan($x, $eps)
+{
+    $NAN = 0.0;
+    $INFINITY = 1.0e100;
+    $IZP_PI_2 = 1.57079632679489661923; // pi/2
+    $IZP_PI_4 = 0.78539816339744830962; // pi/4
+    if(isnan($x)) {return $NAN;}
+    if(m_equal($x, 0.0)) {return 0;}
+    if(m_equal($x, 1.0)) {return $IZP_PI_4;}
+    if(m_equal($x, 0.0-1)) {return 0-$IZP_PI_4;}
+
+    $y = 0;
+    $n = 1.0;
+
+    //Taylorov rozvoj je dostatocne presny, ale pre male X
+    //Zvolena hranica je 0.2 - konverguje rozumne rychlo
+    //Pre x >= 5 sa pouzije vztah atan(x) = PI_2 - atan(1/x)
+    //Pre x < 5 je potrebne dostat x do intervalu (0; 0,2)
+    //a to dosiahnem pomocou atan(x) = 2*atan(x/(1+sqrt(1+x*x)))
+
+    if(m_abs($x) < 5.0){
+        $multiplier = 1.0;
+        while(m_abs($x) > 0.2){
+            $x = $x/(1.0 + m_sqrt(1.0+ $x * $x, $eps));
+            $multiplier = $multiplier * 2.0;
+        }
+
+        $sqrX = $x * $x;
+        $a = $x;
+        $nextMem = $x;
+
+        //opravit rozvoj
+        $y = $y + $nextMem;
+        $a = $a * (0 - $sqrX);
+        $n = $n + 2.0;
+        $nextMem = $a / $n;
+        while(m_abs($nextMem) > m_abs($eps*$y))
+        {
+            $y = $y + $nextMem;
+            $a = $a * (0 - $sqrX);
+            $n = $n + 2.0;
+            $nextMem = $a / $n;
+        }
+
+        $y = $multiplier * $y;
+    }
+    else{
+        $sqrX = $x * $x;
+        $a = 0-$x;
+        $nextMem = m_signOf($x) * $IZP_PI_2 - 1.0 / $x;
+
+        $y = $y + $nextMem;
+        $a = $a * (0 - $sqrX);
+        $n = $n + 2.0;
+        $nextMem = 1.0 / ($n * $a);
+        while(m_abs($nextMem) > m_abs($eps * $y))
+        {
+            $y = $y + $nextMem;
+            $a = $a * (0 - $sqrX);
+            $n = $n + 2.0;
+            $nextMem = 1.0 / ($n * $a);
+        }
+    }
+
+    return $y;
+}
+
+function m_argsinh($x, $eps)
+{
+    $NAN = 0.0;
+    $INFINITY = 1.0e100;
+    $DBL_MAX = 1.79769e+308;
+    //pre male x, ktore by sa nezmestili do presnosti double
+    //vyuzijem vztahu argsinh(x) ~ x
+    if(m_equal($x + 1.0, 1.0)) {
+        return $x;
+    }
+
+    //pre velke x, ktore by naopak vracali po umocneni nekonecno
+    //zanedbam odmocninu s pripocitanim 1 a pocitam priamo logaritmus
+    if($x > m_sqrt($DBL_MAX, $eps)){ // v buducnosti moze byt konstanta
+        return m_ln( 2 * $x, $eps);
+    }
+    else {
+        return m_ln( $x + m_sqrt($x*$x + 1, $eps), $eps );
+    }
+}
+
+$eps = 1e-11;
+$x = put_string(m_sqrt(4.0, $eps), "\n");
+$x = put_string(m_ln(30.0, $eps), "\n");
+$x = put_string(m_pow(1.0, 10.0, $eps), "\n");
+$x = put_string(m_pow(10.0, 3.0, $eps), "\n");
+$x = put_string(m_atan(0.0-2.0, $eps), "\n");
+$x = put_string(m_atan(10.0, $eps), "\n");
+$x = put_string(m_argsinh(10.0, $eps), "\n");

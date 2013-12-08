@@ -71,12 +71,6 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                         instructionPtr->b))
                     break;
 
-                // Need second dereference if constant, as function result can be
-                // referenced through StrongReference
-                if (bVal->type == VT_ConstReference) {
-                    bVal = cCtIt + bVal->data.ref;
-                }
-
                 uint32_t tempRes = instructionPtr->res;
                 if (valueToBool(bVal))
                     instructionPtr++;
@@ -97,12 +91,6 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 if (!fillConstValuePtr(vectorFastAtValue(stack, stackPtr), cCtIt, &bVal,
                         instructionPtr->b))
                     break;
-
-                // Need second dereference if constant, as function result can be
-                // referenced through StrongReference
-                if (bVal->type == VT_ConstReference) {
-                    bVal = cCtIt + bVal->data.ref;
-                }
 
                 uint32_t tempRes = instructionPtr->res;
                 if (valueToBool(bVal))
@@ -182,6 +170,9 @@ void interpretationLoop(const Instruction *firstInstruction, const Vector *const
                 val = vectorPushDefaultValue(stack);
                 val->type = VT_InstructionPtr;
                 val->data.ip = instructionPtr + 1;
+
+                // Condition reserved
+                vectorPushDefaultValue(stack);
 
                 instructionPtr = *((Instruction**)vectorAtConst(addressTable, instructionPtr->a));
                 continue;
