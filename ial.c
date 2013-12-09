@@ -31,7 +31,8 @@ uint32_t symbolTableHash(SymbolTable *st, const String *key)
 {
     uint32_t i, hash = 0;
     for ( i = 0; i < key->length - 1; ++i ) {
-        hash = 33 * hash + (unsigned char)key->data[i];
+        // Bernstein aka Djb2 hash function
+        hash = ((hash << 5) + hash) + (unsigned char)key->data[i];
     }
     if (st) {
         if ( hash > st->size ) {
@@ -291,11 +292,11 @@ int64_t stringSubstrSearchSSO(const char *haystack, uint32_t haystackLen, const 
     return _stringSubstrSearchSSO(haystack, haystackLen, needle, needleLen, offset);
 }
 
-static inline void _stringCharSortMerge(char arr[], char temp[], uint32_t length)
+static inline void _stringCharSortMerge(char arr[], char temp[], uint32_t offset, uint32_t length)
 {
     uint32_t leftIndex = 0,
-        leftMax = length / 2,
-        rightIndex = length / 2,
+        leftMax = offset,
+        rightIndex = offset,
         rightMax = length;
 
     while ((leftIndex < leftMax) && (rightIndex < rightMax)) {
@@ -328,7 +329,7 @@ void stringCharSortDivide(char arr[], char temp[], uint32_t length)
         stringCharSortDivide(temp + offset, arr + offset, length - offset);
     }
 
-    _stringCharSortMerge(arr, temp, length);
+    _stringCharSortMerge(arr, temp, offset, length);
 }
 
 void stringCharSort(const String *s)
