@@ -364,7 +364,8 @@ TEST_RESULT("sources/emptyfail.ifj", "missing PHP tag", 0, 0, ERR_Syntax, 0, 0);
 
 // Parser - empty
 // expected instructions
-exprStart = 2;
+localVarStart = 3;
+exprStart = localVarStart + 0;
 ADD_MAIN_INSTRUCTION(IST_Reserve, 0, exprStart, 0);
 ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 0, 0);
 ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 1, 0);
@@ -376,8 +377,8 @@ TEST_RESULT("sources/empty.ifj", "empty", 0, 0, ERR_None, 0, 0);
 
 // Parser - Assign
 // expected instructions
-localVarStart = 2;
-exprStart = 4;
+localVarStart = 3;
+exprStart = localVarStart + 2;
 ADD_MAIN_INSTRUCTION(IST_Reserve, 0, exprStart, 0);
 ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 0, 0);
 ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 1, 0);
@@ -394,7 +395,7 @@ TEST_RESULT("sources/assign.ifj", "assign", 0, 0, ERR_None, 1, 0);
 
 // Parser - expressions
 // expected instructions
-localVarStart = 2;
+localVarStart = 3;
 exprStart = localVarStart + 14;
 ADD_MAIN_INSTRUCTION(IST_Reserve, 0, exprStart, 0);
 ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 0, 0);
@@ -445,7 +446,7 @@ TEST_RESULT("sources/expr.ifj", "expressions", 0, 0, ERR_None, 3, 0);
 
 // Parser - function expr
 // expected instructions
-localVarStart = 2;
+localVarStart = 3;
 exprStart = localVarStart + 9;
 ADD_MAIN_INSTRUCTION(IST_Reserve, 0, exprStart, 0);
 ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 0, 0);
@@ -537,7 +538,7 @@ TEST_RESULT("sources/func_expr.ifj", "function expr", 0, 0, ERR_None, 4, 4);
 
 // Parser - precedence
 // expected instructions
-localVarStart = 2;
+localVarStart = 3;
 exprStart = localVarStart + 1;
 
 // begin
@@ -559,7 +560,7 @@ TEST_RESULT("sources/relop_precedence.ifj", "rel. op precedence", 0, 0, ERR_None
 
 // Parser - if-elseif-else
 // expected instructions
-localVarStart = 2;
+localVarStart = 3;
 exprStart = localVarStart + 4;
 
 // begin
@@ -574,15 +575,15 @@ ADD_MAIN_INSTRUCTION(IST_MovC, localVarStart + 0, 0, 0);
 ADD_MAIN_INSTRUCTION(IST_MovC, localVarStart + 1, 1, 0);
 
 // if ($a)
-ADD_MAIN_INSTRUCTION(IST_Mov, -1, localVarStart + 0, 0);
-ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 2, -1);
+ADD_MAIN_INSTRUCTION(IST_Mov, 2, localVarStart + 0, 0);
+ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 2, 2);
 
 // if ($a) end
 ADD_MAIN_INSTRUCTION(IST_Jmp, 0, 6, 0);
 
 // elseif ($b)
-ADD_MAIN_INSTRUCTION(IST_Mov, -1, localVarStart + 1, 0);
-ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 3, -1);
+ADD_MAIN_INSTRUCTION(IST_Mov, 2, localVarStart + 1, 0);
+ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 3, 2);
 
 // $c = true
 ADD_MAIN_INSTRUCTION(IST_MovC, localVarStart + 2, 2, 0);
@@ -595,29 +596,29 @@ ADD_MAIN_INSTRUCTION(IST_Jmp, 0, 2, 0);
 ADD_MAIN_INSTRUCTION(IST_Add, localVarStart + 0, localVarStart + 0, 3);
 
 // if ($a)
-ADD_MAIN_INSTRUCTION(IST_Mov, -1, localVarStart + 0, 0);
-ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 2, -1);
+ADD_MAIN_INSTRUCTION(IST_Mov, 2, localVarStart + 0, 0);
+ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 2, 2);
 
 // if ($a) end
 ADD_MAIN_INSTRUCTION(IST_Jmp, 0, 11, 0);
 
 // elseif ($c)
-ADD_MAIN_INSTRUCTION(IST_Mov, -1, localVarStart + 2, 0);
-ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 9, -1);
+ADD_MAIN_INSTRUCTION(IST_Mov, 2, localVarStart + 2, 0);
+ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 9, 2);
 
 // $c = false
 ADD_MAIN_INSTRUCTION(IST_MovC, localVarStart + 2, 4, 0);
 
 // if ($c)
-ADD_MAIN_INSTRUCTION(IST_Mov, -1, localVarStart + 2, 0);
-ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 2, -1);
+ADD_MAIN_INSTRUCTION(IST_Mov, 2, localVarStart + 2, 0);
+ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 2, 2);
 
 // if ($c) end
 ADD_MAIN_INSTRUCTION(IST_Jmp, 0, 5, 0);
 
 // elseif ($a)
-ADD_MAIN_INSTRUCTION(IST_Mov, -1, localVarStart + 0, 0);
-ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 2, -1);
+ADD_MAIN_INSTRUCTION(IST_Mov, 2, localVarStart + 0, 0);
+ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 2, 2);
 
 // elseif ($a) end
 ADD_MAIN_INSTRUCTION(IST_Jmp, 0, 2, 0);
@@ -639,11 +640,11 @@ TEST_RESULT("sources/if.ifj", "if-elseif-else", 0, 0, ERR_None, 7, 0);
 
 // Parser - for statement
 // expected instructions
-localVarStart = 2;
+localVarStart = 3;
 exprStart = localVarStart + 3;
 
 // begin
-ADD_MAIN_INSTRUCTION(IST_Reserve, 0, 5, 0);
+ADD_MAIN_INSTRUCTION(IST_Reserve, 0, exprStart, 0);
 ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 0, 0);
 ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 1, 0);
 // $i = 0
@@ -653,8 +654,8 @@ ADD_MAIN_INSTRUCTION(IST_MovC, localVarStart + 0, 0, 0);
 // $i = $i + 1
 ADD_MAIN_INSTRUCTION(IST_Add, localVarStart + 0, localVarStart + 0, 1);
 // if ($i < 10)
-ADD_MAIN_INSTRUCTION(IST_Less, -1, localVarStart + 0, 2);
-ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 2, -1);
+ADD_MAIN_INSTRUCTION(IST_Less, 2, localVarStart + 0, 2);
+ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 2, 2);
 // continue
 ADD_MAIN_INSTRUCTION(IST_Jmp, 0, 2, 0);
 // break
@@ -669,8 +670,8 @@ ADD_MAIN_INSTRUCTION(IST_Jmp, 0, -7, 0);
 // $j = 0
 ADD_MAIN_INSTRUCTION(IST_MovC, localVarStart + 1, 3, 0);
 // $j < $i
-ADD_MAIN_INSTRUCTION(IST_Less, exprStart + 0, localVarStart + 1, localVarStart + 0);
-ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 9, exprStart + 0);
+ADD_MAIN_INSTRUCTION(IST_Less, 2, localVarStart + 1, localVarStart + 0);
+ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 9, 2);
 // $x = put_string($j, "\n")
 ADD_MAIN_INSTRUCTION(IST_PushRef, 0, -(exprStart + 0) + (localVarStart + 2), 0);
 ADD_MAIN_INSTRUCTION(IST_Push, 0, localVarStart + 1, 0);
@@ -691,11 +692,11 @@ TEST_RESULT("sources/for.ifj", "for statement", 0, 0, ERR_None, 6, 0);
 
 // Parser - while statement
 // expected instructions
-localVarStart = 2;
+localVarStart = 3;
 exprStart = localVarStart + 1;
 
 // begin
-ADD_MAIN_INSTRUCTION(IST_Reserve, 0, 3, 0);
+ADD_MAIN_INSTRUCTION(IST_Reserve, 0, exprStart, 0);
 ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 0, 0);
 ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 1, 0);
 // $i = 10
@@ -705,20 +706,20 @@ ADD_MAIN_INSTRUCTION(IST_Jmp, 0, 2, 0);
 // $i = $i - 1
 ADD_MAIN_INSTRUCTION(IST_Subtract, localVarStart + 0, localVarStart + 0, 1);
 // while condition ($i) and end
-ADD_MAIN_INSTRUCTION(IST_Mov, -1, 2, 0);
-ADD_MAIN_INSTRUCTION(IST_Jmpnz, exprStart, -2, -1);
+ADD_MAIN_INSTRUCTION(IST_Mov, 2, localVarStart, 0);
+ADD_MAIN_INSTRUCTION(IST_Jmpnz, exprStart, -2, 2);
 // while begin
 ADD_MAIN_INSTRUCTION(IST_Jmp, 0, 5, 0);
 // if (true)
-ADD_MAIN_INSTRUCTION(IST_MovC, -1, 2, 0);
-ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 3, -1);
+ADD_MAIN_INSTRUCTION(IST_MovC, 2, 2, 0);
+ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 3, 2);
 // $i = $i + 5
 ADD_MAIN_INSTRUCTION(IST_Add, localVarStart+ 0, localVarStart + 0, 3);
 ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
 // while condition ($i <= 10)
-ADD_MAIN_INSTRUCTION(IST_LessEq, -1, localVarStart + 0, 4);
+ADD_MAIN_INSTRUCTION(IST_LessEq, 2, localVarStart + 0, 4);
 // while end
-ADD_MAIN_INSTRUCTION(IST_Jmpnz, exprStart, -5, -1);
+ADD_MAIN_INSTRUCTION(IST_Jmpnz, exprStart, -5, 2);
 // end
 ADD_MAIN_INSTRUCTION(IST_Nullify, 0, -1, 0);
 ADD_MAIN_INSTRUCTION(IST_Return, 0, 0, 0);
@@ -727,11 +728,11 @@ TEST_RESULT("sources/while.ifj", "while statement", 0, 0, ERR_None, 5, 0);
 
 // Parser - functions
 // expected instructions
-localVarStart = 2;
+localVarStart = 3;
 exprStart = localVarStart + 3;
 
 // begin
-ADD_MAIN_INSTRUCTION(IST_Reserve, 0, 5, 0);
+ADD_MAIN_INSTRUCTION(IST_Reserve, 0, exprStart, 0);
 ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 0, 0);
 ADD_MAIN_INSTRUCTION(IST_Nullify, 0, 1, 0);
 // $a = 2
