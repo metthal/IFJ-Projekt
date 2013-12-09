@@ -108,7 +108,7 @@ sablona
 \subsection{Merge sort}
 Na implementáciu radiaceho algoritmu sme využili Merge sort. Ide o radenie typu rozdeľuj a panuj (angl. divide and conquer), v našej implementácií stabilný algoritmus s časovou zložitosťou O(N log(N)). Princíp alogritmu je jednoduchý. Pole sa rozdelí na menšie podpolia (v našom prípade veľkosti 1). Následne sa po pároch spoja, tak aby výsledné pole bolo tiež zoradené.
 
-Naša implementácia je tzv. zhora-dolu (angl. top-down) s pomocným poľom o rovnakej veľkosti ako zdrojové pole. Tieto polia striedajú svoju funkciu, z jedného sa číta do druhého píše, čím sa odstráni potreba kopírovania medzivýsledku spať do zdrojového poľa. Toto sa ľahko uskutoční jednoduchou zámenou argumentou v rekurzívnom volaní funkcie. Celá logika našej funkcie stringCharSortDivide() spočíva teda v rozdelení zdrojového poľa rekurzívnym volaním (s vymenením zdrojovým a cieľovým poľom) na polovice v prípade že jeho veľkosť je vačšia než 2, a následným spojením týchto 2 polovíc, pri ktorom sa vždy vyberie prvok podľa váhy z danej poľovice.
+Naša implementácia je tzv. zhora-dolu (angl. top-down) s pomocným poľom o rovnakej veľkosti ako zdrojové pole. Tieto polia striedajú svoju funkciu, z jedného sa číta do druhého píše, čím sa odstráni potreba kopírovania medzivýsledku spať do zdrojového poľa. Toto sa ľahko uskutoční jednoduchou zámenou argumentou v rekurzívnom volaní funkcie. Celá logika našej funkcie stringCharSortDivide() spočíva teda v rozdelení zdrojového poľa rekurzívnym volaním (s vymenením zdrojovým a cieľovým poľom) na polovice v prípade že jeho veľkosť je vačšia než 2, a následným spojením týchto 2 polovíc, pri ktorom sa vždy vyberie prvok podľa váhy z danej polovice.
 
 % mozno obrazok sem dat?
 
@@ -118,7 +118,28 @@ HAHA.
 
 %=============================================================================
 \subsection{Hash table}
-HAHA.
+Hash tabuľka je typ abstraktnej dátovej štruktúry, ktorý implementuje operácie
+ nad prvkami identifikovanými unikátnymi kľúčmi. Vyznačuje sa najmä časovou
+ zložitosťou O(1).
+
+V našej implementácií používame hash funkciu djb2 (autor Bernstein). Ide o
+ pomerne jednoduchú a rýchlu funkciu, pričom vypočítaný hash ukladáme spolu so
+ záznamom v tabuľke pre zrychlénie rekalkulácie pozície záznamu v prípade
+ zmeny veľkosti tabuľky. Pri vyhľadavaní v tabuľke sa vypočíta hash z klúča,
+ urobí sa modulo podľa veľkosti tabuľky (zvyčajne mocnina 2 takže vcelku rýchla
+ operácia), pristúpi sa na daný prvok poľa kde sa zistí index záznamu (a v
+ prípade že nastala kolízia, iteruje sa cez odkaz na ďalší záznam), pričom vždy
+ sa musia porovnať porovnať klúče.
+
+Interne naša tabuľka používa vektor na ukladanie záznamov. Takáto implementácia
+ šetrí pamäť a zrýchľuje zmenu veľkosti tabuľky no nevýhodou je väčšia záťaž na
+ cache procesoru (taktiež operácia mazania záznamu by bola komplikovanejšia,
+ pokiaľ by sme ju implementovali). Pri kolízií uložíme do predošlého záznamu
+ odkaz na ďaľší záznam.
+
+Zmena veľkosti tabuľky sa deje pri záťaži 0,75. Zahodí sa staré pole indexov a
+ alokuje sa dvojnásobne väčšie. Následne sa postupne vkladajú všetky odkazy na
+ záznamy z vektora do tabuľky, príp. sa vložia ako odkaz cez existujúci záznam.
 
 % koniec dokumentace
 \end{document}
