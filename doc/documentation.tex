@@ -99,6 +99,27 @@ sablona
 \newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% IAL
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Algoritmy} \label{Algoritmy}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%=============================================================================
+\subsection{Merge sort}
+Na implementáciu radiaceho algoritmu sme využili Merge sort. Ide o radenie typu rozdeľuj a panuj (angl. divide and conquer), v našej implementácií stabilný algoritmus s časovou zložitosťou O(N log(N)). Princíp alogritmu je jednoduchý. Pole sa rozdelí na menšie podpolia (v našom prípade veľkosti 1). Následne sa po pároch spoja, tak aby výsledné pole bolo tiež zoradené.
+
+Naša implementácia je tzv. zhora-dolu (angl. top-down) s pomocným poľom o rovnakej veľkosti ako zdrojové pole. Tieto polia striedajú svoju funkciu, z jedného sa číta do druhého píše, čím sa odstráni potreba kopírovania medzivýsledku spať do zdrojového poľa. Toto sa ľahko uskutoční jednoduchou zámenou argumentou v rekurzívnom volaní funkcie. Celá logika našej funkcie stringCharSortDivide() spočíva teda v rozdelení zdrojového poľa rekurzívnym volaním (s vymenením zdrojovým a cieľovým poľom) na polovice v prípade že jeho veľkosť je vačšia než 2, a následným spojením týchto 2 polovíc, pri ktorom sa vždy vyberie prvok podľa váhy z danej poľovice.
+
+% mozno obrazok sem dat?
+
+%=============================================================================
+\subsection{KMP substring search}
+HAHA.
+
+%=============================================================================
+\subsection{Hash table}
+HAHA.
+
 % koniec dokumentace
 \end{document}
 
