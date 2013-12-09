@@ -162,8 +162,9 @@ static void TEMPLATE(vectorPopN)(Vector *vec, uint32_t amount)
     if (amount > vec->size)
         amount = vec->size;
 
-    for (uint32_t i = 1; i <= amount; ++i)
-        DELETE_ITEM(vec->end - (vec->itemSize * i));
+    VECTOR_ITERATOR itr = (VECTOR_ITERATOR)(vec->end - vec->itemSize);
+    for (uint32_t i = 1; i <= amount; ++i, --itr)
+        DELETE_ITEM(itr);
 
     vec->size -= amount;
     vec->end -= amount * vec->itemSize;
