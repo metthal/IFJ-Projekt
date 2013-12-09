@@ -631,7 +631,6 @@ ADD_MAIN_INSTRUCTION(IST_Add, localVarStart + 0, localVarStart + 0, 5);
 ADD_MAIN_INSTRUCTION(IST_Equal, localVarStart + 3, localVarStart + 0, 6);
 
 // end
-ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, 6, 0);
 ADD_MAIN_INSTRUCTION(IST_Nullify, 0, -1, 0);
 ADD_MAIN_INSTRUCTION(IST_Return, 0, 0, 0);
 
@@ -671,7 +670,7 @@ ADD_MAIN_INSTRUCTION(IST_Jmp, 0, -7, 0);
 ADD_MAIN_INSTRUCTION(IST_MovC, localVarStart + 1, 3, 0);
 // $j < $i
 ADD_MAIN_INSTRUCTION(IST_Less, 2, localVarStart + 1, localVarStart + 0);
-ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 9, 2);
+ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 8, 2);
 // $x = put_string($j, "\n")
 ADD_MAIN_INSTRUCTION(IST_PushRef, 0, -(exprStart + 0) + (localVarStart + 2), 0);
 ADD_MAIN_INSTRUCTION(IST_Push, 0, localVarStart + 1, 0);
@@ -681,8 +680,7 @@ ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
 // $j = $j + 1
 ADD_MAIN_INSTRUCTION(IST_Add, localVarStart + 1, localVarStart + 1, 5);
 // for end
-ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
-ADD_MAIN_INSTRUCTION(IST_Jmp, 0, -9, 0);
+ADD_MAIN_INSTRUCTION(IST_Jmp, 0, -8, 0);
 // end
 ADD_MAIN_INSTRUCTION(IST_Nullify, 0, -1, 0);
 ADD_MAIN_INSTRUCTION(IST_Return, 0, 0, 0);
@@ -709,17 +707,16 @@ ADD_MAIN_INSTRUCTION(IST_Subtract, localVarStart + 0, localVarStart + 0, 1);
 ADD_MAIN_INSTRUCTION(IST_Mov, 2, localVarStart, 0);
 ADD_MAIN_INSTRUCTION(IST_Jmpnz, exprStart, -2, 2);
 // while begin
-ADD_MAIN_INSTRUCTION(IST_Jmp, 0, 5, 0);
+ADD_MAIN_INSTRUCTION(IST_Jmp, 0, 4, 0);
 // if (true)
 ADD_MAIN_INSTRUCTION(IST_MovC, 2, 2, 0);
-ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 3, 2);
+ADD_MAIN_INSTRUCTION(IST_Jmpz, exprStart, 2, 2);
 // $i = $i + 5
 ADD_MAIN_INSTRUCTION(IST_Add, localVarStart+ 0, localVarStart + 0, 3);
-ADD_MAIN_INSTRUCTION(IST_ClearExpr, 0, exprStart, 0);
 // while condition ($i <= 10)
 ADD_MAIN_INSTRUCTION(IST_LessEq, 2, localVarStart + 0, 4);
 // while end
-ADD_MAIN_INSTRUCTION(IST_Jmpnz, exprStart, -5, 2);
+ADD_MAIN_INSTRUCTION(IST_Jmpnz, exprStart, -4, 2);
 // end
 ADD_MAIN_INSTRUCTION(IST_Nullify, 0, -1, 0);
 ADD_MAIN_INSTRUCTION(IST_Return, 0, 0, 0);
