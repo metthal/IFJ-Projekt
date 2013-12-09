@@ -91,15 +91,20 @@ ctags:
 	@ctags $(SRC_FILES) $(TEST_SRC_FILES) $(HEADER_FILES) $(TEST_HEADER_FILES)
 
 doc:
-	@doxygen $(DOXYFILE)
-	@make -C $(DOC_DIR)/img
-	@latex $(DOC_DIR)/documentation.tex
-	@latex $(DOC_DIR)/documentation.tex
-	@dvipdf documentation.dvi
+	@command -v doxygen >/dev/null 2>&1 \
+		&& { doxygen $(DOXYFILE); true; } \
+		|| echo "ini-make: Doxygen not installed."
+	@make -sC $(DOC_DIR)/img
+	@command -v pdflatex >/dev/null 2>&1 \
+		&& pdflatex -interaction=batchmode $(DOC_DIR)/documentation.tex \
+		|| { \
+			latex $(DOC_DIR)/documentation.tex; \
+			dvipdf documentation.dvi; \
+		}
 
 statistics:
 	@echo -n "Lines of code: " && wc -l $(SRC_FILES) $(TEST_SRC_FILES) $(HEADER_FILES) $(TEST_HEADER_FILES) | tail -n 1 | cut -d' ' -f 3
 	@echo -n "Size of code: " && du -hsc $(SRC_FILES) $(TEST_SRC_FILES) $(HEADER_FILES) $(TEST_HEADER_FILES) | tail -n 1 | cut -f 1
-	@test -e ini && echo -n "Size of executable: " && du -hs ini | cut -f 1 || echo "Executable not found."
+	@test -e ini && echo -n "Size of executable: " && du -hs ini | cut -f 1 || echo "ini-make: Executable not found."
 
 .PHONY: build release debug profile clean pack analyze analyzeAll callgraph test ctags doc
