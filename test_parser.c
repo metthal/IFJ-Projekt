@@ -142,18 +142,27 @@ void testInstructions(Vector *genInstrVector, Vector *expectedInstrVector)
     //	return;
 
     uint32_t count = 0;
+    uint32_t lastInst = -1;
     for ( ; (itr1 != end1) && (itr2 != end2); ++itr1, ++itr2, ++count) {
         if (!INSTRUCTIONS_EQ(itr1, itr2)) {
             if (allOk) {
                 printf("\n Nr. Generated        RES   A   B  | Expected         RES   A   B\n");
                 allOk = 0;
             }
+
+            if ((lastInst != (uint32_t)-1) && (lastInst + 1 != count)) {
+                printf("\n");
+            }
+            lastInst = count;
+
+            if (!listMax) {
+                printf("%3d.              ...              |              ...\n", count);
+                break;
+            }
+
             // COMMENT OUT THIS LINE IF YOU WANT TO COMPARE INSTRUCTIONS
             printf("%3d. %16s(%3d,%3d,%3d) | %16s(%3d,%3d,%3d)\n", count, ISTString[itr1->code], itr1->res, itr1->a, itr1->b, ISTString[itr2->code], itr2->res, itr2->a, itr2->b);
             listMax--;
-            if (!listMax) {
-                break;
-            }
         }
     }
 
