@@ -106,15 +106,44 @@ sablona
 
 %=============================================================================
 \subsection{Merge sort}
-Na implementáciu radiaceho algoritmu sme využili Merge sort. Ide o radenie typu rozdeľuj a panuj (angl. divide and conquer), v našej implementácií stabilný algoritmus s časovou zložitosťou O(N log(N)). Princíp alogritmu je jednoduchý. Pole sa rozdelí na menšie podpolia (v našom prípade veľkosti 1). Následne sa po pároch spoja, tak aby výsledné pole bolo tiež zoradené.
+Na implementáciu radiaceho algoritmu sme využili Merge sort. Ide o radenie
+ typu rozdeľuj a panuj (angl. divide and conquer), v našej implementácií stabilný
+ algoritmus s časovou zložitosťou O(N log(N)). Princíp alogritmu je jednoduchý.
+ Pole sa rozdelí na menšie podpolia (v našom prípade veľkosti 1). Následne sa
+ po pároch spoja, tak aby výsledné pole bolo tiež zoradené.
 
-Naša implementácia je tzv. zhora-dolu (angl. top-down) s pomocným poľom o rovnakej veľkosti ako zdrojové pole. Tieto polia striedajú svoju funkciu, z jedného sa číta do druhého píše, čím sa odstráni potreba kopírovania medzivýsledku spať do zdrojového poľa. Toto sa ľahko uskutoční jednoduchou zámenou argumentou v rekurzívnom volaní funkcie. Celá logika našej funkcie stringCharSortDivide() spočíva teda v rozdelení zdrojového poľa rekurzívnym volaním (s vymenením zdrojovým a cieľovým poľom) na polovice v prípade že jeho veľkosť je vačšia než 2, a následným spojením týchto 2 polovíc, pri ktorom sa vždy vyberie prvok podľa váhy z danej polovice.
+Naša implementácia je tzv. zhora-dolu (angl. top-down) s pomocným poľom o
+ rovnakej veľkosti ako zdrojové pole. Tieto polia striedajú svoju funkciu, z
+ jedného sa číta do druhého píše, čím sa odstráni potreba kopírovania
+ medzivýsledku spať do zdrojového poľa. Toto sa ľahko uskutoční jednoduchou
+ zámenou argumentou v rekurzívnom volaní funkcie. Celá logika našej funkcie
+ stringCharSortDivide() spočíva teda v rozdelení zdrojového poľa rekurzívnym
+ volaním (s vymenením zdrojovým a cieľovým poľom) na polovice v prípade že jeho
+ veľkosť je vačšia než 2, a následným spojením týchto 2 polovíc, pri ktorom sa
+ vždy vyberie prvok podľa váhy z danej polovice.
 
 % mozno obrazok sem dat?
 
 %=============================================================================
 \subsection{KMP substring search}
-HAHA.
+Knuth-Morris-Prattov algoritmus zrýchľuje vyhľadávanie podreťazca v reťazci, za
+ využita informácie o výskyte podreťazcov v hľadanom reťazci ktoré sa
+ zhodujú so prefixom hľadaného reťazca. Túto informáciu bude držat pomocná
+ tabuľka, ktorú musíme pred hľadaním zostaviť.
+
+Základný vyhľadávací algoritmus porovnáva podreťazec s reťazcom postupne po
+ každom znaku. KMP sa vyhýba porovaniu toho istého znaku v prípade že bol
+ porovnaný predošlými porovnaniami a nie je možné aby bol súčasťou podreťazca
+ ktorý je prefixom hľadaného reťazca. Samotné vyhľadávanie má teda zložitosť
+ len O(N).
+
+Naša pomocná tabuľka bude držať indexy, od ktorých musíme znova začať porovnávať.
+ Zostavíme ju jednoducho postupným porovnávaním podreťazcou hľadaného reťazca s
+ jeho prefixom. V prípade že neexistuje podreťazec o veľkosti väčšej než 1
+ shodujúci sa so prefixom, bude tabuľka plná núl.
+
+Vyhľadávanie je jednoduché, v prípade neshody sa podľa tabuľky nastaví ktorým
+ písmenom z podreťazca sa má pokračovať porovnávanie.
 
 %=============================================================================
 \subsection{Hash table}
