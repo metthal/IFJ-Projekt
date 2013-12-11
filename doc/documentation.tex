@@ -99,6 +99,60 @@ sablona
 \newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% lex
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Lexikálny analyzátor} \label{Lexikalny analyzator}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%=============================================================================
+\subsection{Struktúra konečného automatu}
+Bertov Graf....
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% sablona
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{LL gramatika} \label{LL gramatika}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%=============================================================================
+\subsection{LL gramatika}
+PROG $\Rightarrow$ $\textless$?php BODY\\
+BODY $\Rightarrow$ STMT BODY\\
+BODY $\Rightarrow$ FUNC BODY\\
+BODY $\Rightarrow$ \$\\
+FUNC $\Rightarrow$ function id ( PARAM\_LIST ) \{ STMT\_LIST \}\\
+STMT\_LIST $\Rightarrow$ $\varepsilon$\\
+STMT\_LIST $\Rightarrow$ STMT STMT\_LIST\\
+STMT $\Rightarrow$ var\_id = EXPR ;\\
+STMT $\Rightarrow$ return EXPR ;\\
+STMT $\Rightarrow$ break ;\\
+STMT $\Rightarrow$ continue ;\\
+STMT $\Rightarrow$ if ( EXPR ) \{ STMT\_LIST \} ELSEIF\_STMT ELSE\_STMT\\
+STMT $\Rightarrow$ while ( EXPR ) \{ STMT\_LIST \}\\
+STMT $\Rightarrow$ for ( FOR\_STMT\_1 ; FOR\_STMT\_2 ; FOR\_STMT\_1 ) \{ STMT\_LIST \}\\
+ELSEIF\_STMT $\Rightarrow$ $\varepsilon$\\
+ELSEIF\_STMT $\Rightarrow$ elseif ( EXPR ) \{ STMT\_LIST \} ELSEIF\_STMT\\
+ELSE\_STMT $\Rightarrow$ $\varepsilon$\\
+ELSE\_STMT $\Rightarrow$ else \{ STMT\_LIST \}\\
+PARAM\_LIST $\Rightarrow$ $\varepsilon$\\
+PARAM\_LIST $\Rightarrow$ var\_id DEF\_ARG NPARAM\_LIST\\
+NPARAM\_LIST $\Rightarrow$ $\varepsilon$\\
+NPARAM\_LIST $\Rightarrow$ , var\_id DEF\_ARG NPARAM\_LIST\\
+DEF\_ARG $\Rightarrow$ $\varepsilon$\\
+DEF\_ARG $\Rightarrow$ = literal\\
+FOR\_STMT\_1 $\Rightarrow$ $\varepsilon$\\
+FOR\_STMT\_1 $\Rightarrow$ var\_id = EXPR\\
+FOR\_STMT\_2 $\Rightarrow$ $\varepsilon$\\
+FOR\_STMT\_2 $\Rightarrow$ EXPR\\
+
+%=============================================================================
+\subsection{gramatika pre výrazy}
+
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 % IAL
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Algoritmy} \label{Algoritmy}
@@ -122,7 +176,7 @@ Naša implementácia je tzv. zhora-dolu (angl. top-down) s pomocným poľom o
  veľkosť je vačšia než 2, a následným spojením týchto 2 polovíc, pri ktorom sa
  vždy vyberie prvok podľa váhy z danej polovice.
 
-% mozno obrazok sem dat?
+% mozno obrazok sem dat? odpoved: NIE uz bez obrazkov to bude dost velke :D 
 
 %=============================================================================
 \subsection{KMP substring search}
