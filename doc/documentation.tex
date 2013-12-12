@@ -62,7 +62,7 @@ Varianta a/4/II
 Team leader: Marek Milkovič (xmilko01), 20\% \\
 Členovia: Lukáš Vrabec (xvrabe07), 20\% \\
 \hspace{57px} Ján Spišiak (xspisi03), 20\% \\
-\hspace{57px} Ivan Ševčík (xsevci05), 20\% \\
+\hspace{57px} Ivan Ševčík (xsevci50), 20\% \\
 \hspace{57px} Marek Bertovič (xberto00), 20\% \\ 
 \end{large}
 \end{flushleft}
@@ -149,6 +149,28 @@ FOR\_STMT\_2 $\Rightarrow$ EXPR\\
 %=============================================================================
 \subsection{gramatika pre výrazy}
 
+EXPR $\Rightarrow$ EXPR + EXPR
+EXPR $\Rightarrow$ EXPR * EXPR
+EXPR $\Rightarrow$ EXPR - EXPR
+EXPR $\Rightarrow$ EXPR / EXPR
+EXPR $\Rightarrow$ EXPR . EXPR
+EXPR $\Rightarrow$ EXPR < EXPR
+EXPR $\Rightarrow$ EXPR > EXPR
+EXPR $\Rightarrow$ EXPR >= EXPR
+EXPR $\Rightarrow$ EXPR <= EXPR
+EXPR $\Rightarrow$ EXPR === EXPR
+EXPR $\Rightarrow$ EXPR !== EXPR
+EXPR $\Rightarrow$ EXPR \&\& EXPR
+EXPR $\Rightarrow$ EXPR || EXPR
+EXPR $\Rightarrow$ EXPR and EXPR
+EXPR $\Rightarrow$ EXPR or EXPR
+EXPR $\Rightarrow$ ! EXPR
+EXPR $\Rightarrow$ ( EXPR )
+EXPR $\Rightarrow$ id ( )
+EXPR $\Rightarrow$ id ( EXPR )
+EXPR $\Rightarrow$ id ( EXPR , EXPR )
+EXPR $\Rightarrow$ id ( EXPR , EXPR , EXPR )
+EXPR $\Rightarrow$ var
 \newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
