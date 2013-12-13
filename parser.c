@@ -1,3 +1,24 @@
+/*
+ * Project name:
+ * Implementace interpretu imperativního jazyka IFJ13.
+ *
+ * Codename:
+ * INI: Ni Interpreter
+ *
+ * Description:
+ * https://wis.fit.vutbr.cz/FIT/st/course-files-st.php/course/IFJ-IT/projects/ifj2013.pdf
+ *
+ * Project's GitHub repository:
+ * https://github.com/metthal/IFJ-Projekt
+ *
+ * Team:
+ * Marek Milkovič   (xmilko01)
+ * Lukáš Vrabec     (xvrabe07)
+ * Ján Spišiak      (xspisi03)
+ * Ivan Ševčík      (xsevci50)
+ * Marek Bertovič   (xberto00)
+ */
+
 #include "parser.h"
 #include "builtin.h"
 #include "interpreter.h"
@@ -300,7 +321,7 @@ void func()
                 vectorAt(addressTable, symbol->data->func.functionAddressIndex);
         (*cipvi) = (InstructionPtr)((size_t)vectorSize(functionsInstructions));
 
-        // Instruction to reserve stack space for condition and locals
+        // Instruction to reserve stack space for locals
         if (currentContext->localVariableCount > 0)
             generateInstruction(IST_Reserve, ISM_NoConst, 0, currentContext->localVariableCount, 0);
     }

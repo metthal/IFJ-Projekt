@@ -1,3 +1,29 @@
+/*
+ * Project name:
+ * Implementace interpretu imperativního jazyka IFJ13.
+ *
+ * Codename:
+ * INI: Ni Interpreter
+ *
+ * Description:
+ * https://wis.fit.vutbr.cz/FIT/st/course-files-st.php/course/IFJ-IT/projects/ifj2013.pdf
+ *
+ * Project's GitHub repository:
+ * https://github.com/metthal/IFJ-Projekt
+ *
+ * Team:
+ * Marek Milkovič   (xmilko01)
+ * Lukáš Vrabec     (xvrabe07)
+ * Ján Spišiak      (xspisi03)
+ * Ivan Ševčík      (xsevci50)
+ * Marek Bertovič   (xberto00)
+ */
+
+/**
+ * @file value_vector.h
+ * @brief Value vector specialization.
+ **/
+
 #ifndef VALUE_VECTOR_H
 #define VALUE_VECTOR_H
 
@@ -15,6 +41,12 @@ typedef const Value* ConstValueVectorIterator;
 #undef VECTOR_ITEM
 #undef VECTOR_STRUCT_ITEM
 
+/**
+ * Optimized vector operation to push item from the same vector.
+ * @param vec Vector to operate on.
+ * @param index Index of value to push on top.
+ * @return Iterator to pushed value.
+ */
 static inline ValueVectorIterator vectorPushIndexValue(Vector *vec, uint32_t index)
 {
     if (index >= vec->size) {
@@ -44,6 +76,11 @@ static inline ValueVectorIterator vectorPushIndexValue(Vector *vec, uint32_t ind
     return ret;
 }
 
+/**
+ * Optimized vector operation to push N values at the same time.
+ * @param vec Vector to operate on.
+ * @param count Number of default values to be pushed - N.
+ */
 static inline void vectorPushDefaultNValue(Vector *vec, uint32_t count)
 {
     if (vec->size + count > vec->capacity) {
@@ -67,6 +104,11 @@ static inline void vectorPushDefaultNValue(Vector *vec, uint32_t count)
     vec->end += count * sizeof(Value);
 }
 
+/**
+ * Optimized vector operation to specifically downsize vector.
+ * @param vec Vector to operate on
+ * @param size New vector size after downsize.
+ */
 static inline void vectorDownsizeValue(Vector *vec, uint32_t size)
 {
     if (size == vec->size)
@@ -80,6 +122,12 @@ static inline void vectorDownsizeValue(Vector *vec, uint32_t size)
     vec->end = (uint8_t*)newEnd;
 }
 
+/**
+ * Optimized operation to retrieve value without overhead.
+ * @param vec Vector to operate on.
+ * @param index Index of value to return.
+ * @return Iterator onto querried value.
+ */
 static inline ValueVectorIterator vectorFastAtValue(Vector *vec, uint32_t index)
 {
     return ((Value*)vec->data) + index;

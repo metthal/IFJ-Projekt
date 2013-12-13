@@ -1,3 +1,29 @@
+/*
+ * Project name:
+ * Implementace interpretu imperativního jazyka IFJ13.
+ *
+ * Codename:
+ * INI: Ni Interpreter
+ *
+ * Description:
+ * https://wis.fit.vutbr.cz/FIT/st/course-files-st.php/course/IFJ-IT/projects/ifj2013.pdf
+ *
+ * Project's GitHub repository:
+ * https://github.com/metthal/IFJ-Projekt
+ *
+ * Team:
+ * Marek Milkovič   (xmilko01)
+ * Lukáš Vrabec     (xvrabe07)
+ * Ján Spišiak      (xspisi03)
+ * Ivan Ševčík      (xsevci50)
+ * Marek Bertovič   (xberto00)
+ */
+
+/**
+ * @file vector_template.h
+ * @brief Template file for creating specialized vectors.
+ **/
+
 #ifdef VECTOR_ITEM_HEADER
 #include VECTOR_ITEM_HEADER
 #endif
@@ -10,8 +36,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+/** Factor used when enlarging vector. */
 static uint8_t const VectorResizeIncRate = 2;
+/** Factor used when shrinking vector. */
 static uint8_t const VectorResizeDecRate = 3;
+/** Default vector capacity upon creation. */
 static uint16_t const VectorDefaultCapacity = 16;
 #endif
 

@@ -1,8 +1,40 @@
+/*
+ * Project name:
+ * Implementace interpretu imperativního jazyka IFJ13.
+ *
+ * Codename:
+ * INI: Ni Interpreter
+ *
+ * Description:
+ * https://wis.fit.vutbr.cz/FIT/st/course-files-st.php/course/IFJ-IT/projects/ifj2013.pdf
+ *
+ * Project's GitHub repository:
+ * https://github.com/metthal/IFJ-Projekt
+ *
+ * Team:
+ * Marek Milkovič   (xmilko01)
+ * Lukáš Vrabec     (xvrabe07)
+ * Ján Spišiak      (xspisi03)
+ * Ivan Ševčík      (xsevci50)
+ * Marek Bertovič   (xberto00)
+ */
+
+/**
+ * @file interpreter_helpers.h
+ * @brief Declares helper functions used in interpret.
+ */
+
 #ifndef INTERPRETER_HELPERS_H
 #define INTERPRETER_HELPERS_H
 
 // Just performance optimizations, improves the speed by ~4% by inlining
 
+/**
+ * @brief Loads res with correct address.
+ * @param base Stack pointer from which to offset.
+ * @param res A place to hold address.
+ * @param ires Index of address.
+ */
 static inline void fillResValuePtr(Value *base, Value **res, int32_t ires)
 {
     *res = base + ires;
@@ -10,6 +42,14 @@ static inline void fillResValuePtr(Value *base, Value **res, int32_t ires)
         *res += (*res)->data.ref;
 }
 
+/**
+ * @brief Loads x with correct address.
+ * @param base Stack pointer from which to offset.
+ * @param constBase Constants pointer from which to offset.
+ * @param x A place to hold address.
+ * @param ix Index of address.
+ * @return 1 if successful.
+ */
 static inline uint8_t fillConstValuePtr(Value *base, const Value *constBase, const Value **x,
         int32_t ix)
 {
@@ -32,6 +72,16 @@ static inline uint8_t fillConstValuePtr(Value *base, const Value *constBase, con
     return 1;
 }
 
+/**
+ * @brief Loads res and x with correct address.
+ * @param base Stack pointer from which to offset.
+ * @param constBase Constants pointer from which to offset.
+ * @param res A place to hold address for res.
+ * @param x A place to hold address for x.
+ * @param ires Index of res address.
+ * @param ix Index of x address.
+ * @return 1 if successful.
+ */
 static inline uint8_t fillResConstValuePtr(Value *base, const Value *constBase, Value **res, const Value **x,
         int32_t ires, int32_t ix)
 {
@@ -58,6 +108,16 @@ static inline uint8_t fillResConstValuePtr(Value *base, const Value *constBase, 
     return 1;
 }
 
+/**
+ * @brief Loads A and B with correct address.
+ * @param base Stack pointer from which to offset.
+ * @param constBase Constants pointer from which to offset.
+ * @param a A place to hold address for A.
+ * @param b A place to hold address for B.
+ * @param ia Index of A address.
+ * @param ib Index of B address.
+ * @return 1 if successful.
+ */
 static inline uint8_t fillConstValuePtrs(Value *base, const Value *constBase, const Value **a, const Value **b,
         int32_t ia, int32_t ib)
 {
@@ -96,6 +156,18 @@ static inline uint8_t fillConstValuePtrs(Value *base, const Value *constBase, co
     return 1;
 }
 
+/**
+ * @brief Loads A, B and res with correct address.
+ * @param base Stack pointer from which to offset.
+ * @param constBase Constants pointer from which to offset.
+ * @param res A place to hold address for res.
+ * @param a A place to hold address for A.
+ * @param b A place to hold address for B.
+ * @param ires Index of res address.
+ * @param ia Index of A address.
+ * @param ib Index of B address.
+ * @return 1 if successful.
+ */
 static inline uint8_t fillValuePtrs(Value *base, const Value *constBase, Value **res, const Value **a, const Value **b,
         const Instruction *iptr)
 {

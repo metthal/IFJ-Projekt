@@ -1,3 +1,29 @@
+/*
+ * Project name:
+ * Implementace interpretu imperativního jazyka IFJ13.
+ *
+ * Codename:
+ * INI: Ni Interpreter
+ *
+ * Description:
+ * https://wis.fit.vutbr.cz/FIT/st/course-files-st.php/course/IFJ-IT/projects/ifj2013.pdf
+ *
+ * Project's GitHub repository:
+ * https://github.com/metthal/IFJ-Projekt
+ *
+ * Team:
+ * Marek Milkovič   (xmilko01)
+ * Lukáš Vrabec     (xvrabe07)
+ * Ján Spišiak      (xspisi03)
+ * Ivan Ševčík      (xsevci50)
+ * Marek Bertovič   (xberto00)
+ */
+
+/**
+ * @file instruction.h
+ * @brief Declares all instruction related stuff.
+ */
+
 #ifndef INSTRUCTION_H
 #define INSTRUCTION_H
 
@@ -95,6 +121,7 @@ typedef enum
     IST_Not          //!< IST_Not
 } InstructionCode;
 
+/** Instruction modes. */
 typedef enum
 {
     ISM_NoConst     = 0,
@@ -103,6 +130,7 @@ typedef enum
     ISM_AllConst    = 3
 } InstructionMode;
 
+/** Structure that holds data of Instruction. */
 typedef struct
 {
     InstructionCode code;
@@ -112,24 +140,79 @@ typedef struct
     int32_t res;
 } Instruction;
 
+/**
+ * @brief Creates new instruction on heap.
+ * @return Pointer to created instruction.
+ */
 Instruction* newInstruction();
 
+/**
+ * @brief Initializes existing instruction.
+ * @param pt Instruction to initialize.
+ */
 void initInstruction(Instruction *pt);
 
+/**
+ * @brief Deletes existing instruction.
+ * @param pt Instruction to delete.
+ */
 void deleteInstruction(Instruction *pt);
 
+/**
+ * @brief Frees an instruction created on heap.
+ * @param ppt Instruction to free.
+ */
 void freeInstruction(Instruction **ppt);
 
+/**
+ * @brief Makes a copy of an instruction.
+ * @param src Source instruction used as image.
+ * @param dest Destination instruction to be filled.
+ */
 void copyInstruction(const Instruction *src, Instruction *dest);
 
+/**
+ * @brief Makes checks and generates a function call instruction.
+ * @param symbol Symbol that holds informations about function.
+ * @param builtinCode Code of built-in function to be called.
+ * @param paramCount Number of parameters with which to call.
+ * @return
+ */
 uint32_t generateCall(const Symbol *symbol, BuiltinCode builtinCode, uint32_t paramCount);
 
+/**
+ * @brief Generates most of instructions.
+ * @param code Code of instruction to generate. Can't be IST_Call.
+ * @param mode Instruction mode.
+ * @param res Result index for instruction.
+ * @param a A operand index for instruction.
+ * @param b B operand index for instruction.
+ */
 void generateInstruction(InstructionCode code, InstructionMode mode, int32_t res, int32_t a, int32_t b);
 
+/**
+ * @brief Generates an empty no-op instruction that can be filled later.
+ * @return Index of generated instruction in instruction vector.
+ */
 uint32_t generateEmptyInstruction();
 
+/**
+ * @brief Fills pre-generated empty instruction.
+ * @param index Index of instruction to fill.
+ * @param code Code of instruction.
+ * @param res Result index for instruction.
+ * @param a A operand index for instruction.
+ * @param b B operand index for instruction.
+ */
 void fillInstruction(uint32_t index, InstructionCode code, int32_t res, int32_t a, int32_t b);
 
+/**
+ * @brief Returns informations about function using token from scanner.
+ * @param funcToken Token holding function's informations.
+ * @param builtinCode If token represents built-in function, it's code is set here.
+ * @param paramCount Number of function's parameters.
+ * @return Symbol that golds informations about function.
+ */
 Symbol* fillInstFuncInfo(const Token *funcToken, BuiltinCode *builtinCode, int64_t *paramCount);
 
 #endif
