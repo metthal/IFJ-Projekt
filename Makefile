@@ -25,7 +25,7 @@ SRC_FILES = $(filter-out $(TEST_SRC_FILES), $(wildcard *.c))
 HEADER_FILES = $(filter-out $(TEST_HEADER_FILES), $(wildcard *.h))
 OBJ_FILES = $(patsubst %.c, %.o, $(SRC_FILES))
 TAR_FILE = xmilko01.tgz
-PACKED_FILES = $(SRC_FILES) $(HEADER_FILES) Makefile rozdeleni
+PACKED_FILES = $(SRC_FILES) $(HEADER_FILES) Makefile rozdeleni rozsireni
 TEMP_FILES = gmon.out
 DOXYFILE = doxyconfig
 DOXY_DIR = doxydoc
@@ -103,8 +103,10 @@ doc:
 		}
 
 statistics:
-	@echo -n "Lines of code: " && wc -l $(SRC_FILES) $(TEST_SRC_FILES) $(HEADER_FILES) $(TEST_HEADER_FILES) | tail -n 1 | cut -d' ' -f 3
-	@echo -n "Size of code: " && du -hsc $(SRC_FILES) $(TEST_SRC_FILES) $(HEADER_FILES) $(TEST_HEADER_FILES) | tail -n 1 | cut -f 1
+	@echo -n "Lines of code: " && wc -l $(SRC_FILES) $(HEADER_FILES) | tail -n 1 | sed -r "s/[ ]*([0-9]+).*/\1/g"
+	@echo -n "Size of code: " && du -hsc $(SRC_FILES) $(HEADER_FILES) | tail -n 1 | cut -f 1
+	@echo -n "Lines of code (with tests): " && wc -l $(SRC_FILES) $(TEST_SRC_FILES) $(HEADER_FILES) $(TEST_HEADER_FILES) | tail -n 1 | sed -r "s/[ ]*([0-9]+).*/\1/g"
+	@echo -n "Size of code (with tests): " && du -hsc $(SRC_FILES) $(TEST_SRC_FILES) $(HEADER_FILES) $(TEST_HEADER_FILES) | tail -n 1 | cut -f 1
 	@test -e ini && echo -n "Size of executable: " && du -hs ini | cut -f 1 || echo "ini-make: Executable not found."
 
 .PHONY: build release debug profile clean pack analyze analyzeAll callgraph test ctags doc statistics
