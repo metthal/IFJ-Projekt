@@ -62,14 +62,20 @@ typedef enum
     SS_Php_3,
     SS_And,
     SS_Or
-} ScannerState;
+} ScannerState;  ///< Enum of all possible scanner states
 
-static int32_t charStreamSwitch = 1;
-static int32_t lastChar = 0;
-static FILE *source = NULL;
-
+static int32_t charStreamSwitch = 1;       ///< This variable is used as switch, if we read next character from input or from lastChar
+static int32_t lastChar = 0;                ///< Here we save character which we use as input for next token
+static FILE *source = NULL;                 ///< Pointer to source file
 // Forward declaration of inner function.
 void scannerFillToken(Token *token);
+
+/**
+ * This function checks, if the identifier which has been found in file is keyword or not.
+ *
+ * @param *str is a pointer to string, which we are going to check
+ * @return Function is returning type of keyword token type or KTT_None if the string is not any specified keyword
+ **/
 
 KeywordTokenType strToKeyword(String *str)
 {
@@ -153,6 +159,9 @@ KeywordTokenType strToKeyword(String *str)
     return KTT_None;
 }
 
+/**
+ * Function which resets the scanner, it is for test purposes.
+ **/
 void scannerReset()
 {
     charStreamSwitch = 1;
@@ -162,6 +171,13 @@ void scannerReset()
         source = NULL;
     }
 }
+
+/**
+ * Function is going through file until EOF or Error and it is parsing the file into tokens, which are used later in parser.
+ *
+ * @param fileName is name of the file which will be scanned
+ * @return pointer to a vector of tokens.
+ **/
 
 Vector* scannerScanFile(const char *fileName)
 {
@@ -193,6 +209,13 @@ Vector* scannerScanFile(const char *fileName)
     }
     return NULL;
 }
+
+/**
+ * Function correctly opens file and checks if the first character in file is '<'
+ *
+ * @param fileName is name of the file which will be opened
+ * @return pointer to a correctly opened file.
+ **/
 
 FILE* scannerOpenFile(const char *fileName) // OPEN FILE AND RETURN POINTER ON IT
 {
@@ -237,6 +260,12 @@ Token* scannerGetToken() // FUNCTION, WHICH RETURNS POINTER ON TOKEN STRUCTURE
 
     return token;
 }
+
+/**
+ * Function, which finds one token and fills the structure with token type and data if it is neccessary
+ *
+ * @param token is pointer to a structure Token
+ **/
 
 void scannerFillToken(Token *token)
 {
