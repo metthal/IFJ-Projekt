@@ -1,9 +1,14 @@
+    ___       ___       ___
+   /\  \     /\__\     /\  \
+  _\:\  \   /:| _|_   _\:\  \
+ /\/::\__\ /::|/\__\ /\/::\__\
+ \::/\/__/ \/|::/  / \::/\/__/
+  \:\__\     |:/  /   \:\__\
+   \/__/     \/__/     \/__/
+      INI: Ni Interpreter
+
 *********************************
-*********************************
-***                           ***
-***    INI: Ni Interpreter    ***
-***                           ***
-*********************************
+*             About             *
 *********************************
 
 This project was created as:
@@ -12,15 +17,63 @@ This project was created as:
    in team development and management
  - a part of project "Implementing imperative language interpreter IFJ13"
 
-*******************************
-*           Credits           *
-*******************************
+*********************************
+*             Setup             *
+*********************************
 
-Team leader: Marek Milkovič
+If you want to use every feature we provide, these are required:
 
-Authors:
-	Ján Spišiak
-	Lukáš Vrabec
-	Ivan Ševčík
-	Marek Bertovič
-	Marek Milkovič
+General:
+    git
+
+Compilation:
+    GNU make
+    gcc
+
+Profiling:
+    gprof
+
+Static analysis:
+    cppcheck
+
+
+Our Makefile have more targets:
+    (nothing)   - builds release configuration
+    debug       - builds debug configuration
+    profile     - builds profiling configuration
+    clean       - removes all intermediate build files
+    analyze     - runs static analysis
+    analyzeAll  - runs static analysis also on test files
+    test        - runs static analysis and preforms automatic tests
+    pack        - packs necessary project files into archive
+    callgraph   - after profiling this can be used to generate callgraph
+    ctags       - generates ctags
+    doc         - generates documentation
+    statistics  - prints LOC, size etc.
+
+*********************************
+*            Credits            *
+*********************************
+
+Thanks to all who contributed into this project, actually with code or with thoughts. It was amazing experience.
+
+Thanks goes to:
+    Ivan Ševčík
+    Ján Spišiak
+    Lukáš Vrabec
+    Marek Bertovič
+    Marek Milkovič
+
+Special thanks goes to:
+    Oliver Nemček, Štefan Martiček and their team for time competition
+    Everyone who believed that we can always get better and supported us ;)
+
+*********************************
+*             Links             *
+*********************************
+
+Project repository: https://github.com/metthal/IFJ-Projekt
+
+Project wiki page: https://github.com/metthal/IFJ-Projekt/wiki
+
+Assignment webpage: http://www.fit.vutbr.cz/study/courses/IFJ/public/project/
