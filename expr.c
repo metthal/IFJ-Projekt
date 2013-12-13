@@ -37,11 +37,11 @@ extern Context *currentContext;
 extern Vector *constantsTable;
 extern Vector *instructions;
 
-static Vector *exprVector = NULL;   ///< Bottom-up parser stack for @ref ExprVector
+static Vector *exprVector = NULL;   ///< Bottom-up parser stack for @ref ExprTokenVector
 static ExprToken endToken;          ///< Token that should be located on the bottom of the stack, used when stack has no topmost terminal token
 static uint32_t currentStackPos;    ///< Current position in the local stack frame
-static uint32_t lastResultInstIndex;
-static uint32_t lastFuncParamCount;
+static uint32_t lastResultInstIndex;///< Index of last instruction that generate expression result in instruction vector
+static uint32_t lastFuncParamCount; ///< Parameter count of last called function in expression (last means evaluation order)
 
 // used as helper variables for function call generation
 static BuiltinCode currentFuncBuiltinCode;  ///< BuiltinCode for currently processed function
@@ -114,9 +114,9 @@ void deinitExpr()
 }
 
 /**
- * Traverses through the stack and finds the token which is terminal and is closest to the top of the stack
+ * Traverses through the stack and finds the token which is terminal and is closest to the top of the stack.
  *
- * @return Topmost terminal token. NULL if not found
+ * @return Topmost terminal token. NULL if not found.
  **/
 ExprToken* findTopmostTerminal()
 {
@@ -134,9 +134,9 @@ ExprToken* findTopmostTerminal()
 /**
  * Transforms token type into index in precedence table.
  *
- * @param tokenType Token type to transform
+ * @param tokenType Token type to transform.
  *
- * @return Index in precedence table
+ * @return Index in precedence table.
  **/
 static inline uint8_t tokenTypeToExprType(uint8_t tokenType)
 {
@@ -152,9 +152,9 @@ static inline uint8_t tokenTypeToExprType(uint8_t tokenType)
 /**
  * Transforms token type into the instruction code.
  *
- * @param tokenType Token type to transform
+ * @param tokenType Token type to transform.
  *
- * @return Instruction code for the token type
+ * @return Instruction code for the token type.
  **/
 static inline uint8_t tokenTypeToInstruction(uint8_t tokenType)
 {
@@ -205,6 +205,13 @@ static inline uint8_t tokenTypeToInstruction(uint8_t tokenType)
     }
 }
 
+/**
+ * Modifies instruction generated at instIndex to directly save result at resultOffset on the stack (interpretation stack).
+ *
+ * @param expr Expression which to modify.
+ * @param instIndex Index of the instruction that generates this expression.
+ * @param resultOffset Result offset to be set into instruction.
+ **/
 static inline void modifyExprInstResult(ExprToken *expr, uint32_t instIndex, int64_t resultOffset)
 {
     if (!lastResultInstIndex) {
@@ -255,10 +262,11 @@ static inline void modifyExprInstResult(ExprToken *expr, uint32_t instIndex, int
 /**
  * Reduces expression for multiparameter functions recursively.
  *
- * @param stackPos Position on the stack where last parameter of the function is located
- * @param paramCount Set to the number of parameters, cannot be NULL
+ * @param stackPos Position on the stack where last parameter of the function is located.
+ * @param paramCount Is set to the number of parameters pushed on the stack, cannot be NULL.
+ * @param totalParamCount Is set the to the total number of parameters the function was called with, cannot be NULL.
  *
- * @return Returns 1 in case of success, otherwise 0
+ * @return Returns 1 in case of success, otherwise 0.
  **/
 uint8_t reduceMultiparamFunc(int64_t stackPos, uint32_t *paramCount, uint32_t *totalParamCount)
 {
@@ -313,11 +321,11 @@ uint8_t reduceMultiparamFunc(int64_t stackPos, uint32_t *paramCount, uint32_t *t
 }
 
 /**
- * Performs reduction by rule in grammar
+ * Performs reduction by rule in grammar.
  *
- * @param topTerm Topmost terminal token on the stack
+ * @param topTerm Topmost terminal token on the stack.
  *
- * @return Returns 1 in case of succes, otherwise 0
+ * @return Returns 1 in case of succes, otherwise 0.
  **/
 uint8_t reduce(ExprToken *topTerm)
 {
@@ -632,7 +640,7 @@ uint8_t reduce(ExprToken *topTerm)
 /**
  * Initializes new token for the bottom-up parser stack.
  *
- * @param token Token to initialize
+ * @param token Token to initialize.
  **/
 void initExprToken(ExprToken *token)
 {
@@ -642,7 +650,7 @@ void initExprToken(ExprToken *token)
 /**
  * Deinitializes token used in the bottom-up parser stack.
  *
- * @param token Token to deinitialize
+ * @param token Token to deinitialize.
  **/
 void deleteExprToken(ExprToken *token)
 {
@@ -652,8 +660,8 @@ void deleteExprToken(ExprToken *token)
 /**
  * Copies one expression token into the other
  *
- * @param src Source expression token
- * @param dest Destination expression token
+ * @param src Source expression token.
+ * @param dest Destination expression token.
  **/
 void copyExprToken(const ExprToken *src, ExprToken *dest)
 {
@@ -665,7 +673,10 @@ void copyExprToken(const ExprToken *src, ExprToken *dest)
 /**
  * Based on the input token and its priority to the token on the top of the stack performs shift or reduce.
  *
- * @return Offset in the local stack frame where the result is stored, in case of error 0
+ * @param resultOffset If non-zero, result of the expression is directly generated on this position on the stack.
+ * @param maxStackPosUsed Is set to the highest generated position in the stack frame. Can be NULL.
+ *
+ * @return Offset in the local stack frame where the result is stored, in case of error 0.
  **/
 int64_t expr(int64_t resultOffset, uint32_t *maxStackPosUsed)
 {
