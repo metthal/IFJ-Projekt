@@ -48,6 +48,15 @@ void copySymbolEntry(const SymbolEntry *src, SymbolEntry *dest)
     return;
 }
 
+/**
+ * Hash function implementation.
+ * If st is set, automatically returns hash for given table size.
+ *
+ * @param   st   SymbolTable
+ * @param   key  Key to hash
+ *
+ * @return       Hash - See description
+ */
 uint32_t symbolTableHash(SymbolTable *st, const String *key)
 {
     uint32_t i, hash = 0;
@@ -84,6 +93,11 @@ static inline void* _initSymbolTable(SymbolTable *st)
     return st->table;
 }
 
+/**
+ * Returns allocated and initialized SymbolTable.
+ *
+ * @return  SymbolTable pointer
+ */
 SymbolTable* newSymbolTable()
 {
     SymbolTable *st = malloc(sizeof(SymbolTable));
@@ -98,6 +112,11 @@ SymbolTable* newSymbolTable()
     return st;
 }
 
+/**
+ * Frees allocated SymbolTable.
+ *
+ * @param  st  Pointer to SymbolTable pointer
+ */
 void freeSymbolTable(SymbolTable **st)
 {
     if (st) {
@@ -110,11 +129,21 @@ void freeSymbolTable(SymbolTable **st)
     }
 }
 
+/**
+ * Initializes already allocated SymbolTable.
+ *
+ * @param  st  Pointer to SymbolTable
+ */
 void initSymbolTable(SymbolTable *st)
 {
     _initSymbolTable(st);
 }
 
+/**
+ * Deletes initialized SymbolTable.
+ *
+ * @param  st  Pointer to SymbolTable.
+ */
 void deleteSymbolTable(SymbolTable *st)
 {
     free(st->table);
@@ -126,6 +155,7 @@ void deleteSymbolTable(SymbolTable *st)
 
 static inline void _symbolTableAddSymbolEntry(SymbolTable *st, uint32_t nseIndex, uint32_t hash)
 {
+    // Internal function to add index of SymbolEntry to SymbolTable after resize
     if (st->table[hash]) {
         SymbolEntry *symbolEntry = vectorAt(st->vec, st->table[hash]);
         while (symbolEntry->next) {
@@ -138,6 +168,13 @@ static inline void _symbolTableAddSymbolEntry(SymbolTable *st, uint32_t nseIndex
     }
 }
 
+/**
+ * Resizes SymbolTable to given size.
+ * Sets ERR_Allocation if memory couldn't be allocated.
+ *
+ * @param  st    SymbolTable to resize
+ * @param  size  Size
+ */
 void symbolTableResize(SymbolTable *st, uint32_t size)
 {
     free(st->table);
@@ -161,11 +198,20 @@ void symbolTableResize(SymbolTable *st, uint32_t size)
 
 static inline void symbolTableCheckIncrease(SymbolTable *st)
 {
+    // Check if load is bigger than 0.75
     if (st->count > (3 * st->size) / 4) {
         symbolTableResize(st, st->size * 2);
     }
 }
 
+/**
+ * Returns pointer to Symbol if found, otherwise NULL.
+ *
+ * @param   st   SymbolTable to search in
+ * @param   key  Key
+ *
+ * @return       Pointer to Symbol - See description
+ */
 Symbol* symbolTableFind(SymbolTable *st, const String *key)
 {
     uint32_t index = st->table[symbolTableHash(st, key)];
@@ -183,6 +229,16 @@ Symbol* symbolTableFind(SymbolTable *st, const String *key)
     return (Symbol*)symbolEntry;
 }
 
+/**
+ * Tries to add new entry for given key. If succesfull returns pointer
+ * to Symbol, otherwise NULL.
+ * Sets ERR_Allocation if memory couldn't be allocated.
+ *
+ * @param   st   SymbolTable to add into
+ * @param   key  Key
+ *
+ * @return       Pointer to Symbol - See description
+ */
 Symbol* symbolTableAdd(SymbolTable *st, const String *key)
 {
     uint32_t fullHash = symbolTableHash(NULL, key),
@@ -228,6 +284,15 @@ Symbol* symbolTableAdd(SymbolTable *st, const String *key)
     return newSymbol;
 }
 
+/**
+ * Helper function to build jump table for KMP substring search.
+ * Sets ERR_Allocation if memory couldn't be allocated.
+ *
+ * @param   str  C String to build table from
+ * @param   len  Length of string
+ *
+ * @return       Pointer to Table
+ */
 uint32_t* stringSubstrSearchBuildTable(const char *str, uint32_t len)
 {
     uint32_t *table = malloc(sizeof(uint32_t) * len);
@@ -283,31 +348,62 @@ static inline int64_t _stringSubstrSearchSSO(const char *haystack, uint32_t hays
     return result;
 }
 
+/**
+ * Finds first occurence of needle in haystack, if not found returns -1.
+ * Sets ERR_Allocation if memory couldn't be allocated.
+ *
+ * @param   haystack  String to search in
+ * @param   needle    String to search for
+ *
+ * @return            Index of occurence - See description
+ */
 int64_t stringSubstrSearch(const String *haystack, const String *needle)
 {
     return _stringSubstrSearchSSO(haystack->data, haystack->length - 1, needle->data, needle->length - 1, 0);
 }
 
+/**
+ * Finds first occurence of needle in haystack from offset, if not found returns -1.
+ * Sets ERR_Allocation if memory couldn't be allocated.
+ *
+ * @param   haystack  String to search in
+ * @param   needle    String to search for
+ * @param   offset    Index to start from
+ *
+ * @return            Index of occurence - See description
+ */
 int64_t stringSubstrSearchO(String *haystack, String *needle, uint32_t offset)
 {
     return _stringSubstrSearchSSO(haystack->data, haystack->length - 1, needle->data, needle->length - 1, offset);
 }
 
+/**
+ * See stringSubstrSearch()
+ */
 int64_t stringSubstrSearchS(String *haystack, const char *needle, uint32_t needleLen)
 {
     return _stringSubstrSearchSSO(haystack->data, haystack->length - 1, needle, needleLen, 0);
 }
 
+/**
+ * See stringSubstrSearchO()
+ */
 int64_t stringSubstrSearchSO(String *haystack, const char *needle, uint32_t needleLen, uint32_t offset)
 {
     return _stringSubstrSearchSSO(haystack->data, haystack->length - 1, needle, needleLen, offset);
 }
 
+/**
+ * See stringSubstrSearch()
+ */
 int64_t stringSubstrSearchSS(const char *haystack, uint32_t haystackLen, const char *needle, uint32_t needleLen)
 {
     return _stringSubstrSearchSSO(haystack, haystackLen, needle, needleLen, 0);
 }
 
+/**
+ * See stringSubstrSearchO()
+ */
 int64_t stringSubstrSearchSSO(const char *haystack, uint32_t haystackLen, const char *needle, uint32_t needleLen, uint32_t offset)
 {
     return _stringSubstrSearchSSO(haystack, haystackLen, needle, needleLen, offset);
@@ -315,6 +411,7 @@ int64_t stringSubstrSearchSSO(const char *haystack, uint32_t haystackLen, const 
 
 static inline void _stringCharSortMerge(char arr[], char temp[], uint32_t offset, uint32_t length)
 {
+    // Merges two intervals given by offset and length from temp[] into arr[]
     uint32_t leftIndex = 0,
         leftMax = offset,
         rightIndex = offset,
@@ -344,6 +441,7 @@ static inline void _stringCharSortMerge(char arr[], char temp[], uint32_t offset
 
 void stringCharSortDivide(char arr[], char temp[], uint32_t length)
 {
+    // Recursively divides and merges temp[] into arr[]
     uint32_t offset = length / 2;
     if (length > 2) {
         stringCharSortDivide(temp, arr, offset);
@@ -353,6 +451,12 @@ void stringCharSortDivide(char arr[], char temp[], uint32_t length)
     _stringCharSortMerge(arr, temp, offset, length);
 }
 
+/**
+ * Sorts string in alphabetical order.
+ * Sets ERR_Allocation if memory couldn't be allocated.
+ *
+ * @param  s  String to sort
+ */
 void stringCharSort(const String *s)
 {
     char *temp = malloc(sizeof(char) * (s->length - 1));
