@@ -101,12 +101,52 @@ sablona
 
 % lex
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Lexikálny analyzátor} \label{Lexikalny analyzator}
+\section{Riešenie interpretu} \label{Riesenie interpretu}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %=============================================================================
-\subsection{Struktúra konečného automatu}
-Bertov Graf....
+\subsection{Lexikálna analýza}
+Úlohy lexikálnej analýzy : \\
+1. čítanie znakov zo vstupu a ich preklad na postupnosť tokenov, ktoré ďalej slúžia
+syntaktickej analýze \\
+2. odstránenie komentárov a bielych znakov v zdrojovom programe \\
+3. nájdenie lexikálnych chýb v zdrojovom programe \\
+
+Výstup lexikálnej analýzy je zároveň vstupom do syntaktickej analýzy, preto je
+lexikálna analýza volaná syntaktickou analýzou. V našom prípade je konkrétne
+výstup lexikálnej analýzy vektor tokenov, kde token je štruktúra obsahujúca
+informácie o type tokenu ( typ tokenu je enumerácia všetkých prípustných tokenov )
+a v prípade tokenov vyžadujúcich dalšie informácie ako napríklad obsah stringu
+( znakový reťazec ) čí číselnu hodnotu tokenu typu číslo obsahuje štruktúra aj tieto dáta.
+Úlohou je teda prejsť celým súborom až pokým scanner nenájde koniec vstupného súboru
+( v C terminológii EOF - End Of File ), odhaliť prípadne lexikálne chyby a
+v prípade lexikálnej bezchybnosti programu vyplniť vektor tokenmi a pripraviť
+tak vstup do syntaktickej analýzy.
+
+Implementácia lexikálnej analýzy spočíva v konštrukcii konečného automatu
+( v angličtine finite state machine ), ktorý prečíta znak zo súboru, vyhodnotí
+ho a na základe aktuálneho stavu a vstupného znaku môžu nastať tri nasledujúce
+ možnosti:
+
+1. aktuálny stav neumožnuje pokračovať s daným vstupným znakom a ukončuje tak
+jeden token, znak sa "vracia" naspäť do vstupného súboru, avšak v našom prípade
+len uloženie do pomocnej premennej a uchovanie informácie, že další znak pre
+další token bude čítaný nie zo súboru ale z tejto pomocnej premennej.
+
+2. aktálny stav umožnuje pokračovať s daným vstupným znakom, mení sa stav automatu,
+avšak táto zmena môže byť v niektorých prípadoch nie úplne zmenou ak pokračujeme
+do stavu, ktorý je zároveň aktuálnym stavom.
+
+3. aktuálny stav neumožnuje pokračovat s daným vstupným znakom a zároveň
+nedovoluje ukončiť token.To znamená,že sa v programe nachádza lexikálna chyba.
+
+Špeciálnym prípadom sú stavy pre komentáre a blokové komentáre programu, ktoré
+lexikálna analýza registruje, ale kedže sú nepodstatné pre činnosť zdrojového
+programu, zahadzuje tieto informácie a ani ich ďalej nespracúva a neposiela
+syntaktickej analýze v podobe tokenu.
+
+Tento automat najlepšie ilustruje príloha č.1 , kde je nakreslený model
+automatu lexikálnej analýzy.
 \newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
