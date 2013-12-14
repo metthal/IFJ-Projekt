@@ -18,6 +18,9 @@
 \usepackage[top=3.5cm, left=2.5cm, text={17cm, 24cm}, ignorefoot]{geometry}
 
 \setcounter{secnumdepth}{4}
+\usepackage{pdflscape}
+\usepackage{afterpage}
+\usepackage{capt-of}% or use the larger `caption` package
 
 \begin{document}
 
@@ -136,7 +139,7 @@ syntaktickej analýze v podobe tokenu.
 
 Tento automat najlepšie ilustruje príloha č.1 , kde je nakreslený model
 automatu lexikálnej analýzy.
-\newpage
+
 %=============================================================================
 \subsection{Interpret}
 
@@ -267,7 +270,6 @@ príslušná inštrukcia vstavanej funckie a táto nastaví aj návratovú hodno
 Pre konverziu parametrov vstavaných funkcií na požadovaný typ sa využívajú už existujúce
 konverzné funkcie, napríklad v prípade prevodu na \texttt{string} sa využije funkcia
 \texttt{valueToString}, ktorá je však využitá aj pri vstavanej funkcii \texttt{strval}.
-\newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % IAL
@@ -348,34 +350,34 @@ Zmena veľkosti tabuľky sa deje pri záťaži 0,75. Zahodí sa staré pole inde
 
 %=============================================================================
 \subsection{LL gramatika}
-PROG $\Rightarrow$ $\textless$?php BODY\\
-BODY $\Rightarrow$ STMT BODY\\
-BODY $\Rightarrow$ FUNC BODY\\
-BODY $\Rightarrow$ \$\\
-FUNC $\Rightarrow$ function id ( PARAM\_LIST ) \{ STMT\_LIST \}\\
-STMT\_LIST $\Rightarrow$ $\varepsilon$\\
-STMT\_LIST $\Rightarrow$ STMT STMT\_LIST\\
-STMT $\Rightarrow$ var\_id = EXPR ;\\
-STMT $\Rightarrow$ return EXPR ;\\
-STMT $\Rightarrow$ break ;\\
-STMT $\Rightarrow$ continue ;\\
-STMT $\Rightarrow$ if ( EXPR ) \{ STMT\_LIST \} ELSEIF\_STMT ELSE\_STMT\\
-STMT $\Rightarrow$ while ( EXPR ) \{ STMT\_LIST \}\\
-STMT $\Rightarrow$ for ( FOR\_STMT\_1 ; FOR\_STMT\_2 ; FOR\_STMT\_1 ) \{ STMT\_LIST \}\\
-ELSEIF\_STMT $\Rightarrow$ $\varepsilon$\\
-ELSEIF\_STMT $\Rightarrow$ elseif ( EXPR ) \{ STMT\_LIST \} ELSEIF\_STMT\\
-ELSE\_STMT $\Rightarrow$ $\varepsilon$\\
-ELSE\_STMT $\Rightarrow$ else \{ STMT\_LIST \}\\
-PARAM\_LIST $\Rightarrow$ $\varepsilon$\\
-PARAM\_LIST $\Rightarrow$ var\_id DEF\_ARG NPARAM\_LIST\\
-NPARAM\_LIST $\Rightarrow$ $\varepsilon$\\
-NPARAM\_LIST $\Rightarrow$ , var\_id DEF\_ARG NPARAM\_LIST\\
-DEF\_ARG $\Rightarrow$ $\varepsilon$\\
-DEF\_ARG $\Rightarrow$ = literal\\
-FOR\_STMT\_1 $\Rightarrow$ $\varepsilon$\\
-FOR\_STMT\_1 $\Rightarrow$ var\_id = EXPR\\
-FOR\_STMT\_2 $\Rightarrow$ $\varepsilon$\\
-FOR\_STMT\_2 $\Rightarrow$ EXPR\\
+1. PROG $\Rightarrow$ $\textless$?php BODY\\
+2. BODY $\Rightarrow$ STMT BODY\\
+3. BODY $\Rightarrow$ FUNC BODY\\
+4. BODY $\Rightarrow$ \$\\
+5. FUNC $\Rightarrow$ function id ( PARAM\_LIST ) \{ STMT\_LIST \}\\
+6. STMT\_LIST $\Rightarrow$ $\varepsilon$\\
+7. STMT\_LIST $\Rightarrow$ STMT STMT\_LIST\\
+8. STMT $\Rightarrow$ var\_id = EXPR ;\\
+9. STMT $\Rightarrow$ return EXPR ;\\
+10. STMT $\Rightarrow$ break ;\\
+11. STMT $\Rightarrow$ continue ;\\
+12. STMT $\Rightarrow$ if ( EXPR ) \{ STMT\_LIST \} ELSEIF\_STMT ELSE\_STMT\\
+13. STMT $\Rightarrow$ while ( EXPR ) \{ STMT\_LIST \}\\
+14. STMT $\Rightarrow$ for ( FOR\_STMT\_1 ; FOR\_STMT\_2 ; FOR\_STMT\_1 ) \{ STMT\_LIST \}\\
+15. ELSEIF\_STMT $\Rightarrow$ $\varepsilon$\\
+16. ELSEIF\_STMT $\Rightarrow$ elseif ( EXPR ) \{ STMT\_LIST \} ELSEIF\_STMT\\
+17. ELSE\_STMT $\Rightarrow$ $\varepsilon$\\
+18. ELSE\_STMT $\Rightarrow$ else \{ STMT\_LIST \}\\
+19. PARAM\_LIST $\Rightarrow$ $\varepsilon$\\
+20. PARAM\_LIST $\Rightarrow$ var\_id DEF\_ARG NPARAM\_LIST\\
+21. NPARAM\_LIST $\Rightarrow$ $\varepsilon$\\
+22. NPARAM\_LIST $\Rightarrow$ , var\_id DEF\_ARG NPARAM\_LIST\\
+23. DEF\_ARG $\Rightarrow$ $\varepsilon$\\
+24. DEF\_ARG $\Rightarrow$ = literal\\
+25. FOR\_STMT\_1 $\Rightarrow$ $\varepsilon$\\
+26. FOR\_STMT\_1 $\Rightarrow$ var\_id = EXPR\\
+27. FOR\_STMT\_2 $\Rightarrow$ $\varepsilon$\\
+28. FOR\_STMT\_2 $\Rightarrow$ EXPR\\
  \\
 EXPR $\Rightarrow$ EXPR + EXPR \\
 EXPR $\Rightarrow$ EXPR * EXPR \\
@@ -399,6 +401,46 @@ EXPR $\Rightarrow$ id ( EXPR )  \\
 EXPR $\Rightarrow$ id ( EXPR , EXPR ) \\
 EXPR $\Rightarrow$ id ( EXPR , EXPR , EXPR ) \\
 EXPR $\Rightarrow$ var \\
+
+%=============================================================================
+
+    \afterpage{%
+    \clearpage% Flush earlier floats (otherwise order might not be correct)
+    \thispagestyle{empty}% empty page style (?)
+    \begin{landscape}% Landscape page
+\begin{table}
+    \begin{small}
+    \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|} \hline
+    ~        & {\scriptsize PROG \par} & {\scriptsize BODY \par} & {\scriptsize FUNC \par} & {\scriptsize STMT\_LIST \par} & {\scriptsize STMT \par} & {\scriptsize ELSEIF\_STMT \par} & {\scriptsize ELSE\_STMT \par} & {\scriptsize PARAM\_LIST \par} & {\scriptsize NPARAM\_LIST \par} & {\scriptsize DEF\_ARG \par} & {\scriptsize FOR\_STMT1 \par} & {\scriptsize FOR\_STMT2 \par} \\ \hline
+    =       & ~    & ~    & ~    & ~         & ~    & ~           & ~         & ~          & ~           & 24      & ~         & ~         \\ \hline
+    var\_id  & ~    & 2    & ~    & 7         & 8    & 15          & 17        & 20         & ~           & ~       & 26        & ~         \\ \hline
+    literal  & ~    & ~    & ~    & ~         & ~    & ~           & ~         & ~          & ~           & ~       & ~         & ~         \\ \hline
+    ,       & ~    & ~    & ~    & ~         & ~    & ~           & ~         & ~          & 22          & 23      & ~         & ~         \\ \hline
+    \}       & ~    & ~    & ~    & 6         & ~    & 15          & 17        & ~          & ~           & ~       & ~         & ~         \\ \hline
+    \{       & ~    & ~    & ~    & ~         & ~    & ~           & ~         & ~          & ~           & ~       & ~         & ~         \\ \hline
+    else     & ~    & ~    & ~    & ~         & ~    & 15          & 18        & ~          & ~           & ~       & ~         & ~         \\ \hline
+    )        & ~    & ~    & ~    & ~         & ~    & ~           & ~         & 19         & 21          & 23      & 25        & ~         \\ \hline
+    (        & ~    & ~    & ~    & ~         & ~    & ~           & ~         & ~          & ~           & ~       & ~         & ~         \\ \hline
+    elseif   & ~    & ~    & ~    & ~         & ~    & 16          & ~         & ~          & ~           & ~       & ~         & ~         \\ \hline
+    ;       & ~    & ~    & ~    & ~         & ~    & ~           & ~         & ~          & ~           & ~       & 25        & 27        \\ \hline
+    for      & ~    & 2    & ~    & 7         & 14   & 15          & 17        & ~          & ~           & ~       & ~         & ~         \\ \hline
+    while    & ~    & 2    & ~    & 7         & 13   & 15          & 17        & ~          & ~           & ~       & ~         & ~         \\ \hline
+    if       & ~    & 2    & ~    & 7         & 12   & 15          & 17        & ~          & ~           & ~       & ~         & ~         \\ \hline
+    continue & ~    & 2    & ~    & 7         & 11   & 15          & 17        & ~          & ~           & ~       & ~         & ~         \\ \hline
+    break    & ~    & 2    & ~    & 7         & 10   & 15          & 17        & ~          & ~           & ~       & ~         & ~         \\ \hline
+    return   & ~    & 2    & ~    & 7         & 9    & 15          & 17        & ~          & ~           & ~       & ~         & ~         \\ \hline
+    id       & ~    & ~    & ~    & ~         & ~    & ~           & ~         & ~          & ~           & ~       & ~         & ~         \\ \hline
+    function & ~    & 2    & ~    & 5         & ~    & 15          & 17        & ~          & ~           & ~       & ~         & ~         \\ \hline
+    \$      & ~    & 2    & ~    & ~         & ~    & 15          & 17        & ~          & ~           & ~       & ~         & ~         \\ \hline
+    $\textless$?php      & 1    & ~    & ~    & ~         & ~    & ~           & ~         & ~          & ~           & ~       & ~         & ~         \\ \hline
+    \end{tabular}
+    \end{small}
+    \captionof{table}{LL Tabuľka}
+\end{table}
+    \end{landscape}
+    \clearpage% Flush page
+    }
+
 
 %=============================================================================
 \subsection{Inštrukčná sada}
