@@ -17,6 +17,8 @@
 % velikost stranky
 \usepackage[top=3.5cm, left=2.5cm, text={17cm, 24cm}, ignorefoot]{geometry}
 
+\setcounter{secnumdepth}{4}
+
 \begin{document}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -150,71 +152,79 @@ syntaktickej analýze v podobe tokenu.
 Tento automat najlepšie ilustruje príloha č.1 , kde je nakreslený model
 automatu lexikálnej analýzy.
 \newpage
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% sablona
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{LL gramatika} \label{LL gramatika}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%=============================================================================
+\subsection{Interpret}
 
 %=============================================================================
-\subsection{LL gramatika}
-PROG $\Rightarrow$ $\textless$?php BODY\\
-BODY $\Rightarrow$ STMT BODY\\
-BODY $\Rightarrow$ FUNC BODY\\
-BODY $\Rightarrow$ \$\\
-FUNC $\Rightarrow$ function id ( PARAM\_LIST ) \{ STMT\_LIST \}\\
-STMT\_LIST $\Rightarrow$ $\varepsilon$\\
-STMT\_LIST $\Rightarrow$ STMT STMT\_LIST\\
-STMT $\Rightarrow$ var\_id = EXPR ;\\
-STMT $\Rightarrow$ return EXPR ;\\
-STMT $\Rightarrow$ break ;\\
-STMT $\Rightarrow$ continue ;\\
-STMT $\Rightarrow$ if ( EXPR ) \{ STMT\_LIST \} ELSEIF\_STMT ELSE\_STMT\\
-STMT $\Rightarrow$ while ( EXPR ) \{ STMT\_LIST \}\\
-STMT $\Rightarrow$ for ( FOR\_STMT\_1 ; FOR\_STMT\_2 ; FOR\_STMT\_1 ) \{ STMT\_LIST \}\\
-ELSEIF\_STMT $\Rightarrow$ $\varepsilon$\\
-ELSEIF\_STMT $\Rightarrow$ elseif ( EXPR ) \{ STMT\_LIST \} ELSEIF\_STMT\\
-ELSE\_STMT $\Rightarrow$ $\varepsilon$\\
-ELSE\_STMT $\Rightarrow$ else \{ STMT\_LIST \}\\
-PARAM\_LIST $\Rightarrow$ $\varepsilon$\\
-PARAM\_LIST $\Rightarrow$ var\_id DEF\_ARG NPARAM\_LIST\\
-NPARAM\_LIST $\Rightarrow$ $\varepsilon$\\
-NPARAM\_LIST $\Rightarrow$ , var\_id DEF\_ARG NPARAM\_LIST\\
-DEF\_ARG $\Rightarrow$ $\varepsilon$\\
-DEF\_ARG $\Rightarrow$ = literal\\
-FOR\_STMT\_1 $\Rightarrow$ $\varepsilon$\\
-FOR\_STMT\_1 $\Rightarrow$ var\_id = EXPR\\
-FOR\_STMT\_2 $\Rightarrow$ $\varepsilon$\\
-FOR\_STMT\_2 $\Rightarrow$ EXPR\\
+\subsubsection{Vstupy}
+TODO
 
 %=============================================================================
-\subsection{gramatika pre výrazy}
+\subsubsection{Vnútorné štruktúry}
+TODO
 
-EXPR $\Rightarrow$ EXPR + EXPR \\
-EXPR $\Rightarrow$ EXPR * EXPR \\
-EXPR $\Rightarrow$ EXPR - EXPR \\
-EXPR $\Rightarrow$ EXPR / EXPR \\
-EXPR $\Rightarrow$ EXPR . EXPR \\
-EXPR $\Rightarrow$ EXPR $\textless$ EXPR \\
-EXPR $\Rightarrow$ EXPR $\textgreater$ EXPR \\
-EXPR $\Rightarrow$ EXPR $\textgreater$= EXPR \\
-EXPR $\Rightarrow$ EXPR $\textless$= EXPR \\
-EXPR $\Rightarrow$ EXPR === EXPR \\
-EXPR $\Rightarrow$ EXPR !== EXPR \\
-EXPR $\Rightarrow$ EXPR \&\& EXPR \\
-EXPR $\Rightarrow$ EXPR || EXPR \\
-EXPR $\Rightarrow$ EXPR and EXPR \\
-EXPR $\Rightarrow$ EXPR or EXPR \\
-EXPR $\Rightarrow$ ! EXPR \\
-EXPR $\Rightarrow$ ( EXPR ) \\
-EXPR $\Rightarrow$ id ( ) \\
-EXPR $\Rightarrow$ id ( EXPR )  \\
-EXPR $\Rightarrow$ id ( EXPR , EXPR ) \\
-EXPR $\Rightarrow$ id ( EXPR , EXPR , EXPR ) \\
-EXPR $\Rightarrow$ var \\
+%=============================================================================
+\subsubsection{Inštrukcie}
+TODO
+
+%=============================================================================
+\subsubsection{Činnosť}
+TODO
+
+%=============================================================================
+\subsubsection{Princípy}
+
+\paragraph{Volanie funkcií}\mbox{}\\
+
+Pred volaním funkcie musí byť na zásobniku zarezervované 1 miesto pre návratovú hodnotu.
+Následné musia byť na zásobník vložené parametre funkcií v poradí, že prvý parameter bude
+bezprostredne pred vykonaním inštrukcie pre zavolanie funkcie na vrchole zásobniku.
+
+Po zavolaní funkcie sa na zásobníku interpretu vytvára zásobnikový ramec. Ten obsahuje (v tomto
+poradí smerom k vyšším adresám) miesto pre návratovú hodnotu, parametre funkcie, starý \texttt{stack pointer}
+, adresu inštrukcie pre návrat funkcie, lokálne premenné a zvyšok je určený pre medzivýsledky výrazov
+a pre vytváranie ďaľších zásobnikových rámcov.
+
+Ukončenie funkcie je sprevádzané nastavením \texttt{instruction pointer}a na adresu kam sa vykonávanie
+programu vráti po zmazaní aktuálneho zásobníkového rámca. Následne je obnovený aj starý \texttt{stack
+pointer} aby interpret ukazoval do nadradeného zásobníkového rámca a aktuálny zásobnikový
+rámec je zničený.
+
+\paragraph{Referencie}\mbox{}\\
+
+V rámci optimalizácií interpret nepracuje vždy na zásobníku s konkrétnymi hodnotami,
+ale aj s referenciami, čo sú ukazovatele na hodnoty niekde inde na zásobniku, poprípade
+v tabuľke konštánt. Referencia má v sebe nesie informáciu o relatívnej vzdialenosti od miesta
+na zásobníku, poprípade umiestnenie v tabuľke konštánt kam ukazuje. Existujú tieto typy referencií:
+
+\begin{enumerate}
+    \itemsep0em
+    \item \texttt{Strong Reference}
+    \item \texttt{Weak Reference}
+    \item \texttt{Const Reference}
+\end{enumerate}
+
+Každá z nich má iné vlastnosti týkajúce sa toho kedy dochádza k dereferncií a kedy
+je referencia prepísaná novou hodnotou.
+
+\texttt{Strong Reference} sa používa pre návrátové hodnoty v prípade najvyššieho volanie funckie,
+kedy sa do miesta pre návrtovú hodnotu vloží referencia na premennú do ktorej chceme
+výsledok funkcie priradiť. Pri priradení do \texttt{Strong Reference} dochádza k dereferncií a teda
+priamemu priradeniu bez zbytočných kopíí.
+
+\texttt{Weak Reference} sa používa pre parametre funkcií, ktoré sú typu String, kvôli časovej náročnosti
+kopírovania reťazca. Pri priradení do \texttt{Weak Reference} dochádza k nahradenie referencie
+novou hodnotou predstavujúcou výsledok výrazu, ktorý bol priradený. Pri všetkých ostatných použitiach
+\texttt{Weak Reference} dochádza k jej dereferencií. Pri snahe vložiť na zásobnik referenciu na \texttt{Weak Reference}
+je vytvorená \texttt{Weak Reference} na miesto kam ukazuje pôvodná Weak Reference.
+
+\texttt{Const Reference} je referencia do tabuľky konštánt, chová sa presne tak isto ako \texttt{Weak Reference},
+až na to že sa používa všade kde sa vo výraze nachádza konštanta.
+
+%=============================================================================
+\subsubsection{Vstavané funkcie}
+TODO
 \newpage
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % IAL
@@ -288,81 +298,93 @@ Zmena veľkosti tabuľky sa deje pri záťaži 0,75. Zahodí sa staré pole inde
  alokuje sa dvojnásobne väčšie. Následne sa postupne vkladajú všetky odkazy na
  záznamy z vektora do tabuľky, príp. sa vložia ako odkaz cez existujúci záznam.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Interpret}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% sablona
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Prílohy} \label{Prilohy}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %=============================================================================
-\subsection{Vstupy}
-TODO
+\subsection{LL gramatika}
+PROG $\Rightarrow$ $\textless$?php BODY\\
+BODY $\Rightarrow$ STMT BODY\\
+BODY $\Rightarrow$ FUNC BODY\\
+BODY $\Rightarrow$ \$\\
+FUNC $\Rightarrow$ function id ( PARAM\_LIST ) \{ STMT\_LIST \}\\
+STMT\_LIST $\Rightarrow$ $\varepsilon$\\
+STMT\_LIST $\Rightarrow$ STMT STMT\_LIST\\
+STMT $\Rightarrow$ var\_id = EXPR ;\\
+STMT $\Rightarrow$ return EXPR ;\\
+STMT $\Rightarrow$ break ;\\
+STMT $\Rightarrow$ continue ;\\
+STMT $\Rightarrow$ if ( EXPR ) \{ STMT\_LIST \} ELSEIF\_STMT ELSE\_STMT\\
+STMT $\Rightarrow$ while ( EXPR ) \{ STMT\_LIST \}\\
+STMT $\Rightarrow$ for ( FOR\_STMT\_1 ; FOR\_STMT\_2 ; FOR\_STMT\_1 ) \{ STMT\_LIST \}\\
+ELSEIF\_STMT $\Rightarrow$ $\varepsilon$\\
+ELSEIF\_STMT $\Rightarrow$ elseif ( EXPR ) \{ STMT\_LIST \} ELSEIF\_STMT\\
+ELSE\_STMT $\Rightarrow$ $\varepsilon$\\
+ELSE\_STMT $\Rightarrow$ else \{ STMT\_LIST \}\\
+PARAM\_LIST $\Rightarrow$ $\varepsilon$\\
+PARAM\_LIST $\Rightarrow$ var\_id DEF\_ARG NPARAM\_LIST\\
+NPARAM\_LIST $\Rightarrow$ $\varepsilon$\\
+NPARAM\_LIST $\Rightarrow$ , var\_id DEF\_ARG NPARAM\_LIST\\
+DEF\_ARG $\Rightarrow$ $\varepsilon$\\
+DEF\_ARG $\Rightarrow$ = literal\\
+FOR\_STMT\_1 $\Rightarrow$ $\varepsilon$\\
+FOR\_STMT\_1 $\Rightarrow$ var\_id = EXPR\\
+FOR\_STMT\_2 $\Rightarrow$ $\varepsilon$\\
+FOR\_STMT\_2 $\Rightarrow$ EXPR\\
+ \\
+EXPR $\Rightarrow$ EXPR + EXPR \\
+EXPR $\Rightarrow$ EXPR * EXPR \\
+EXPR $\Rightarrow$ EXPR - EXPR \\
+EXPR $\Rightarrow$ EXPR / EXPR \\
+EXPR $\Rightarrow$ EXPR . EXPR \\
+EXPR $\Rightarrow$ EXPR $\textless$ EXPR \\
+EXPR $\Rightarrow$ EXPR $\textgreater$ EXPR \\
+EXPR $\Rightarrow$ EXPR $\textgreater$= EXPR \\
+EXPR $\Rightarrow$ EXPR $\textless$= EXPR \\
+EXPR $\Rightarrow$ EXPR === EXPR \\
+EXPR $\Rightarrow$ EXPR !== EXPR \\
+EXPR $\Rightarrow$ EXPR \&\& EXPR \\
+EXPR $\Rightarrow$ EXPR || EXPR \\
+EXPR $\Rightarrow$ EXPR and EXPR \\
+EXPR $\Rightarrow$ EXPR or EXPR \\
+EXPR $\Rightarrow$ ! EXPR \\
+EXPR $\Rightarrow$ ( EXPR ) \\
+EXPR $\Rightarrow$ id ( ) \\
+EXPR $\Rightarrow$ id ( EXPR )  \\
+EXPR $\Rightarrow$ id ( EXPR , EXPR ) \\
+EXPR $\Rightarrow$ id ( EXPR , EXPR , EXPR ) \\
+EXPR $\Rightarrow$ var \\
 
 %=============================================================================
-\subsection{Vnútorné štruktúry}
-TODO
+\subsection{Inštrukčná sada}
 
-%=============================================================================
-\subsection{Inštrukcie}
-TODO
-
-%=============================================================================
-\subsection{Činnosť}
-TODO
-
-%=============================================================================
-\subsection{Princípy}
-
-\subsubsection{Volanie funkcií}
-
-Pred volaním funkcie musí byť na zásobniku zarezervované 1 miesto pre návratovú hodnotu.
-Následné musia byť na zásobník vložené parametre funkcií v poradí, že prvý parameter bude
-bezprostredne pred vykonaním inštrukcie pre zavolanie funkcie na vrchole zásobniku.
-
-Po zavolaní funkcie sa na zásobníku interpretu vytvára zásobnikový ramec. Ten obsahuje (v tomto
-poradí smerom k vyšším adresám) miesto pre návratovú hodnotu, parametre funkcie, starý \texttt{stack pointer}
-, adresu inštrukcie pre návrat funkcie, lokálne premenné a zvyšok je určený pre medzivýsledky výrazov
-a pre vytváranie ďaľších zásobnikových rámcov.
-
-Ukončenie funkcie je sprevádzané nastavením \texttt{instruction pointer}a na adresu kam sa vykonávanie
-programu vráti po zmazaní aktuálneho zásobníkového rámca. Následne je obnovený aj starý \texttt{stack
-pointer} aby interpret ukazoval do nadradeného zásobníkového rámca a aktuálny zásobnikový
-rámec je zničený.
-
-\subsubsection{Referencie}
-
-V rámci optimalizácií interpret nepracuje vždy na zásobníku s konkrétnymi hodnotami,
-ale aj s referenciami, čo sú ukazovatele na hodnoty niekde inde na zásobniku, poprípade
-v tabuľke konštánt. Referencia má v sebe nesie informáciu o relatívnej vzdialenosti od miesta
-na zásobníku, poprípade umiestnenie v tabuľke konštánt kam ukazuje. Existujú tieto typy referencií:
-
-\begin{enumerate}
-    \itemsep0em
-    \item \texttt{Strong Reference}
-    \item \texttt{Weak Reference}
-    \item \texttt{Const Reference}
-\end{enumerate}
-
-Každá z nich má iné vlastnosti týkajúce sa toho kedy dochádza k dereferncií a kedy
-je referencia prepísaná novou hodnotou.
-
-\texttt{Strong Reference} sa používa pre návrátové hodnoty v prípade najvyššieho volanie funckie,
-kedy sa do miesta pre návrtovú hodnotu vloží referencia na premennú do ktorej chceme
-výsledok funkcie priradiť. Pri priradení do \texttt{Strong Reference} dochádza k dereferncií a teda
-priamemu priradeniu bez zbytočných kopíí.
-
-\texttt{Weak Reference} sa používa pre parametre funkcií, ktoré sú typu String, kvôli časovej náročnosti
-kopírovania reťazca. Pri priradení do \texttt{Weak Reference} dochádza k nahradenie referencie
-novou hodnotou predstavujúcou výsledok výrazu, ktorý bol priradený. Pri všetkých ostatných použitiach
-\texttt{Weak Reference} dochádza k jej dereferencií. Pri snahe vložiť na zásobnik referenciu na \texttt{Weak Reference}
-je vytvorená \texttt{Weak Reference} na miesto kam ukazuje pôvodná Weak Reference.
-
-\texttt{Const Reference} je referencia do tabuľky konštánt, chová sa presne tak isto ako \texttt{Weak Reference},
-až na to že sa používa všade kde sa vo výraze nachádza konštanta.
-
-%=============================================================================
-\subsection{Vstavané funkcie}
-TODO
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\textbf{IST\_Mov a b}\\
+Presunutie operandu \textbf{a} do oberandu \textbf{b}. \\
+\textbf{IST\_Jmp dist}\\
+Inštrukcia pre vykonanie nepodmieneného skoku.\\
+Pripočítanie vzdialenosti(\textbf{dist}) skoku k aktuálnej hodnote instruction
+pointeru.\\
+\textbf{IST\_Jmpz dist cond}\\
+Inštrukcia pre vykonanie podmieneného skoku.\\
+V prípade ze hodnota v operande \textbf{cond} je rovna '0' tak sa prevedie
+pripočítanie vzdialenosti (\textbf{dist}) skoku k aktuálnej hodnote instruction
+pointeru.Prevádza sa pretypovanie v prípade nutnosti.\\
+\textbf{IST\_Push}\\
+Inštrukcia vklada položku na zásobnik.\\
+\textbf{IST\_PushC}\\
+Inštrukcia vklada konštantu na zásobnik.\\
+\textbf{IST\_Reserve N}\\
+Inštrukcia rezervuje miesto pre \textbf{N} položiek na zásobníku, pre neskoršie
+ použitie.\\
+\textbf{IST\_Pop N}\\
+Inštrukcia vytiahne \textbf{N} polozkiek zo zásobníku.\\
+\textbf{IST\_Call adressIndex}\\
+Inštrukcia v vloží na zásobník Stack pointer a Instruction Pointer. Nastaví
+Stack Pointer na vrchol zásobniku a nastaví Instruction Pointer na adresu
+\textbf{AdressTable[adressIndex]}.\\
 
 % koniec dokumentace
 \end{document}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
