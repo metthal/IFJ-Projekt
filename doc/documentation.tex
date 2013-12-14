@@ -84,22 +84,7 @@ Team leader: Marek Milkovič (xmilko01), 20\% \\
 \pagenumbering{arabic}
 \setcounter{page}{1}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% sablona
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Sablona} \label{uvod}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{center}
-\end{center}
-SABLONA
-
-
-%=============================================================================
-\subsection{subsablona}
-sablona
-\newpage
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % lex
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -157,11 +142,57 @@ automatu lexikálnej analýzy.
 
 %=============================================================================
 \subsubsection{Vstupy}
-TODO
+Interpret je volaný s troma parametrami:
+- Ukazateľ na prvú inštrukciu hlavného tela programu.
+- Odkaz na tabuľku konštánt, kde sú uložené všetky konštantné hodnoty.
+- Odkaz na tabuľku adries, ktorá poskytuje adresy na prvé inštrukcie funckií.
+Všetky parametre majú modifikátor \texttt{const}, chrániaci pred ich prípadnou zmenou
+vrámci interpretácie. Inštrukcie sú v pameti uložené bezprostredne za sebou, čo
+umožňuje jednoducho inkrementovať prvý predaný parameter po vykonaní aktuálnej
+inštrukcie. Aj keď sú inštrukcie funkcií uložené oddelene od tých ktoré tvoria hlavné
+telo programu, je možné sa k nim dostať práve cez reálne adresy uložené v tabuľke adries.
 
 %=============================================================================
 \subsubsection{Vnútorné štruktúry}
-TODO
+Zasobník
+Zásobník je najdôležitejšia štruktúra počas interpretácie. Je odvodená od štruktúry
+\texttt{Vector}, no pre zrýchlenie interpretácie boli pre ňu implementované ďalšie
+špecifické operácie. Rovnako ako tabuľka konštánt obsahuje položky typu \texttt{Value}, 
+ktorý združuje typ a samotnú hodnotu. Na zásobníku sa môžu nachádzať premenné, parametre
+funckie, referencie, zásobníkové a inštrukčné ukazatele ako aj medzivýsledky výrazov.
+
+Kapacita zásobníku, tj. predalokované miesto, je v rámci optimalízácie nastavená pred
+interpretáciou na dostatočne veľkú konštantu. Aj keď teda zásobník je dynamická štruktúra
+s možnosťou zmeny svojej kapacity, reálne sa tak deje veľmi ojedinele, napríklad v programoch
+využívajucich rekurziu.
+
+Vektor
+\texttt{Vector} je najpoužívanejšou štruktúrou v rámci programu. Jedná sa o jednorozmerné pole s
+dynamickou veľkosťou, uložené v pamäti ako jeden blok. Jeho prvky teda nasledujú v pamäti bezprostredne
+za sebou. \texttt{Vector} obsahuje predalokovaný priestor o určitej veľkosti, nazývanej kapacita.
+Ak by počet reálne využitých položiek, nazývaný veľkosť, mal presiahnuť kapacitu, vytvorí
+sa nový blok v pamäti a dáta sa skopírujú z predchádzajúceho bloku, ktorý je následne uvoľnený.
+Implementáciu tvoria dve časti -- všeobecná a špecifická.
+
+Všeobecná časť definuje operácie, ktoré sú nezávislé od dátového typu položiek. Jedná sa napríklad
+o operáciu \texttt{shrinkToFit}, ktorá obsah vektoru prealokuje do nového bloku, tak aby jeho
+kapacita bola rovná veľkosti, čím sa uvoľní nevyužívaná pameť. 
+
+Zdrojový kód pre špecifickú časť využíva makrá a definície, ktoré sa pred prekladom prepíšu
+špecifickými názvami a kódom. Takto je možné zdielať jeden zdrojový kód pre všetky štruktúry,
+ktoré majú vlastnosti štruktúry \texttt{Vector}, a líšia sa iba dátovým typom položiek. V hlavičkovom
+súbore pre novú štruktúru sa zadefinuje s akým typom by mal \texttt{Vector} pracovať, 
+a následne sú pre túto štruktúru nagenerované všetky potrebné operácie. Implementácia je možná vďaka
+konvenciám pri vytváraní nových zložených typov a operácií nad nimi. V jazyku C++ sa pre tento účel
+využívajú šablóny.
+
+\texttt{Vector} je používaný ako základ väčšiny dynamických štruktúr, medzi ktoré patria napríklad:
+- Zoznam tokenov
+- Inštrukčný vektor
+- Tabuľka symbolov
+- Tabuľka konštánt
+- Tabuľka adries
+- Zásobník
 
 %=============================================================================
 \subsubsection{Inštrukcie}
@@ -223,7 +254,19 @@ až na to že sa používa všade kde sa vo výraze nachádza konštanta.
 
 %=============================================================================
 \subsubsection{Vstavané funkcie}
-TODO
+Každá vstavaná funkcia predstavuje pre interpret samostatnú inštrukciu. Ak sa
+názov vstavanej funkcie objaví vo výraze, je už za prekladu rozpoznaná a 
+nageneruje sa príslušná inštrukcia. Vstavané funkcie zdieľajú koncept zásobníkového
+rámca s užívateľom definovanými funkciami, teda na zásobníku sa pri zavolaní funkcie 
+nachádza miesto pre návratovú hodnotu a následujú parametre. Keďže však vstavaná funkcia
+má presne predpísanú činnosť, ktorá bola implementovaná ako súčasť interpretu v jazyku C,
+nie je potrebné na zásobník ukladať \texttt{stack pointer} a \texttt{instruction pointer}.
+Volanie vstavanej funkcie sa potom líši v tom, že namiesto \texttt{IST\_Call} sa vykoná 
+príslušná inštrukcia vstavanej funckie a táto nastaví aj návratovú hodnotu.
+
+Pre konverziu parametrov vstavaných funkcií na požadovaný typ sa využívajú už existujúce
+konverzné funkcie, napríklad v prípade prevodu na \texttt{string} sa využije funkcia
+\texttt{valueToString}, ktorá je však využitá aj pri vstavanej funkcii \texttt{strval}.
 \newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -384,6 +427,20 @@ Inštrukcia vytiahne \textbf{N} polozkiek zo zásobníku.\\
 Inštrukcia v vloží na zásobník Stack pointer a Instruction Pointer. Nastaví
 Stack Pointer na vrchol zásobniku a nastaví Instruction Pointer na adresu
 \textbf{AdressTable[adressIndex]}.\\
+\textbf{IST\_NUllify offset}\\
+Inštrukcia nastaví položku na adrese \textbf{offset} v zásobniku na NULL.\\
+\textbf{IST\_Add res a b}\\
+Vykoná \textbf{a} + \textbf{b} a výsledok uloží do \textbf{res}.\\
+\textbf{a}, \textbf{b}, \textbf{res} sú relatívne adresy na zásobníku.\\
+\textbf{IST\_Subtract res a b}\\
+Vykoná \textbf{a} - \textbf{b} a výsledok uloží do \textbf{res}.\\
+\textbf{a}, \textbf{b}, \textbf{res} sú relatívne adresy na zásobníku.\\
+\textbf{IST\_Multiply res a b}\\
+Vykoná \textbf{a} * \textbf{b} a výsledok uloží do \textbf{res}.\\
+\textbf{a}, \textbf{b}, \textbf{res} sú relatívne adresy na zásobníku.\\
+\textbf{IST\_Divide res a b}\\
+Vykoná \textbf{a} / \textbf{b} a výsledok uloží do \textbf{res}.\\
+\textbf{a}, \textbf{b}, \textbf{res} sú relatívne adresy na zásobníku.\\
 
 % koniec dokumentace
 \end{document}
