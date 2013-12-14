@@ -31,7 +31,7 @@
 \begin{figure}[!h]
   \centering
   \includegraphics[height=5cm]{doc/img/logo.eps}
-\end{figure} 
+\end{figure}
 \center Fakulta Informačních Technologií \\
 \center Vysoké Učení Technické v Brně \\
 
@@ -106,20 +106,22 @@ sablona
 
 %=============================================================================
 \subsection{Lexikálna analýza}
-Úlohy lexikálnej analýzy : \\
-1. čítanie znakov zo vstupu a ich preklad na postupnosť tokenov, ktoré ďalej slúžia
-syntaktickej analýze \\
-2. odstránenie komentárov a bielych znakov v zdrojovom programe \\
-3. nájdenie lexikálnych chýb v zdrojovom programe \\
+Úlohy lexikálnej analýzy sú
+\begin{enumerate}
+    \itemsep0em
+    \item čítanie znakov zo vstupu a ich preklad na postupnosť tokenov, ktoré ďalej slúžia syntaktickej analýze
+    \item odstránenie komentárov a bielych znakov v zdrojovom programe
+    \item nájdenie lexikálnych chýb v zdrojovom programe
+\end{enumerate}
 
 Výstup lexikálnej analýzy je zároveň vstupom do syntaktickej analýzy, preto je
 lexikálna analýza volaná syntaktickou analýzou. V našom prípade je konkrétne
 výstup lexikálnej analýzy vektor tokenov, kde token je štruktúra obsahujúca
 informácie o type tokenu ( typ tokenu je enumerácia všetkých prípustných tokenov )
 a v prípade tokenov vyžadujúcich dalšie informácie ako napríklad obsah stringu
-( znakový reťazec ) čí číselnu hodnotu tokenu typu číslo obsahuje štruktúra aj tieto dáta.
+(znakový reťazec) čí číselnu hodnotu tokenu typu číslo obsahuje štruktúra aj tieto dáta.
 Úlohou je teda prejsť celým súborom až pokým scanner nenájde koniec vstupného súboru
-( v C terminológii EOF - End Of File ), odhaliť prípadne lexikálne chyby a
+(v C terminológii \texttt{EOF} - End Of File), odhaliť prípadne lexikálne chyby a
 v prípade lexikálnej bezchybnosti programu vyplniť vektor tokenmi a pripraviť
 tak vstup do syntaktickej analýzy.
 
@@ -286,7 +288,81 @@ Zmena veľkosti tabuľky sa deje pri záťaži 0,75. Zahodí sa staré pole inde
  alokuje sa dvojnásobne väčšie. Následne sa postupne vkladajú všetky odkazy na
  záznamy z vektora do tabuľky, príp. sa vložia ako odkaz cez existujúci záznam.
 
-% koniec dokumentace
-\end{document}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Interpret}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%=============================================================================
+\subsection{Vstupy}
+TODO
+
+%=============================================================================
+\subsection{Vnútorné štruktúry}
+TODO
+
+%=============================================================================
+\subsection{Inštrukcie}
+TODO
+
+%=============================================================================
+\subsection{Činnosť}
+TODO
+
+%=============================================================================
+\subsection{Princípy}
+
+\subsubsection{Volanie funkcií}
+
+Pred volaním funkcie musí byť na zásobniku zarezervované 1 miesto pre návratovú hodnotu.
+Následné musia byť na zásobník vložené parametre funkcií v poradí, že prvý parameter bude
+bezprostredne pred vykonaním inštrukcie pre zavolanie funkcie na vrchole zásobniku.
+
+Po zavolaní funkcie sa na zásobníku interpretu vytvára zásobnikový ramec. Ten obsahuje (v tomto
+poradí smerom k vyšším adresám) miesto pre návratovú hodnotu, parametre funkcie, starý \texttt{stack pointer}
+, adresu inštrukcie pre návrat funkcie, lokálne premenné a zvyšok je určený pre medzivýsledky výrazov
+a pre vytváranie ďaľších zásobnikových rámcov.
+
+Ukončenie funkcie je sprevádzané nastavením \texttt{instruction pointer}a na adresu kam sa vykonávanie
+programu vráti po zmazaní aktuálneho zásobníkového rámca. Následne je obnovený aj starý \texttt{stack
+pointer} aby interpret ukazoval do nadradeného zásobníkového rámca a aktuálny zásobnikový
+rámec je zničený.
+
+\subsubsection{Referencie}
+
+V rámci optimalizácií interpret nepracuje vždy na zásobníku s konkrétnymi hodnotami,
+ale aj s referenciami, čo sú ukazovatele na hodnoty niekde inde na zásobniku, poprípade
+v tabuľke konštánt. Referencia má v sebe nesie informáciu o relatívnej vzdialenosti od miesta
+na zásobníku, poprípade umiestnenie v tabuľke konštánt kam ukazuje. Existujú tieto typy referencií:
+
+\begin{enumerate}
+    \itemsep0em
+    \item \texttt{Strong Reference}
+    \item \texttt{Weak Reference}
+    \item \texttt{Const Reference}
+\end{enumerate}
+
+Každá z nich má iné vlastnosti týkajúce sa toho kedy dochádza k dereferncií a kedy
+je referencia prepísaná novou hodnotou.
+
+\texttt{Strong Reference} sa používa pre návrátové hodnoty v prípade najvyššieho volanie funckie,
+kedy sa do miesta pre návrtovú hodnotu vloží referencia na premennú do ktorej chceme
+výsledok funkcie priradiť. Pri priradení do \texttt{Strong Reference} dochádza k dereferncií a teda
+priamemu priradeniu bez zbytočných kopíí.
+
+\texttt{Weak Reference} sa používa pre parametre funkcií, ktoré sú typu String, kvôli časovej náročnosti
+kopírovania reťazca. Pri priradení do \texttt{Weak Reference} dochádza k nahradenie referencie
+novou hodnotou predstavujúcou výsledok výrazu, ktorý bol priradený. Pri všetkých ostatných použitiach
+\texttt{Weak Reference} dochádza k jej dereferencií. Pri snahe vložiť na zásobnik referenciu na \texttt{Weak Reference}
+je vytvorená \texttt{Weak Reference} na miesto kam ukazuje pôvodná Weak Reference.
+
+\texttt{Const Reference} je referencia do tabuľky konštánt, chová sa presne tak isto ako \texttt{Weak Reference},
+až na to že sa používa všade kde sa vo výraze nachádza konštanta.
+
+%=============================================================================
+\subsection{Vstavané funkcie}
+TODO
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% koniec dokumentace
+\end{document}
