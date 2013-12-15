@@ -111,55 +111,56 @@ Team leader: Marek Milkovič (xmilko01), 20\% \\
 \end{enumerate}
 
 Výstup lexikálnej analýzy je zároveň vstupom do syntaktickej analýzy, preto je
-lexikálna analýza volaná syntaktickou analýzou. V našom prípade je konkrétne
+lexikálna analýza volaná syntaktickou analýzou. V našom konkrétnom prípade je
 výstup lexikálnej analýzy vektor tokenov, kde token je štruktúra obsahujúca
-informácie o type tokenu (typ tokenu je enumerácia všetkých prípustných tokenov)
-a v prípade tokenov vyžadujúcich dalšie informácie ako napríklad obsah stringu
-(znakový reťazec) čí číselnu hodnotu tokenu typu číslo obsahuje štruktúra aj tieto dáta.
-Úlohou je teda prejsť celým súborom až pokým scanner nenájde koniec vstupného súboru
+jehoo typ (typ je enumerácia všetkých prípustných tokenov)
+a v prípade tokenov vyžadujúcich dalšie informácie ako napríklad znakový reťazec,
+či prevedenú číselnú hodnotu obsahuje štruktúra aj tieto dáta.
+Cieľom je teda prejsť celým súborom až pokým scanner nenájde koniec vstupného súboru
 (v C terminológii \texttt{EOF} - End Of File), odhaliť prípadne lexikálne chyby a
-v prípade lexikálnej bezchybnosti programu vyplniť vektor tokenmi a pripraviť
+v prípade lexikálnej bezchybnosti programu naplniť vektor tokenmi, a pripraviť
 tak vstup do syntaktickej analýzy.
 
 Implementácia lexikálnej analýzy spočíva v konštrukcii konečného automatu
-(v angličtine finite state machine), ktorý prečíta znak zo súboru, vyhodnotí
+(angl. finite state machine), ktorý prečíta znak zo súboru, vyhodnotí
 ho a na základe aktuálneho stavu a vstupného znaku môžu nastať tri nasledujúce
- možnosti:
+možnosti:
 
 1. aktuálny stav neumožnuje pokračovať s daným vstupným znakom a ukončuje tak
-jeden token, znak sa "vracia" naspäť do vstupného súboru, avšak v našom prípade
-len uloženie do pomocnej premennej a uchovanie informácie, že další znak pre
-další token bude čítaný nie zo súboru ale z tejto pomocnej premennej.
+jeden token. Prečítaný znak by sa mal navrátiť späť do vstupného súboru, avšak v našej
+implementácii sa uloží do pomocnej premennej a nastaví sa príznak, že znak pre
+další token bude čítaný nie zo súboru, ale z tejto pomocnej premennej.
 
-2. aktálny stav umožnuje pokračovať s daným vstupným znakom, mení sa stav automatu,
-avšak táto zmena môže byť v niektorých prípadoch nie úplne zmenou ak pokračujeme
-do stavu, ktorý je zároveň aktuálnym stavom.
+2. aktuálny stav umožňuje pokračovať s daným vstupným znakom a nastáva prechod do nového stavu.
+V niektorých prípadoch je nový stav totožný s aktuálnym stavom, preto k zmene stavu nedochádza.
 
 3. aktuálny stav neumožnuje pokračovat s daným vstupným znakom a zároveň
-nedovoluje ukončiť token.To znamená,že sa v programe nachádza lexikálna chyba.
+nedovoluje ukončiť token. To znamená, že sa v programe nachádza lexikálna chyba.
 
 Špeciálnym prípadom sú stavy pre komentáre a blokové komentáre programu, ktoré
 lexikálna analýza registruje, ale kedže sú nepodstatné pre činnosť zdrojového
-programu, zahadzuje tieto informácie a ani ich ďalej nespracúva a neposiela
+programu, ignoruje tieto informácie a ďalej ich nespracováva ani neposiela
 syntaktickej analýze v podobe tokenu.
 
-Tento automat najlepšie ilustruje príloha č.1, kde je nakreslený model
-automatu lexikálnej analýzy.
+Automat lexikálnej analýzy najlepšie ilustruje príloha č.1, kde je nakreslený jej model.
 
 %=============================================================================
 \subsection{Syntaktická a sémantická analýza}
-Syntaktická analýya sa spúšťa po lexikálnej analýze a pracuje s vektorom tokenov,
-ktorý naplnila. Riadi LL gramatikou a jej pravidlami podľa LL tabuľky v prílohách.
-Implementovaná je rekurzívnym zostupom, pričom v prípade vyhodnocovania výrazov sa
+Syntaktická analýza sa spúšťa po úsešne dokončenej lexikálnej analýze a pracuje s vektorom tokenov,
+ktorý bol vytvorený. Riadi sa LL gramatikou a jej pravidlami podľa LL tabuľky v prílohách.
+Implementovaná je rekurzívnym zostupom, pričom v prípade potreby spracovania výrazu sa
 z nej spúšťa precedenčná analýza.
 
 Vzhľadom na to, že nami implementovaný jazyk podporuje volanie funkcie ešte pred
 jej definíciou, alebo napríklad deklaráciu premennej v podmienenej časti kódu,
-použili sme dvojfázový priechod vektorom tokenov, kde pri prvom priechode sa zaznamenáva počet
-lokálnych premenných v hlavnom tele programu a vo všetkých funkiách pričom tieto premenné
-sú automaticky vkladané do lokálnych tabuliek symbolov a zároveň sa napĺňa aj globálna
-tabuľka symbolov s definíciami funkcií. Pri druhom priechode preto už vieme, že či je daná funkcia
-definovaná, alebo nie a na základe toho vrátiť správny chybový kód.
+použili sme dvojfázový prechod vektorom tokenov. Pri prvom prechode sa hlavne kontroluje syntaktická
+správnosť programu. Ďalej sa zaznamenáva počet lokálnych premenných v hlavnom tele programu a vo 
+všetkých funkciách, pričom tieto premenné sú vkladané do príslušných lokálnych tabuliek symbolov, a rovnako
+sa napĺňa aj globálna tabuľka symbolov definíciami funkcií.
+
+V druhom prechode je potom už možné kontrolovať sémantické chyby programu, ako napríklad volanie
+nedefinovanej funckie, použitie neexistujúcej premennej alebo volanie funkcie so zlým počtom parametrov,
+a taktiež sa vytvárajú inštrukcie pre interpret.
 
 %=============================================================================
 \subsection{Interpret}
@@ -174,9 +175,9 @@ Interpret je volaný s tromi parametrami:
     \item Odkaz na tabuľku adries, ktorá poskytuje adresy na prvé inštrukcie funckií.
 \end{enumerate}
 Všetky parametre majú modifikátor \texttt{const}, chrániaci pred ich prípadnou zmenou
-v rámci interpretácie. Inštrukcie sú v pameti uložené bezprostredne za sebou, čo
+v rámci interpretácie. Inštrukcie sú v pamäti uložené bezprostredne za sebou, čo
 umožňuje jednoducho inkrementovať prvý predaný parameter po vykonaní aktuálnej
-inštrukcie. Aj keď sú inštrukcie funkcií uložené oddelene od tých ktoré tvoria hlavné
+inštrukcie. Aj keď sú inštrukcie funkcií uložené oddelene od tých, ktoré tvoria hlavné
 telo programu, je možné sa k nim dostať práve cez reálne adresy uložené v tabuľke adries.
 
 %=============================================================================
@@ -185,35 +186,35 @@ telo programu, je možné sa k nim dostať práve cez reálne adresy uložené v
 \paragraph{Zasobník}\mbox{}\\
 
 Zásobník je najdôležitejšia štruktúra počas interpretácie. Je odvodená od štruktúry
-\texttt{Vector}, no pre zrýchlenie interpretácie boli pre ňu implementované ďalšie
+\texttt{Vector}, no z dôvodu zrýchlenia interpretácie pre ňu boli implementované ďalšie
 špecifické operácie. Rovnako ako tabuľka konštánt obsahuje položky typu \texttt{Value}, 
 ktorý združuje typ a samotnú hodnotu. Na zásobníku sa môžu nachádzať premenné, parametre
-funckie, referencie, zásobníkové a inštrukčné ukazatele ako aj medzivýsledky výrazov.
+funckie, referencie, zásobníkové a inštrukčné ukazatele, ako aj medzivýsledky výrazov.
 
-Kapacita zásobníku, tj. predalokované miesto, je v rámci optimalizácie nastavená pred
+Kapacita zásobníku, tj. predalokované miesto, je v rámci optimalizácií nastavená pred
 interpretáciou na dostatočne veľkú konštantu. Aj keď teda zásobník je dynamická štruktúra
-s možnosťou zmeny svojej kapacity, reálne sa tak deje veľmi ojedinele, napríklad v programoch
+s možnosťou zmeny svojej kapacity, reálne sa tak deje len veľmi ojedinele, napríklad v programoch
 využívajucich rekurziu.
 
 \paragraph{Vektor}\mbox{}\\
 
 \texttt{Vector} je najpoužívanejšou štruktúrou v rámci programu. Jedná sa o jednorozmerné pole s
 dynamickou veľkosťou, uložené v pamäti ako jeden blok. Jeho prvky teda nasledujú v pamäti bezprostredne
-za sebou. \texttt{Vector} obsahuje predalokovaný priestor o určitej veľkosti, nazývanej kapacita.
-Ak by počet reálne využitých položiek, nazývaný veľkosť, mal presiahnuť kapacitu, vytvorí
+za sebou. \texttt{Vector} obsahuje predalokovaný priestor o určitej veľkosti, nazývanej {\em kapacita}.
+Ak by počet reálne využitých položiek, nazývaný {\em veľkosť}, mal presiahnuť {\em kapacitu}, vytvorí
 sa nový blok v pamäti a dáta sa skopírujú z predchádzajúceho bloku, ktorý je následne uvoľnený.
 Implementáciu tvoria dve časti -- všeobecná a špecifická.
 
 Všeobecná časť definuje operácie, ktoré sú nezávislé od dátového typu položiek. Jedná sa napríklad
-o operáciu \texttt{shrinkToFit}, ktorá obsah vektoru prealokuje do nového bloku, tak aby jeho
-kapacita bola rovná veľkosti, čím sa uvoľní nevyužívaná pameť. 
+o operáciu \texttt{shrinkToFit}, ktorá obsah vektoru prealokuje do nového bloku tak, aby jeho
+kapacita bola rovná veľkosti, čím sa uvoľní nevyužívaná pamäť. 
 
 Zdrojový kód pre špecifickú časť využíva makrá a definície, ktoré sa pred prekladom prepíšu
 špecifickými názvami a kódom. Takto je možné zdielať jeden zdrojový kód pre všetky štruktúry,
 ktoré majú vlastnosti štruktúry \texttt{Vector}, a líšia sa iba dátovým typom položiek. V hlavičkovom
-súbore pre novú štruktúru sa zadefinuje s akým typom by mal \texttt{Vector} pracovať, 
+súbore novej štruktúry sa zadefinuje s akým typom by mal \texttt{Vector} pracovať, 
 a následne sú pre túto štruktúru nagenerované všetky potrebné operácie. Implementácia je možná vďaka
-konvenciám pri vytváraní nových zložených typov a operácií nad nimi. V jazyku C++ sa pre tento účel
+konvenciám používaných pri tvorbe nových zložených typov a operácií nad nimi. V jazyku C++ sa pre tento účel
 využívajú šablóny.
 
 \texttt{Vector} je používaný ako základ väčšiny dynamických štruktúr, medzi ktoré patria napríklad:
@@ -229,7 +230,7 @@ využívajú šablóny.
 
 %=============================================================================
 \subsubsection{Inštrukcie}
-Inštrukcia je reprezentovaná štruktúrou \texttt{Instruction}, ktorá obsahuje nasledujúce data:
+Inštrukcia je reprezentovaná štruktúrou \texttt{Instruction}, ktorá obsahuje nasledujúce dáta:
 \begin{itemize}
     \itemsep0em
     \item Inštrukčný kód
@@ -240,46 +241,46 @@ Inštrukcia je reprezentovaná štruktúrou \texttt{Instruction}, ktorá obsahuj
 \end{itemize}
 Inštrukčný kód je reprezentovaný enumeráciou, podľa ktorej intepret vie, akú činnosť má vykonať pri
 prečítaní danej inštrukcie. Inštrukčný mód je použitý pri niektorých inštrukciách, ktorých operand
-môže byť buď konštanta z tabuľky konštánt alebo hodnota zo zásobnika, kde mód ako bitová maska
-určuje, ktorý operand pochádza odkiaľ. Operandy A a B sú brané ako vstupné operandy do inštrukcie a sú
-to čísla, ktoré informujú o pozícií v tabuľke konštánt. Operand R je braný ako cieľový a vyjadruje vždy
-pozíciu na zásobníku v rámci aktuálneho zásobníkového ramca. Inštrukčná sada sa nachádza v prílohách.
+môže byť buď konštanta z tabuľky konštánt, alebo hodnota zo zásobnika, kde mód v podobe bitovej masky
+určuje, ktorý operand pochádza odkiaľ. Operandy A a B sú používané ako vstupné operandy do inštrukcie a sú
+to čísla, ktoré informujú o pozícií v tabuľke konštánt, resp. zásobníku. Operand R potom predstavuje cieľové miesto 
+v rámci aktuálneho zásobníkového ramca, kam sa uloží výsledok inštrukcie. Inštrukčná sada sa nachádza v prílohách.
 
 %=============================================================================
 \subsubsection{Činnosť}
 Interpret má \texttt{instruction pointer} ukazujúci na inštrukciu v inštrukčnom vektore,
 ktorá sa bude ako nasledujúca vykonávať. Po spustení interpretačnej časti programu
-tento pointer ukazuje na prvú inštrukciu v hlavnom inštrukčnom vektore. Pokiaľ nedochádza ku skokom,
+tento ukazateľ ukazuje na prvú inštrukciu v hlavnom inštrukčnom vektore. Pokiaľ nedochádza ku skokom,
 \texttt{instruction pointer} sa po inštrukčnom vektore posúva sekvenčne až na jeho koniec.
 
-Pri skoku môže dôjsť k posunutiu \texttt{instruction pointer}a hocikde do hlavného
-inštrukčného vektora, alebo aj do inštrukčného vektora pre funkcie v prípade volania funkcie.
+Pri skoku môže dôjsť k posunutiu ukazateľa na ľubovoľnú inštrukciu hlavného
+inštrukčného vektora alebo, v prípade volania funkcie, prepísaniu jeho obsahu adresou prvej inštrukcie funckie.
 
 Po inicializácií potrebných štruktúr a premenných sa začína interpretačný cyklus.
 Ten prečíta z inštrukcie na ktorú ukazuje \texttt{instruction pointer} jej kód a podľa
-toho reaguje svojou činnosťou. Na konci inštrukčného cyklu sa inkrementuje \texttt{instruction pointer},
-ak zrovna nedošlo ku skoku.
+toho reaguje svojou činnosťou. Po neskokovej inštrukcii sa \texttt{instruction pointer} inkrementuje,
+čím sa prejde na ďalšiu inštrukciu.
 
-Keď interpret rozpozná koniec programu na základe vložených inštrukcií a informáciam na zásobníku, svoju činnosť končí.
+Interpret svoju činnosť končí odstránením posledného zásobníkového rámcu, ktorý bol vytvorený ešte pred spustením
+interpretácie, a na zásobníku teda zostáva jediná hodnota -- návratová hodnota programu. 
 
 %=============================================================================
 \subsubsection{Princípy}
 
 \paragraph{Volanie funkcií}\mbox{}\\
 
-Pred volaním funkcie musí byť na zásobniku zarezervované 1 miesto pre návratovú hodnotu.
-Následné musia byť na zásobník vložené parametre funkcií v poradí, že prvý parameter bude
-bezprostredne pred vykonaním inštrukcie pre zavolanie funkcie na vrchole zásobniku.
+Pred volaním funkcie je na zásobniku zarezervované jedno miesto pre návratovú hodnotu.
+Následné sa na zásobník vložia parametre funkcie v rovnakom poradí, v akom boli zapísané pri
+jej volaní, teda posledný parameter sa bude nachádzať na vrchole zásobníka. 
 
-Po zavolaní funkcie sa na zásobníku interpretu vytvára zásobnikový ramec. Ten obsahuje (v tomto
-poradí smerom k vyšším adresám) miesto pre návratovú hodnotu, parametre funkcie, starý \texttt{stack pointer}
-, adresu inštrukcie pre návrat funkcie, lokálne premenné a zvyšok je určený pre medzivýsledky výrazov
-a pre vytváranie ďaľších zásobnikových rámcov.
+Zavolaním funkcie sa na zásobníku interpretu vytvára zásobnikový ramec. Ten je tvorený (postupne v tomto
+poradí smerom k vrcholu zásobníka) starým \texttt{stack pointer}-om, adresou inštrukcie, pri ktorej došlo k
+zavolaniu funkcie, a lokálnymi premennými. Zvyšok zásobníka je určený pre medzivýsledky výrazov, a pre
+vytváranie ďaľších zásobnikových rámcov.
 
-Ukončenie funkcie je sprevádzané nastavením \texttt{instruction pointer}a na adresu kam sa vykonávanie
-programu vráti po zmazaní aktuálneho zásobníkového rámca. Následne je obnovený aj starý \texttt{stack
-pointer} aby interpret ukazoval do nadradeného zásobníkového rámca a aktuálny zásobnikový
-rámec je zničený.
+Ukončenie funkcie je sprevádzané nastavením \texttt{instruction pointer}-a na adresu uloženú na zásobníku,
+obnovením starého \texttt{stack pointer}-a, aby interpret ukazoval do nadradeného zásobníkového rámca,
+a zmazaním aktuálneho zásobníkového rámca.
 
 \paragraph{Referencie}\mbox{}\\
 
