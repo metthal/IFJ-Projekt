@@ -96,7 +96,7 @@ Team leader: Marek Milkovič (xmilko01), 20\% \\
 
 %=============================================================================
 \subsection{Lexikálna analýza}
-Úlohy lexikálnej analýzy sú
+Úlohy lexikálnej analýzy sú:
 \begin{enumerate}
     \itemsep0em
     \item čítanie znakov zo vstupu a ich preklad na postupnosť tokenov, ktoré ďalej slúžia syntaktickej analýze
@@ -107,7 +107,7 @@ Team leader: Marek Milkovič (xmilko01), 20\% \\
 Výstup lexikálnej analýzy je zároveň vstupom do syntaktickej analýzy, preto je
 lexikálna analýza volaná syntaktickou analýzou. V našom prípade je konkrétne
 výstup lexikálnej analýzy vektor tokenov, kde token je štruktúra obsahujúca
-informácie o type tokenu ( typ tokenu je enumerácia všetkých prípustných tokenov )
+informácie o type tokenu (typ tokenu je enumerácia všetkých prípustných tokenov)
 a v prípade tokenov vyžadujúcich dalšie informácie ako napríklad obsah stringu
 (znakový reťazec) čí číselnu hodnotu tokenu typu číslo obsahuje štruktúra aj tieto dáta.
 Úlohou je teda prejsť celým súborom až pokým scanner nenájde koniec vstupného súboru
@@ -116,7 +116,7 @@ v prípade lexikálnej bezchybnosti programu vyplniť vektor tokenmi a pripravi�
 tak vstup do syntaktickej analýzy.
 
 Implementácia lexikálnej analýzy spočíva v konštrukcii konečného automatu
-( v angličtine finite state machine ), ktorý prečíta znak zo súboru, vyhodnotí
+(v angličtine finite state machine), ktorý prečíta znak zo súboru, vyhodnotí
 ho a na základe aktuálneho stavu a vstupného znaku môžu nastať tri nasledujúce
  možnosti:
 
@@ -137,7 +137,7 @@ lexikálna analýza registruje, ale kedže sú nepodstatné pre činnosť zdrojo
 programu, zahadzuje tieto informácie a ani ich ďalej nespracúva a neposiela
 syntaktickej analýze v podobe tokenu.
 
-Tento automat najlepšie ilustruje príloha č.1 , kde je nakreslený model
+Tento automat najlepšie ilustruje príloha č.1, kde je nakreslený model
 automatu lexikálnej analýzy.
 
 %=============================================================================
@@ -145,31 +145,37 @@ automatu lexikálnej analýzy.
 
 %=============================================================================
 \subsubsection{Vstupy}
-Interpret je volaný s troma parametrami:
-- Ukazateľ na prvú inštrukciu hlavného tela programu.
-- Odkaz na tabuľku konštánt, kde sú uložené všetky konštantné hodnoty.
-- Odkaz na tabuľku adries, ktorá poskytuje adresy na prvé inštrukcie funckií.
+Interpret je volaný s tromi parametrami:
+\begin{enumerate}
+    \itemsep0em
+    \item Ukazateľ na prvú inštrukciu hlavného tela programu.
+    \item Odkaz na tabuľku konštánt, kde sú uložené všetky konštantné hodnoty.
+    \item Odkaz na tabuľku adries, ktorá poskytuje adresy na prvé inštrukcie funckií.
+\end{enumerate}
 Všetky parametre majú modifikátor \texttt{const}, chrániaci pred ich prípadnou zmenou
-vrámci interpretácie. Inštrukcie sú v pameti uložené bezprostredne za sebou, čo
+v rámci interpretácie. Inštrukcie sú v pameti uložené bezprostredne za sebou, čo
 umožňuje jednoducho inkrementovať prvý predaný parameter po vykonaní aktuálnej
 inštrukcie. Aj keď sú inštrukcie funkcií uložené oddelene od tých ktoré tvoria hlavné
 telo programu, je možné sa k nim dostať práve cez reálne adresy uložené v tabuľke adries.
 
 %=============================================================================
 \subsubsection{Vnútorné štruktúry}
-Zasobník
+
+\paragraph{Zasobník}\mbox{}\\
+
 Zásobník je najdôležitejšia štruktúra počas interpretácie. Je odvodená od štruktúry
 \texttt{Vector}, no pre zrýchlenie interpretácie boli pre ňu implementované ďalšie
 špecifické operácie. Rovnako ako tabuľka konštánt obsahuje položky typu \texttt{Value}, 
 ktorý združuje typ a samotnú hodnotu. Na zásobníku sa môžu nachádzať premenné, parametre
 funckie, referencie, zásobníkové a inštrukčné ukazatele ako aj medzivýsledky výrazov.
 
-Kapacita zásobníku, tj. predalokované miesto, je v rámci optimalízácie nastavená pred
+Kapacita zásobníku, tj. predalokované miesto, je v rámci optimalizácie nastavená pred
 interpretáciou na dostatočne veľkú konštantu. Aj keď teda zásobník je dynamická štruktúra
 s možnosťou zmeny svojej kapacity, reálne sa tak deje veľmi ojedinele, napríklad v programoch
 využívajucich rekurziu.
 
-Vektor
+\paragraph{Vektor}\mbox{}\\
+
 \texttt{Vector} je najpoužívanejšou štruktúrou v rámci programu. Jedná sa o jednorozmerné pole s
 dynamickou veľkosťou, uložené v pamäti ako jeden blok. Jeho prvky teda nasledujú v pamäti bezprostredne
 za sebou. \texttt{Vector} obsahuje predalokovaný priestor o určitej veľkosti, nazývanej kapacita.
@@ -190,12 +196,15 @@ konvenciám pri vytváraní nových zložených typov a operácií nad nimi. V j
 využívajú šablóny.
 
 \texttt{Vector} je používaný ako základ väčšiny dynamických štruktúr, medzi ktoré patria napríklad:
-- Zoznam tokenov
-- Inštrukčný vektor
-- Tabuľka symbolov
-- Tabuľka konštánt
-- Tabuľka adries
-- Zásobník
+\begin{itemize}
+    \itemsep0em
+    \item Zoznam tokenov
+    \item Inštrukčný vektor
+    \item Tabuľka symbolov
+    \item Tabuľka konštánt
+    \item Tabuľka adries
+    \item Zásobník
+\end{itemize}
 
 %=============================================================================
 \subsubsection{Inštrukcie}
@@ -203,7 +212,20 @@ TODO
 
 %=============================================================================
 \subsubsection{Činnosť}
-TODO
+Interpret má \texttt{instruction pointer} ukazujúci na inštrukciu v inštrukčnom vektore,
+ktorá sa bude ako nasledujúca vykonávať. Po spustení interpretačnej časti programu
+tento pointer ukazuje na prvú inštrukciu v hlavnom inštrukčnom vektore. Pokiaľ nedochádza ku skokom,
+\texttt{instruction pointer} sa po inštrukčnom vektore posúva sekvenčne až na jeho koniec.
+
+Pri skoku môže dôjsť k posunutiu \texttt{instruction pointer}a hocikde do hlavného
+inštrukčného vektora, alebo aj do inštrukčného vektora pre funkcie v prípade volania funkcie.
+
+Po inicializácií potrebných štruktúr a premenných sa začína interpretačný cyklus.
+Ten prečíta z inštrukcie na ktorú ukazuje \texttt{instruction pointer} jej kód a podľa
+toho reaguje svojou činnosťou. Na konci inštrukčného cyklu sa inkrementuje \texttt{instruction pointer},
+ak zrovna nedošlo ku skoku.
+
+Keď interpret rozpozná koniec programu na základe vložených inštrukcií a informáciam na zásobníku, svoju činnosť končí.
 
 %=============================================================================
 \subsubsection{Princípy}
@@ -249,8 +271,8 @@ priamemu priradeniu bez zbytočných kopíí.
 \texttt{Weak Reference} sa používa pre parametre funkcií, ktoré sú typu String, kvôli časovej náročnosti
 kopírovania reťazca. Pri priradení do \texttt{Weak Reference} dochádza k nahradenie referencie
 novou hodnotou predstavujúcou výsledok výrazu, ktorý bol priradený. Pri všetkých ostatných použitiach
-\texttt{Weak Reference} dochádza k jej dereferencií. Pri snahe vložiť na zásobnik referenciu na \texttt{Weak Reference}
-je vytvorená \texttt{Weak Reference} na miesto kam ukazuje pôvodná Weak Reference.
+\texttt{Weak Reference} dochádza k jej dereferencií. Pri snahe vložiť na zásobník referenciu na \texttt{Weak Reference}
+je vytvorená \texttt{Weak Reference} na miesto kam ukazuje pôvodná \texttt{Weak Reference}.
 
 \texttt{Const Reference} je referencia do tabuľky konštánt, chová sa presne tak isto ako \texttt{Weak Reference},
 až na to že sa používa všade kde sa vo výraze nachádza konštanta.
