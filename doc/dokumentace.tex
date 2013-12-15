@@ -146,7 +146,7 @@ Automat lexikálnej analýzy najlepšie ilustruje príloha č.1, kde je nakresle
 
 %=============================================================================
 \subsection{Syntaktická a sémantická analýza}
-Syntaktická analýza sa spúšťa po úsešne dokončenej lexikálnej analýze a pracuje s vektorom tokenov,
+Syntaktická analýza sa spúšťa po úspešne dokončenej lexikálnej analýze a pracuje s vektorom tokenov,
 ktorý bol vytvorený. Riadi sa LL gramatikou a jej pravidlami podľa LL tabuľky v prílohách.
 Implementovaná je rekurzívnym zostupom, pričom v prípade potreby spracovania výrazu sa
 z nej spúšťa precedenčná analýza.
@@ -159,7 +159,7 @@ všetkých funkciách, pričom tieto premenné sú vkladané do príslušných l
 sa napĺňa aj globálna tabuľka symbolov definíciami funkcií.
 
 V druhom prechode je potom už možné kontrolovať sémantické chyby programu, ako napríklad volanie
-nedefinovanej funckie, použitie neexistujúcej premennej alebo volanie funkcie so zlým počtom parametrov,
+nedefinovanej funkcie, použitie neexistujúcej premennej alebo volanie funkcie so zlým počtom parametrov,
 a taktiež sa vytvárajú inštrukcie pre interpret.
 
 %=============================================================================
@@ -189,12 +189,12 @@ Zásobník je najdôležitejšia štruktúra počas interpretácie. Je odvodená
 \texttt{Vector}, no z dôvodu zrýchlenia interpretácie pre ňu boli implementované ďalšie
 špecifické operácie. Rovnako ako tabuľka konštánt obsahuje položky typu \texttt{Value}, 
 ktorý združuje typ a samotnú hodnotu. Na zásobníku sa môžu nachádzať premenné, parametre
-funckie, referencie, zásobníkové a inštrukčné ukazovatele, ako aj medzivýsledky výrazov.
+funkcie, referencie, zásobníkové a inštrukčné ukazovatele, ako aj medzivýsledky výrazov.
 
 Kapacita zásobníku, tj. predalokované miesto, je v rámci optimalizácií nastavená pred
 interpretáciou na dostatočne veľkú konštantu. Aj keď teda zásobník je dynamická štruktúra
 s možnosťou zmeny svojej kapacity, reálne sa tak deje len veľmi ojedinele, napríklad v programoch
-využívajucich rekurziu.
+využívajúcich rekurziu.
 
 \paragraph{Vektor}\mbox{}\\
 
@@ -214,7 +214,7 @@ Zdrojový kód pre špecifickú časť využíva makrá a definície, ktoré sa 
 ktoré majú vlastnosti štruktúry \texttt{Vector}, a líšia sa iba dátovým typom položiek. V hlavičkovom
 súbore novej štruktúry sa zadefinuje s akým typom by mal \texttt{Vector} pracovať, 
 a následne sú pre túto štruktúru nagenerované všetky potrebné operácie. Implementácia je možná vďaka
-konvenciám používaných pri tvorbe nových zložených typov a operácií nad nimi. V jazyku C++ sa pre tento účel
+konvenciám používaných pri tvorbe nových zložených typov a operácii nad nimi. V jazyku C++ sa pre tento účel
 využívajú šablóny.
 
 \texttt{Vector} je používaný ako základ väčšiny dynamických štruktúr, medzi ktoré patria napríklad:
@@ -284,7 +284,7 @@ a zmazaním aktuálneho zásobníkového rámca.
 
 \paragraph{Referencie}\mbox{}\\
 
-V rámci optimalizácií interpret nepracuje vždy na zásobníku s konkrétnymi hodnotami,
+V rámci optimalizácii interpret nepracuje vždy na zásobníku s konkrétnymi hodnotami,
 ale aj s referenciami, čo sú ukazovatele na hodnoty niekde inde na zásobniku, poprípade
 v tabuľke konštánt. Referencia nesie informáciu o relatívnej vzdialenosti od miesta
 na zásobníku, poprípade o umiestnení konštanty v tabuľke konštánt. Existujú tieto typy referencií:
