@@ -5,15 +5,16 @@ ini*
 # Temporary files
 *.*~
 *.swp
+doc/img/*-eps-converted-to.pdf
 
 # Doxydoc
 doxydoc
-documentation.dvi
-documentation.aux
-documentation.toc
-documentation.log
-documentation.out
-documentation.pdf
+dokumentace.dvi
+dokumentace.aux
+dokumentace.toc
+dokumentace.log
+dokumentace.out
+dokumentace.pdf
 texput.log
 
 # Hidden files
