@@ -22,6 +22,7 @@
 \usepackage{afterpage}
 \usepackage{capt-of}% or use the larger `caption` package
 \usepackage{amsmath}
+\usepackage{rotating}
 \newcommand{\BigO}[1]{\ensuremath{O\bigl(#1\bigr)}}
 \newcommand{\ttlcb}{\texttt{\char 123}}
 \newcommand{\ttrcb}{\texttt{\char 125}}
@@ -404,6 +405,16 @@ Zmena veľkosti tabuľky sa deje pri záťaži 0,75. Zahodí sa staré pole inde
 \appendix
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%=============================================================================
+\section{Struktura lex. automatu}
+% \vspace*{1cm}
+\begin{figure}[!h]
+\begin{sideways}
+  \centering
+  \includegraphics[height=310px]{doc/img/lex_analyza.eps}
+\end{sideways}
+\end{figure}
+\newpage
 %=============================================================================
 \section{LL gramatika}
 1. \textit{PROG} $\rightarrow$ \texttt{<?php} \textit{BODY}\\
