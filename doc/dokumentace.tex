@@ -113,7 +113,7 @@ Team leader: Marek Milkovič (xmilko01), 20\% \\
 Výstup lexikálnej analýzy je zároveň vstupom do syntaktickej analýzy, preto je
 lexikálna analýza volaná syntaktickou analýzou. V našom konkrétnom prípade je
 výstup lexikálnej analýzy vektor tokenov, kde token je štruktúra obsahujúca
-jehoo typ (typ je enumerácia všetkých prípustných tokenov)
+jeho typ (typ je enumerácia všetkých prípustných tokenov)
 a v prípade tokenov vyžadujúcich dalšie informácie ako napríklad znakový reťazec,
 či prevedenú číselnú hodnotu obsahuje štruktúra aj tieto dáta.
 Cieľom je teda prejsť celým súborom až pokým scanner nenájde koniec vstupného súboru
@@ -170,7 +170,7 @@ a taktiež sa vytvárajú inštrukcie pre interpret.
 Interpret je volaný s tromi parametrami:
 \begin{enumerate}
     \itemsep0em
-    \item Ukazateľ na prvú inštrukciu hlavného tela programu.
+    \item Ukazovateľ na prvú inštrukciu hlavného tela programu.
     \item Odkaz na tabuľku konštánt, kde sú uložené všetky konštantné hodnoty.
     \item Odkaz na tabuľku adries, ktorá poskytuje adresy na prvé inštrukcie funckií.
 \end{enumerate}
@@ -189,7 +189,7 @@ Zásobník je najdôležitejšia štruktúra počas interpretácie. Je odvodená
 \texttt{Vector}, no z dôvodu zrýchlenia interpretácie pre ňu boli implementované ďalšie
 špecifické operácie. Rovnako ako tabuľka konštánt obsahuje položky typu \texttt{Value}, 
 ktorý združuje typ a samotnú hodnotu. Na zásobníku sa môžu nachádzať premenné, parametre
-funckie, referencie, zásobníkové a inštrukčné ukazatele, ako aj medzivýsledky výrazov.
+funckie, referencie, zásobníkové a inštrukčné ukazovatele, ako aj medzivýsledky výrazov.
 
 Kapacita zásobníku, tj. predalokované miesto, je v rámci optimalizácií nastavená pred
 interpretáciou na dostatočne veľkú konštantu. Aj keď teda zásobník je dynamická štruktúra
@@ -250,10 +250,10 @@ v rámci aktuálneho zásobníkového ramca, kam sa uloží výsledok inštrukci
 \subsubsection{Činnosť}
 Interpret má \texttt{instruction pointer} ukazujúci na inštrukciu v inštrukčnom vektore,
 ktorá sa bude ako nasledujúca vykonávať. Po spustení interpretačnej časti programu
-tento ukazateľ ukazuje na prvú inštrukciu v hlavnom inštrukčnom vektore. Pokiaľ nedochádza ku skokom,
+tento ukazovateľ ukazuje na prvú inštrukciu v hlavnom inštrukčnom vektore. Pokiaľ nedochádza ku skokom,
 \texttt{instruction pointer} sa po inštrukčnom vektore posúva sekvenčne až na jeho koniec.
 
-Pri skoku môže dôjsť k posunutiu ukazateľa na ľubovoľnú inštrukciu hlavného
+Pri skoku môže dôjsť k posunutiu ukazovateľa na ľubovoľnú inštrukciu hlavného
 inštrukčného vektora alebo, v prípade volania funkcie, prepísaniu jeho obsahu adresou prvej inštrukcie funckie.
 
 Po inicializácií potrebných štruktúr a premenných sa začína interpretačný cyklus.
@@ -286,8 +286,8 @@ a zmazaním aktuálneho zásobníkového rámca.
 
 V rámci optimalizácií interpret nepracuje vždy na zásobníku s konkrétnymi hodnotami,
 ale aj s referenciami, čo sú ukazovatele na hodnoty niekde inde na zásobniku, poprípade
-v tabuľke konštánt. Referencia má v sebe nesie informáciu o relatívnej vzdialenosti od miesta
-na zásobníku, poprípade umiestnenie v tabuľke konštánt kam ukazuje. Existujú tieto typy referencií:
+v tabuľke konštánt. Referencia nesie informáciu o relatívnej vzdialenosti od miesta
+na zásobníku, poprípade o umiestnení konštanty v tabuľke konštánt. Existujú tieto typy referencií:
 
 \begin{enumerate}
     \itemsep0em
@@ -296,10 +296,10 @@ na zásobníku, poprípade umiestnenie v tabuľke konštánt kam ukazuje. Existu
     \item \texttt{Const Reference}
 \end{enumerate}
 
-Každá z nich má iné vlastnosti týkajúce sa toho kedy dochádza k dereferncií a kedy
+Každá z nich má iné vlastnosti týkajúce sa toho, kedy dochádza k dereferncií, a kedy
 je referencia prepísaná novou hodnotou.
 
-\texttt{Strong Reference} sa používa pre návrátové hodnoty v prípade najvyššieho volanie funckie,
+\texttt{Strong Reference} sa používa pre návrátové hodnoty v prípade najvyššieho volania funckie,
 kedy sa do miesta pre návrtovú hodnotu vloží referencia na premennú do ktorej chceme
 výsledok funkcie priradiť. Pri priradení do \texttt{Strong Reference} dochádza k dereferncií a teda
 priamemu priradeniu bez zbytočných kopíí.
