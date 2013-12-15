@@ -25,11 +25,11 @@ SRC_FILES = $(filter-out $(TEST_SRC_FILES), $(wildcard *.c))
 HEADER_FILES = $(filter-out $(TEST_HEADER_FILES), $(wildcard *.h))
 OBJ_FILES = $(patsubst %.c, %.o, $(SRC_FILES))
 TAR_FILE = xmilko01.tgz
-PACKED_FILES = $(SRC_FILES) $(HEADER_FILES) Makefile rozdeleni rozsireni
+PACKED_FILES = $(SRC_FILES) $(HEADER_FILES) Makefile rozdeleni rozsireni dokumentace.pdf
 TEMP_FILES = gmon.out
 DOXYFILE = doxyconfig
 DOXY_DIR = doxydoc
-DOC_FILES = texput.log documentation.dvi documentation.aux documentation.toc documentation.log documentation.out documentation.pdf
+DOC_FILES = texput.log dokumentace.dvi dokumentace.aux dokumentace.toc dokumentace.log dokumentace.out dokumentace.pdf
 DOC_DIR = doc
 
 ANALYZE_FLAGS = --enable=all --std=c99
@@ -96,10 +96,10 @@ doc:
 		|| echo "ini-make: Doxygen not installed."
 	@make -sC $(DOC_DIR)/img
 	@command -v pdflatex >/dev/null 2>&1 \
-		&& pdflatex -interaction=batchmode $(DOC_DIR)/documentation.tex \
+		&& pdflatex -interaction=batchmode $(DOC_DIR)/dokumentace.tex \
 		|| { \
-			latex $(DOC_DIR)/documentation.tex; \
-			dvipdf documentation.dvi; \
+			latex $(DOC_DIR)/dokumentace.tex; \
+			dvipdf dokumentace.dvi; \
 		}
 
 statistics:
