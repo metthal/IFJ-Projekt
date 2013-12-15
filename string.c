@@ -84,40 +84,6 @@ void initStringS(String *ps, const char *str, uint32_t len)
 }
 
 /**
- * Initializes string with another string.
- * Sets ERR_Allocation if memory couldn't be allocated.
- *
- * @param  ps   String to initialize
- * @param  src  Source string
- */
-void initStringSet(String *ps, const String *src)
-{
-    ps->size = src->size;
-    ps->length = src->length;
-    ps->data = malloc(sizeof(char) * src->size);
-    if (ps->data != NULL) {
-        memcpy(ps->data, src->data, sizeof(char) * src->length);
-    } else {
-        setError(ERR_Allocation);
-    }
-}
-
-/**
- * Frees buffer and resets members.
- *
- * @param  ps  String to delete
- */
-void deleteString(String *ps)
-{
-    if (ps != NULL) {
-        free(ps->data);
-        ps->data = NULL;
-        ps->size = 0;
-        ps->length = 0;
-    }
-}
-
-/**
  * Creates new String with default size.
  * Sets ERR_Allocation if memory couldn't be allocated.
  *

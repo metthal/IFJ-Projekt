@@ -76,7 +76,10 @@ uint32_t vectorCapacity(const Vector *vec);
  * @param vec Vector to query.
  * @return Size of vector.
  */
-uint32_t vectorSize(const Vector *vec);
+static inline uint32_t vectorSize(const Vector *vec)
+{
+    return vec->size;
+}
 
 /**
  * Returns pointer to item at specified index.

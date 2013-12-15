@@ -23,10 +23,13 @@
 #define STRING_H
 
 #include <ctype.h>
+#include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
+#include "nierr.h"
 
 // Shortcut for declaring str in arguments
-#define CSTR_ARG(str)	str, sizeof(str) - 1
+#define CSTR_ARG(str)   str, sizeof(str) - 1
 
 typedef struct
 {
@@ -42,8 +45,40 @@ static uint16_t const STRING_DEFAULT_SIZE = 16;
 void initString(String *ps);
 void initStringSize(String *ps, uint32_t size);
 void initStringS(String *ps, const char *str, uint32_t len);
-void initStringSet(String *ps, const String *src);
-void deleteString(String *ps);
+
+/**
+ * Initializes string with another string.
+ * Sets ERR_Allocation if memory couldn't be allocated.
+ *
+ * @param  ps   String to initialize
+ * @param  src  Source string
+ */
+static inline void initStringSet(String *ps, const String *src)
+{
+    ps->size = src->size;
+    ps->length = src->length;
+    ps->data = malloc(sizeof(char) * src->size);
+    if (ps->data != NULL) {
+        memcpy(ps->data, src->data, sizeof(char) * src->length);
+    } else {
+        setError(ERR_Allocation);
+    }
+}
+
+/**
+ * Frees buffer and resets members.
+ *
+ * @param  ps  String to delete
+ */
+static inline void deleteString(String *ps)
+{
+    if (ps != NULL) {
+        free(ps->data);
+        ps->data = NULL;
+        ps->size = 0;
+        ps->length = 0;
+    }
+}
 
 String* newString();
 String* newStringSize(uint32_t size);

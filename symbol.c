@@ -24,17 +24,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-void initValue(Value *value)
-{
-    memset(value, 0, sizeof(Value));
-}
-
-void deleteValue(Value *value)
-{
-    if (value->type == VT_String)
-        deleteString(&(value->data.s));
-}
-
 void copyValue(const Value *src, Value *dest)
 {
     dest->type = src->type;

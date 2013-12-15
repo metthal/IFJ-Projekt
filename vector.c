@@ -73,11 +73,6 @@ uint32_t vectorCapacity(const Vector *vec)
     return vec->capacity;
 }
 
-uint32_t vectorSize(const Vector *vec)
-{
-    return vec->size;
-}
-
 void* vectorAt(Vector *vec, uint32_t index)
 {
     if (vec->size <= index) {

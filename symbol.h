@@ -92,8 +92,16 @@ typedef struct {
     const String *key;
 } Symbol;
 
-void initValue(Value *value);
-void deleteValue(Value *value);
+static inline void initValue(Value *value)
+{
+    memset(value, 0, sizeof(Value));
+}
+
+static inline void deleteValue(Value *value)
+{
+    if (value->type == VT_String)
+        deleteString(&(value->data.s));
+}
 void copyValue(const Value *src, Value *dest);
 
 /// Value must be in initialized state
