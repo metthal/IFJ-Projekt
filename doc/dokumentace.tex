@@ -552,102 +552,103 @@ aby sme sa vyhli možným chybám v testoch spôsobené ľudským faktorom.
 \section{Inštrukčná sada}
 
 \texttt{IST\_Mov a b}\\
-Presunutie operandu \textbf{a} do operandu \textbf{b}. \\
+Skopírovanie položky na relatívnej pozícií \texttt{a} do položky na relatívnej pozícií \texttt{b} v aktuálnom zásobnikovom rámci. \\
 \\\texttt{IST\_MovC a b} \\
-Presunutie konštanty \textbf{a} do operandu \textbf{b}. \\
+Skopírovanie konštanty v tabuľke konštánt na pozícií \texttt{a} do položky na relatívnej pozícií \texttt{b} v aktuálnom zásobnikovom rámci. \\
 \\\texttt{IST\_Jmp dist}\\
 Inštrukcia pre vykonanie nepodmieneného skoku.\\
-Pripočítanie vzdialenosti(\textbf{dist}) skoku k aktuálnej hodnote instruction
-pointeru.\\
+Pripočítanie vzdialenosti(\texttt{dist}) skoku k aktuálnej hodnote \texttt{instruction pointer}u.\\
 \\\texttt{IST\_Jmpz dist cond}\\
 Inštrukcia pre vykonanie podmieneného skoku.\\
-V prípade ze hodnota v operande \textbf{cond} je rovna '0' tak sa prevedie
-pripočítanie vzdialenosti (\textbf{dist}) skoku k aktuálnej hodnote instruction
+V prípade, že hodnota v operande \texttt{cond} je rovná \texttt{0} tak sa prevedie
+pripočítanie vzdialenosti (\texttt{dist}) skoku k aktuálnej hodnote instruction
 pointeru.Prevádza sa pretypovanie v prípade nutnosti.\\
 \\\texttt{IST\_Jmpnz dist cond}\\
 Inštrukcia pre vykonanie podmieneného skoku.\\
-V prípade ze hodnota v operande \textbf{cond} nieje rovna '0' tak sa prevedie
-pripočítanie vzdialenosti (\textbf{dist}) skoku k aktuálnej hodnote instruction
-pointeru.Prevádza sa pretypovanie v prípade nutnosti.\\
-\\\texttt{IST\_Push}\\
-Inštrukcia vklada položku na zásobnik.\\
-\\\texttt{IST\_PushC}\\
-Inštrukcia vklada konštantu na zásobnik.\\
+V prípade, že hodnota v operande \texttt{cond} nieje rovná '0' tak sa prevedie
+pripočítanie vzdialenosti (\texttt{dist}) skoku k aktuálnej hodnote \texttt{instruction pointer}u. \\
+\\\texttt{IST\_Push a}\\
+Vloženie položky na relatívnej pozícií \texttt{a} na vrchol zásobniku.\\
+V prípade, že je položka na relatívnej pozícií typu \texttt{VT\_String}, dôjde k vytvorenie \texttt{Weak Reference}.\\
+\\\texttt{IST\_PushC a}\\
+Vloženie konštanty na pozícií \texttt{a} v tabuľke konštánt na vrchol zásobniku.\\
+\\\texttt{IST\_PushRef a}\\
+Na vrchol zásobníku sa vloží \texttt{Strong Reference} na položku na relatívnej pozícií \texttt{a}.\\
+Pokiaľ sa na relatívnej pozícií \texttt{a} nachádza \texttt{Strong Reference}, je k jeho hodnote pripočítané \texttt{a}.\\
 \\\texttt{IST\_Reserve N}\\
-Inštrukcia rezervuje miesto pre \textbf{N} položiek na zásobníku, pre neskoršie
- použitie.\\
+Rezervuje miesto pre \texttt{N} položiek na zásobníku, pre neskoršie použitie.\\
 \\\texttt{IST\_Pop N}\\
-Inštrukcia vytiahne \textbf{N} polozkiek zo zásobníku.\\
+Zmazanie \texttt{N} položiek z vrcholu zásobníku.\\
 \\\texttt{IST\_ClearExpr offset} \\
-Inštrukcia odstráni výraz zo zásobníku. Relátívna adresa je zadaná v \textbf{offset}.\\
+Vyčistenie zásobníku po vyhodnotení výrazu. V \texttt{offset} je zapísaná pozícia začiatku zásobníkového rámca pre výrazy.\\
 \\\texttt{IST\_Call adressIndex}\\
-Inštrukcia v vloží na zásobník Stack pointer a Instruction Pointer. Nastaví
-Stack Pointer na vrchol zásobniku a nastaví Instruction Pointer na adresu
-\textbf{AdressTable[adressIndex]}.\\
+Inštrukcia v vloží na zásobník \texttt{stack pointer} a \texttt{instruction pointer}. Nastaví
+\texttt{stack pointer} na miesto kam vložila starý \texttt{stack pointer} a nastaví \texttt{instruction pointer} na adresu
+\texttt{AdressTable[adressIndex]}.\\
 \\\texttt{IST\_Nullify offset}\\
-Inštrukcia nastaví položku na adrese \textbf{offset} v zásobniku na NULL.\\
+Nastaví položku na relatívnej pozícií \texttt{offset} v zásobniku na NULL.\\
+\\\texttt{IST\_Return a } \\
+Zničí aktuálny zásobníkový rámec, pričom načíta starý \texttt{stack pointer} a \texttt{instruction pointer} zo zásobníka.\\
 \\\texttt{IST\_BoolVal a res } \\
-Inštrukcia prevedie akýkoľvek udajový typ na boolean.\\
-\textbf{a} hodnota ktorá sa ma previesť, \textbf{res} cieľ kde bude hodnota uložená typu
-boolean. \\
+Prevedie položku na zásobníku na relatívnej adrese \texttt{a} na boolean a výsledok uloží do položky na relatívnej adrese \texttt{res}.\\
 \\\texttt{IST\_DoubleVal a res } \\
-Inštrukcia prevedie akýkoľvek udajový typ na Double.\\
-\textbf{a} hodnota ktorá sa ma previesť, \textbf{res} cieľ kde bude hodnota uložená typu
-double. \\
+Prevedie položku na zásobníku na relatívnej adrese \texttt{a} na desatinné číslo a výsledok uloží do položky na relatívnej adrese \texttt{res}.\\
 \\\texttt{IST\_IntVal a res } \\
-Inštrukcia prevedie akýkoľvek udajový typ na Int.\\
-\textbf{a} hodnota ktorá sa ma previesť, \textbf{res} cieľ kde bude hodnota uložená typu
-int. \\
+Prevedie položku na zásobníku na relatívnej adrese \texttt{a} na celé číslo a výsledok uloží do položky na relatívnej adrese \texttt{res}.\\
 \\\texttt{IST\_StrVal a res } \\
-Inštrukcia prevedie akýkoľvek udajový typ na string.\\
-\textbf{a} hodnota ktorá sa ma previesť, \textbf{res} cieľ kde bude hodnota uložená typu
-string. \\
+Prevedie položku na zásobníku na relatívnej adrese \texttt{a} na reťazec a výsledok uloží do položky na relatívnej adrese \texttt{res}.\\
 \\\texttt{IST\_FindString a b res} \\
-Inštrukcia vyhľadá v stringu \textbf{a} string \textbf{b} a v prípade zhody
-uloží index zaciatku podretazca do \textbf{res}.\\
+Vyhľadá v reťazci \texttt{a} reťazec \texttt{b} a v prípade zhody
+uloží index začiatku podreťazca do \texttt{res}.\\
 \\\texttt{IST\_GetString res} \\
-Inštrukcia načíta string zo štandartného vstupu, a uloží do \textbf{res}. \\
+Načíta reťazec zo štandartného vstupu a uloží do \texttt{res}. \\
 \\\texttt{IST\_GetSubString a b res}\\
-Inštrukcia vrati podreťazec reťazca, \textbf{a} je zaciatočný index a \textbf{b} je
-ukončovací index reťazca. Výsledný podreťazec sa bude nachádzať v \textbf{res}.\\
+Vrati podreťazec reťazca, \texttt{a} je začiatočný index a \texttt{b} je
+ukončovací index reťazca. Výsledný podreťazec sa bude nachádzať v \texttt{res}.\\
 \\\texttt{IST\_PutString res}\\
-Inštrukcia vypíše na štandartný výstup string uložený v \textbf{res}.\\
+Vypíše na štandartný výstup reťazec uložený v \texttt{res}.\\
 \\\texttt{IST\_SortString a res}\\
-Inštrukcia zatriedi reťazec uložený v \textbf{res}, \textbf{a} je dĺžka reťazca.\\
+Utriedi reťazec uložený v \texttt{res}, \texttt{a} je dĺžka reťazca.\\
 \\\texttt{IST\_Add res a b}\\
-Vykoná \textbf{a} + \textbf{b} a výsledok uloží do \textbf{res}.\\
-\textbf{a}, \textbf{b}, \textbf{res} sú relatívne adresy na zásobníku.\\
+Vykoná \texttt{a} + \texttt{b} a výsledok uloží do \texttt{res}.\\
+\texttt{a}, \texttt{b}, \texttt{res} sú relatívne adresy na základe inštrukčného módu.\\
 \\\texttt{IST\_Subtract res a b}\\
-Vykoná \textbf{a} - \textbf{b} a výsledok uloží do \textbf{res}.\\
-\textbf{a}, \textbf{b}, \textbf{res} sú relatívne adresy na zásobníku.\\
+Vykoná \texttt{a} - \texttt{b} a výsledok uloží do \texttt{res}.\\
+\texttt{a}, \texttt{b}, \texttt{res} sú relatívne adresy na základe inštrukčného módu.\\
 \\\texttt{IST\_Multiply res a b}\\
-Vykoná \textbf{a} * \textbf{b} a výsledok uloží do \textbf{res}.\\
-\textbf{a}, \textbf{b}, \textbf{res} sú relatívne adresy na zásobníku.\\
+Vykoná \texttt{a} * \texttt{b} a výsledok uloží do \texttt{res}.\\
+\texttt{a}, \texttt{b}, \texttt{res} sú relatívne adresy na základe inštrukčného módu.\\
 \\\texttt{IST\_Divide res a b}\\
-Vykoná \textbf{a} / \textbf{b} a výsledok uloží do \textbf{res}.\\
-\textbf{a}, \textbf{b}, \textbf{res} sú relatívne adresy na zásobníku.\\
+Vykoná \texttt{a} / \texttt{b} a výsledok uloží do \texttt{res}.\\
+\texttt{a}, \texttt{b}, \texttt{res} sú relatívne adresy na základe inštrukčného módu.\\
 \\\texttt{IST\_Concat res a b}\\
-Vykoná konkatenáciu operandov \textbf{a} a \textbf{b} a výsledok uloží do \textbf{res}.\\
-\textbf{a}, \textbf{b}, \textbf{res} sú relatívne adresy na zásobníku.\\
+Vykoná konkatenáciu operandov \texttt{a} a \texttt{b} a výsledok uloží do \texttt{res}.\\
+\texttt{a}, \texttt{b}, \texttt{res} sú relatívne adresy na základe inštrukčného módu.\\
+\\\texttt{IST\_Equal res a b}\\
+Porovná či \texttt{a} a \texttt{b} sú rovnakého typu a ak je \texttt{a} rovné \texttt{b}, tak do \texttt{res} vloží \texttt{1}, inak \texttt{0}.\\
+\\\texttt{IST\_NotEqual res a b}\\
+Porovná či \texttt{a} a \texttt{b} sú rovnakého typu a ak nie je \texttt{a} rovné \texttt{b}, tak do \texttt{res} vloží \texttt{1}, inak \texttt{0}.\\
 \\\texttt{IST\_Less res a b}\\
-Porovná \textbf{a}, \textbf{b} ak je \textbf{a} menšie do operandu \textbf{res} vloží '1' inak '0'.\\
-\textbf{a}, \textbf{b}, \textbf{res} sú relatívne adresy na zásobníku.\\
+Porovná či \texttt{a} a \texttt{b} sú rovnakého typu a ak je \texttt{a} menšie ako \texttt{b}, tak do \texttt{res} vloží \texttt{1}, inak \texttt{0}.\\
+\texttt{a}, \texttt{b}, \texttt{res} sú relatívne adresy na základe inštrukčného módu.\\
 \\\texttt{IST\_LessEq res a b}\\
-Porovná \textbf{a}, \textbf{b} ak je \textbf{a} menšie alebo rovné, do operandu \textbf{res} vloží '1' inak '0'.\\
-\textbf{a}, \textbf{b}, \textbf{res} sú relatívne adresy na zásobníku.\\
+Porovná či \texttt{a} a \texttt{b} sú rovnakého typu a ak je \texttt{a} menšie alebo rovné ako \texttt{b}, tak do \texttt{res} vloží \texttt{1}, inak \texttt{0}.\\
+\texttt{a}, \texttt{b}, \texttt{res} sú relatívne adresy na základe inštrukčného módu.\\
 \\\texttt{IST\_Greater res a b}\\
-Porovná \textbf{a}, \textbf{b} ak je \textbf{a} vačšie do operandu \textbf{res} vloží '1' inak '0'.\\
-\textbf{a}, \textbf{b}, \textbf{res} sú relatívne adresy na zásobníku.\\
+Porovná či \texttt{a} a \texttt{b} sú rovnakého typu a ak je \texttt{a} väčšie ako \texttt{b}, tak do \texttt{res} vloží \texttt{1}, inak \texttt{0}.\\
+\texttt{a}, \texttt{b}, \texttt{res} sú relatívne adresy na základe inštrukčného módu.\\
 \\\texttt{IST\_GreaterEq res a b}\\
-Porovná \textbf{a}, \textbf{b} ak je \textbf{a} vačšie alebo rovné, do operandu \textbf{res} vloží '1' inak '0'.\\
-\textbf{a}, \textbf{b}, \textbf{res} sú relatívne adresy na zásobníku.\\
+Porovná či \texttt{a} a \texttt{b} sú rovnakého typu a ak je \texttt{a} väčšie alebo rovné ako \texttt{b}, tak do \texttt{res} vloží \texttt{1}, inak \texttt{0}.\\
+\texttt{a}, \texttt{b}, \texttt{res} sú relatívne adresy na základe inštrukčného módu.\\
 \\\texttt{IST\_And a b res}\\
-Inštrukcia vykoná logický AND u \textbf{a}, \textbf{b} a výsledok zapíše do \textbf{res}.\\
+Inštrukcia vykoná logický AND u \texttt{a}, \texttt{b} a výsledok zapíše do \texttt{res}.\\
+\texttt{a}, \texttt{b}, \texttt{res} sú relatívne adresy na základe inštrukčného módu.\\
 \\\texttt{IST\_Or a b res}\\
-Inštrukcia vykoná logický OR u \textbf{a}, \textbf{b} a výsledok zapíše do \textbf{res}.\\
+Inštrukcia vykoná logický OR u \texttt{a}, \texttt{b} a výsledok zapíše do \texttt{res}.\\
+\texttt{a}, \texttt{b}, \texttt{res} sú relatívne adresy na základe inštrukčného módu.\\
 \\\texttt{IST\_Not a b res}\\
-Inštrukcia vykoná negáciu operandu \textbf{a} ak je operand \textbf{b} rovný '1', ak je operand \textbf{b} rovný '0'
-vykoná sa iba konverzia operandu \textbf{a} na údajový typ boolean.\\
+Inštrukcia vykoná negáciu operandu \texttt{a} ak je operand \texttt{b} rovný \texttt{1}, ak je operand \texttt{b} rovný \texttt{0}
+vykoná sa iba konverzia operandu \texttt{a} na údajový typ boolean.\\
 % koniec dokumentace
 \end{document}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
