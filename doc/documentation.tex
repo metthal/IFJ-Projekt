@@ -399,6 +399,44 @@ Zmena veľkosti tabuľky sa deje pri záťaži 0,75. Zahodí sa staré pole inde
  alokuje sa dvojnásobne väčšie. Následne sa postupne vkladajú všetky odkazy na
  záznamy z vektora do tabuľky, príp. sa vložia ako odkaz cez existujúci záznam.
 
+\section{Práca v tíme}
+Tým o 5 ľuďoch už vyžaduje opatrenia, aby bol vývoj riadený, aby každý vedel, čo treba robiť,
+čo robia ostatní. Tieto opatrenia bolo potrebné zaviesť hneď na začiatku, ešte predtým ako sa
+začne vývojový cyklus. Nasledujúca kapitola popíše všetky technológie a metodiky, ktoré boli použité.
+
+\subsection{Verzovací systém}
+Keďže celý tím musí pracovať na jedných a tých istých zdrojových súboroch, tak
+bol zvolený distribuovaný verzovací systém \texttt{git}, pričom náš spoločný vzdialený
+repozitoár bol na \texttt{github}e. Keďže nebolo dostatok času na vysvetlenie
+pokročilej práce s \texttt{git}om všetkým členom tímu, tak za hlavnú vývojovú vetvu
+bola zvolená \texttt{master} vetva, ktorá vždy musela byť v kompilovatelnom stave, čo
+sa vždy až na pár výnimočných momentov podarilo. Ďaľšie vetvy pribúdali až v neskorších vývojových
+fázach, kedy sa optimalizoval už fungujúci kód.
+
+\subsection{Agilný vývoj}
+Spôsob agilného vývoja sme zvolili sprinty, kedy sme sa v týždenných intervaloch
+stretávali a debatovali o riešeniach problémov a o tom čo sa bude v najsledujúcom sprinte
+robiť. Každý sprint sme sa snažili iteratívne pridať nejaku funkcionalitu do interpretu
+až sme nakoniec nedospeli k výslednému celku. Po dokončení začala optimalizačná časť, 
+ktorá však už nebola riadená osobnými meetingami, ale písomnou formou.
+
+\subsection{Rozdelenie práce}
+Na zaznamenávanie toho čo má kto na starosti sme aktívne používali \texttt{issue tracking}
+systém na \texttt{github}e, kde sa jednotlivým úlohám pridelovala priorita
+a diskutovalo sa aj o možných riešeniach. \texttt{Issue tracking} bol tiež použitý
+na oznamovanie bugov, aby ich bolo možné jednoducho sledovať. Rozdelenie práce na väčších
+celkoch bolo preberané na týždenných meetingoch.
+
+\subsection{Automatizované testy}
+Pri projektoch rozdelených na viac modulov, sú taktiež súčasťou implementácie aj
+testy jednotlivých modulov. Z toho dôvodu sme si napísali vlastný testovcí framework
+na písanie automatizovaných testov. Tieto automatizované testy boli spúšťané vždy spolu
+so statickou analýzou zdrojového kódu pre čo najväčší rozsah pokrytia možných chýb.
+
+Automatizované testy sa buď písali zároveň s modulom, ktorý sa testoval, alebo až po tom čo
+bol implementovaný, pričom ich vždz písal niekto iný, ako ten ktorý písal daný modul,
+aby sme sa vyhli možným chybám v testoch spôsobené ľudským faktorom.
+
 % sablona
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
