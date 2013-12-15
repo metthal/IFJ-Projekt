@@ -21,6 +21,11 @@
 \usepackage{pdflscape}
 \usepackage{afterpage}
 \usepackage{capt-of}% or use the larger `caption` package
+\usepackage{amsmath}
+\newcommand{\BigO}[1]{\ensuremath{O\bigl(#1\bigr)}}
+\newcommand{\ttlcb}{\texttt{\char 123}}
+\newcommand{\ttrcb}{\texttt{\char 125}}
+\newcommand{\ttsc}{\texttt{\char 59}}
 
 \begin{document}
 
@@ -68,7 +73,7 @@ Team leader: Marek Milkovič (xmilko01), 20\% \\
 Členovia: Lukáš Vrabec (xvrabe07), 20\% \\
 \hspace{57px} Ján Spišiak (xspisi03), 20\% \\
 \hspace{57px} Ivan Ševčík (xsevci50), 20\% \\
-\hspace{57px} Marek Bertovič (xberto00), 20\% \\ 
+\hspace{57px} Marek Bertovič (xberto00), 20\% \\
 \end{large}
 \end{flushleft}
 \end{titlepage}
@@ -76,8 +81,7 @@ Team leader: Marek Milkovič (xmilko01), 20\% \\
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % obsah
 \pagestyle{plain}
-\pagenumbering{roman}
-\setcounter{page}{1}
+\pagenumbering{gobble}
 \tableofcontents
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -332,7 +336,7 @@ konverzné funkcie, napríklad v prípade prevodu na \texttt{string} sa využije
 \subsection{Merge sort}
 Na implementáciu radiaceho algoritmu sme využili Merge sort. Ide o radenie
  typu rozdeľuj a panuj (angl. divide and conquer), v našej implementácií stabilný
- algoritmus s časovou zložitosťou O(N log(N)). Princíp alogritmu je jednoduchý.
+ algoritmus s časovou zložitosťou \BigO{N \log{N}}. Princíp alogritmu je jednoduchý.
  Pole sa rozdelí na menšie podpolia (v našom prípade veľkosti 1). Následne sa
  po pároch spoja, tak aby výsledné pole bolo tiež zoradené.
 
@@ -341,7 +345,7 @@ Naša implementácia je tzv. zhora-dolu (angl. top-down) s pomocným poľom o
  jedného sa číta do druhého píše, čím sa odstráni potreba kopírovania
  medzivýsledku spať do zdrojového poľa. Toto sa ľahko uskutoční jednoduchou
  zámenou argumentou v rekurzívnom volaní funkcie. Celá logika našej funkcie
- stringCharSortDivide() spočíva teda v rozdelení zdrojového poľa rekurzívnym
+ \texttt{stringCharSortDivide()} spočíva teda v rozdelení zdrojového poľa rekurzívnym
  volaním (s vymenením zdrojovým a cieľovým poľom) na polovice v prípade že jeho
  veľkosť je vačšia než 2, a následným spojením týchto 2 polovíc, pri ktorom sa
  vždy vyberie prvok podľa váhy z danej polovice.
@@ -359,7 +363,7 @@ Základný vyhľadávací algoritmus porovnáva podreťazec s reťazcom postupne
  každom znaku. KMP sa vyhýba porovaniu toho istého znaku v prípade že bol
  porovnaný predošlými porovnaniami a nie je možné aby bol súčasťou podreťazca
  ktorý je prefixom hľadaného reťazca. Samotné vyhľadávanie má teda zložitosť
- len O(N).
+ len \BigO{N}.
 
 Naša pomocná tabuľka bude držať indexy, od ktorých musíme znova začať porovnávať.
  Zostavíme ju jednoducho postupným porovnávaním podreťazcou hľadaného reťazca s
@@ -373,9 +377,9 @@ Vyhľadávanie je jednoduché, v prípade neshody sa podľa tabuľky nastaví kt
 \subsection{Hash table}
 Hash tabuľka je typ abstraktnej dátovej štruktúry, ktorý implementuje operácie
  nad prvkami identifikovanými unikátnymi kľúčmi. Vyznačuje sa najmä časovou
- zložitosťou O(1).
+ zložitosťou \BigO{1}.
 
-V našej implementácií používame hash funkciu djb2 (autor Bernstein). Ide o
+ V našej implementácií používame hash funkciu \texttt{djb2} (autor Bernstein). Ide o
  pomerne jednoduchú a rýchlu funkciu, pričom vypočítaný hash ukladáme spolu so
  záznamom v tabuľke pre zrychlénie rekalkulácie pozície záznamu v prípade
  zmeny veľkosti tabuľky. Pri vyhľadavaní v tabuľke sa vypočíta hash z klúča,
@@ -396,62 +400,64 @@ Zmena veľkosti tabuľky sa deje pri záťaži 0,75. Zahodí sa staré pole inde
 
 % sablona
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
 \section{Prílohy} \label{Prilohy}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %=============================================================================
 \subsection{LL gramatika}
-1. PROG $\Rightarrow$ $\textless$?php BODY\\
-2. BODY $\Rightarrow$ STMT BODY\\
-3. BODY $\Rightarrow$ FUNC BODY\\
-4. BODY $\Rightarrow$ \$\\
-5. FUNC $\Rightarrow$ function id ( PARAM\_LIST ) \{ STMT\_LIST \}\\
-6. STMT\_LIST $\Rightarrow$ $\varepsilon$\\
-7. STMT\_LIST $\Rightarrow$ STMT STMT\_LIST\\
-8. STMT $\Rightarrow$ var\_id = EXPR ;\\
-9. STMT $\Rightarrow$ return EXPR ;\\
-10. STMT $\Rightarrow$ break ;\\
-11. STMT $\Rightarrow$ continue ;\\
-12. STMT $\Rightarrow$ if ( EXPR ) \{ STMT\_LIST \} ELSEIF\_STMT ELSE\_STMT\\
-13. STMT $\Rightarrow$ while ( EXPR ) \{ STMT\_LIST \}\\
-14. STMT $\Rightarrow$ for ( FOR\_STMT\_1 ; FOR\_STMT\_2 ; FOR\_STMT\_1 ) \{ STMT\_LIST \}\\
-15. ELSEIF\_STMT $\Rightarrow$ $\varepsilon$\\
-16. ELSEIF\_STMT $\Rightarrow$ elseif ( EXPR ) \{ STMT\_LIST \} ELSEIF\_STMT\\
-17. ELSE\_STMT $\Rightarrow$ $\varepsilon$\\
-18. ELSE\_STMT $\Rightarrow$ else \{ STMT\_LIST \}\\
-19. PARAM\_LIST $\Rightarrow$ $\varepsilon$\\
-20. PARAM\_LIST $\Rightarrow$ var\_id DEF\_ARG NPARAM\_LIST\\
-21. NPARAM\_LIST $\Rightarrow$ $\varepsilon$\\
-22. NPARAM\_LIST $\Rightarrow$ , var\_id DEF\_ARG NPARAM\_LIST\\
-23. DEF\_ARG $\Rightarrow$ $\varepsilon$\\
-24. DEF\_ARG $\Rightarrow$ = literal\\
-25. FOR\_STMT\_1 $\Rightarrow$ $\varepsilon$\\
-26. FOR\_STMT\_1 $\Rightarrow$ var\_id = EXPR\\
-27. FOR\_STMT\_2 $\Rightarrow$ $\varepsilon$\\
-28. FOR\_STMT\_2 $\Rightarrow$ EXPR\\
- \\
-EXPR $\Rightarrow$ EXPR + EXPR \\
-EXPR $\Rightarrow$ EXPR * EXPR \\
-EXPR $\Rightarrow$ EXPR - EXPR \\
-EXPR $\Rightarrow$ EXPR / EXPR \\
-EXPR $\Rightarrow$ EXPR . EXPR \\
-EXPR $\Rightarrow$ EXPR $\textless$ EXPR \\
-EXPR $\Rightarrow$ EXPR $\textgreater$ EXPR \\
-EXPR $\Rightarrow$ EXPR $\textgreater$= EXPR \\
-EXPR $\Rightarrow$ EXPR $\textless$= EXPR \\
-EXPR $\Rightarrow$ EXPR === EXPR \\
-EXPR $\Rightarrow$ EXPR !== EXPR \\
-EXPR $\Rightarrow$ EXPR \&\& EXPR \\
-EXPR $\Rightarrow$ EXPR || EXPR \\
-EXPR $\Rightarrow$ EXPR and EXPR \\
-EXPR $\Rightarrow$ EXPR or EXPR \\
-EXPR $\Rightarrow$ ! EXPR \\
-EXPR $\Rightarrow$ ( EXPR ) \\
-EXPR $\Rightarrow$ id ( ) \\
-EXPR $\Rightarrow$ id ( EXPR )  \\
-EXPR $\Rightarrow$ id ( EXPR , EXPR ) \\
-EXPR $\Rightarrow$ id ( EXPR , EXPR , EXPR ) \\
-EXPR $\Rightarrow$ var \\
+1. \textit{PROG} $\rightarrow$ \texttt{<?php} \textit{BODY}\\
+2. \textit{BODY} $\rightarrow$ \textit{STMT BODY}\\
+3. \textit{BODY} $\rightarrow$ \textit{FUNC BODY}\\
+4. \textit{BODY} $\rightarrow$ \texttt{\$}\\
+5. \textit{FUNC} $\rightarrow$ \texttt{function id (} \textit{PARAM\_LIST} \texttt{)} \ttlcb  \textit{STMT\_LIST} \ttrcb \\
+6. \textit{STMT\_LIST} $\rightarrow$ $\varepsilon$\\
+7. \textit{STMT\_LIST} $\rightarrow$ \textit{STMT STMT\_LIST}\\
+8. \textit{STMT} $\rightarrow$ \texttt{var\_id =} \textit{EXPR} \ttsc\\
+9. \textit{STMT} $\rightarrow$ \texttt{return} \textit{EXPR} \ttsc\\
+10. \textit{STMT} $\rightarrow$ \texttt{break} \ttsc\\
+11. \textit{STMT} $\rightarrow$ \texttt{continue} \ttsc\\
+12. \textit{STMT} $\rightarrow$ \texttt{if (} \textit{EXPR} \texttt{)} \ttlcb \textit{STMT\_LIST} \ttrcb \textit{ELSEIF\_STMT ELSE\_STMT}\\
+13. \textit{STMT} $\rightarrow$ \texttt{while (} \textit{EXPR} \texttt{)} \ttlcb \textit{STMT\_LIST} \ttrcb\\
+14. \textit{STMT} $\rightarrow$ \texttt{for (} \textit{FOR\_STMT\_1} \ttsc \textit{FOR\_STMT\_2} \ttsc \textit{FOR\_STMT\_1} \texttt{)} \ttlcb \textit{STMT\_LIST} \ttrcb\\
+15. \textit{ELSEIF\_STMT} $\rightarrow$ $\varepsilon$\\
+16. \textit{ELSEIF\_STMT} $\rightarrow$ \texttt{elseif (} \textit{EXPR} \texttt{)} \ttlcb \textit{STMT\_LIST} \ttrcb \textit{ELSEIF\_STMT}\\
+17. \textit{ELSE\_STMT} $\rightarrow$ $\varepsilon$\\
+18. \textit{ELSE\_STMT} $\rightarrow$ \texttt{else} \ttlcb \textit{STMT\_LIST} \ttrcb\\
+19. \textit{PARAM\_LIST} $\rightarrow$ $\varepsilon$\\
+20. \textit{PARAM\_LIST} $\rightarrow$ \texttt{var\_id} \textit{DEF\_ARG NPARAM\_LIST}\\
+21. \textit{NPARAM\_LIST} $\rightarrow$ $\varepsilon$\\
+22. \textit{NPARAM\_LIST} $\rightarrow$ \texttt{, var\_id} \textit{DEF\_ARG NPARAM\_LIST}\\
+23. \textit{DEF\_ARG} $\rightarrow$ $\varepsilon$\\
+24. \textit{DEF\_ARG} $\rightarrow$ \texttt{= literal}\\
+25. \textit{FOR\_STMT\_1} $\rightarrow$ $\varepsilon$\\
+26. \textit{FOR\_STMT\_1} $\rightarrow$ \texttt{var\_id =} \textit{EXPR}\\
+27. \textit{FOR\_STMT\_2} $\rightarrow$ $\varepsilon$\\
+28. \textit{FOR\_STMT\_2} $\rightarrow$ \textit{EXPR}\\
+\newpage
+\subsection{Gramatika pre výrazy}
+ \textit{EXPR} $\rightarrow$ \textit{EXPR} \texttt{+} \textit{EXPR} \\
+ \textit{EXPR} $\rightarrow$ \textit{EXPR} \texttt{*} \textit{EXPR} \\
+ \textit{EXPR} $\rightarrow$ \textit{EXPR} \texttt{-} \textit{EXPR} \\
+ \textit{EXPR} $\rightarrow$ \textit{EXPR} \texttt{/} \textit{EXPR} \\
+ \textit{EXPR} $\rightarrow$ \textit{EXPR} \texttt{.} \textit{EXPR} \\
+ \textit{EXPR} $\rightarrow$ \textit{EXPR} \texttt{<} \textit{EXPR} \\
+ \textit{EXPR} $\rightarrow$ \textit{EXPR} \texttt{>} \textit{EXPR} \\
+ \textit{EXPR} $\rightarrow$ \textit{EXPR} \texttt{<=} \textit{EXPR} \\
+ \textit{EXPR} $\rightarrow$ \textit{EXPR} \texttt{>=} \textit{EXPR} \\
+ \textit{EXPR} $\rightarrow$ \textit{EXPR} \texttt{===} \textit{EXPR} \\
+ \textit{EXPR} $\rightarrow$ \textit{EXPR} \texttt{!==} \textit{EXPR} \\
+ \textit{EXPR} $\rightarrow$ \textit{EXPR} \texttt{\&\&} \textit{EXPR} \\
+ \textit{EXPR} $\rightarrow$ \textit{EXPR} \texttt{$\|$} \textit{EXPR} \\
+ \textit{EXPR} $\rightarrow$ \textit{EXPR} \texttt{and} \textit{EXPR} \\
+ \textit{EXPR} $\rightarrow$ \textit{EXPR} \texttt{or} \textit{EXPR} \\
+ \textit{EXPR} $\rightarrow$ \texttt{!} \textit{EXPR} \\
+ \textit{EXPR} $\rightarrow$ \texttt{(} \textit{EXPR} \texttt{)} \\
+ \textit{EXPR} $\rightarrow$ \texttt{id ( )} \\
+ \textit{EXPR} $\rightarrow$ \texttt{id (} \textit{EXPR} \texttt{)}  \\
+ \textit{EXPR} $\rightarrow$ \texttt{id (} \textit{EXPR} \texttt{,} \textit{EXPR} \texttt{)} \\
+ \textit{EXPR} $\rightarrow$ \texttt{id (} \textit{EXPR} \texttt{,} \textit{EXPR} \texttt{,} \textit{EXPR} \texttt{)} \\
+ \textit{EXPR} $\rightarrow$ \texttt{literal} \\
 \newpage
 
 %=============================================================================
