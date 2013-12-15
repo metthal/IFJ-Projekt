@@ -243,8 +243,8 @@ Inštrukčný kód je reprezentovaný enumeráciou, podľa ktorej intepret vie, 
 prečítaní danej inštrukcie. Inštrukčný mód je použitý pri niektorých inštrukciách, ktorých operand
 môže byť buď konštanta z tabuľky konštánt, alebo hodnota zo zásobnika, kde mód v podobe bitovej masky
 určuje, ktorý operand pochádza odkiaľ. Operandy A a B sú používané ako vstupné operandy do inštrukcie a sú
-to čísla, ktoré informujú o pozícií v tabuľke konštánt, resp. zásobníku. Operand R potom predstavuje cieľové miesto 
-v rámci aktuálneho zásobníkového ramca, kam sa uloží výsledok inštrukcie. Inštrukčná sada sa nachádza v prílohách.
+to čísla, ktoré informujú o pozícií v tabuľke konštánt, resp. zásobníku. Operand R predstavuje cieľové miesto 
+v rámci aktuálneho zásobníkového rámca, kam sa uloží výsledok inštrukcie. Inštrukčná sada sa nachádza v prílohách.
 
 %=============================================================================
 \subsubsection{Činnosť}
@@ -274,7 +274,7 @@ Následné sa na zásobník vložia parametre funkcie v rovnakom poradí, v akom
 jej volaní, teda posledný parameter sa bude nachádzať na vrchole zásobníka. 
 
 Zavolaním funkcie sa na zásobníku interpretu vytvára zásobnikový ramec. Ten je tvorený (postupne v tomto
-poradí smerom k vrcholu zásobníka) starým \texttt{stack pointer}-om, adresou inštrukcie, pri ktorej došlo k
+poradí smerom k vrcholu zásobníka) starým \texttt{stack pointer}-om, adresou nasledjúcej inštrukcie, pri ktorej došlo k
 zavolaniu funkcie, a lokálnymi premennými. Zvyšok zásobníka je určený pre medzivýsledky výrazov, a pre
 vytváranie ďaľších zásobnikových rámcov.
 
@@ -397,7 +397,7 @@ Zmena veľkosti tabuľky sa deje pri jej zaplnení nad 75\%. Staré pole indexov
  záznamy z vektora do tabuľky, príp. sa vložia ako odkaz cez existujúci záznam.
 
 \section{Práca v tíme}
-Tým o 5 ľuďoch už vyžaduje opatrenia, aby bol vývoj riadený, aby každý vedel, čo treba robiť a
+Tím o 5 ľuďoch už vyžaduje opatrenia, aby bol vývoj riadený, aby každý vedel, čo treba robiť a
 čo robia ostatní. Tieto opatrenia bolo potrebné zaviesť hneď na začiatku, ešte predtým ako sa
 začne vývojový cyklus. Nasledujúca kapitola popíše všetky technológie a metodiky, ktoré boli použité.
 
@@ -419,7 +419,7 @@ ktorá však už nebola riadená osobnými meetingami, ale písomnou formou.
 
 \subsection{Rozdelenie práce}
 Na zaznamenávanie toho čo má kto na starosti sme aktívne používali \texttt{issue tracking}
-systém na \texttt{github}e, kde sa jednotlivým úlohám pridelovala priorita
+systém na \texttt{github}-e, kde sa jednotlivým úlohám pridelovala priorita
 a diskutovalo sa aj o možných riešeniach. \texttt{Issue tracking} bol tiež použitý
 na oznamovanie bugov, aby ich bolo možné jednoducho sledovať. Rozdelenie práce na väčších
 celkoch bolo preberané na týždenných meetingoch.
@@ -548,29 +548,29 @@ aby sme sa vyhli možným chybám v testoch spôsobené ľudským faktorom.
 \section{Inštrukčná sada}
 
 \texttt{IST\_Mov a b}\\
-Skopírovanie položky na relatívnej pozícií \texttt{a} do položky na relatívnej pozícií \texttt{b} v aktuálnom zásobnikovom rámci. \\
+Skopírovanie položky na relatívnej adrese \texttt{a} do položky na relatívnej adrese \texttt{b} v aktuálnom zásobnikovom rámci. \\
 \\\texttt{IST\_MovC a b} \\
-Skopírovanie konštanty v tabuľke konštánt na pozícií \texttt{a} do položky na relatívnej pozícií \texttt{b} v aktuálnom zásobnikovom rámci. \\
+Skopírovanie konštanty v tabuľke konštánt na pozícií \texttt{a} do položky na relatívnej adrese \texttt{b} v aktuálnom zásobnikovom rámci. \\
 \\\texttt{IST\_Jmp dist}\\
 Inštrukcia pre vykonanie nepodmieneného skoku.\\
-Pripočítanie vzdialenosti(\texttt{dist}) skoku k aktuálnej hodnote \texttt{instruction pointer}u.\\
+Pripočítanie vzdialenosti(\texttt{dist}) skoku k aktuálnej hodnote \texttt{instruction pointer}-u.\\
 \\\texttt{IST\_Jmpz dist cond}\\
 Inštrukcia pre vykonanie podmieneného skoku.\\
 V prípade, že hodnota v operande \texttt{cond} je rovná \texttt{0} tak sa prevedie
-pripočítanie vzdialenosti (\texttt{dist}) skoku k aktuálnej hodnote instruction
-pointeru.Prevádza sa pretypovanie v prípade nutnosti.\\
+pripočítanie vzdialenosti (\texttt{dist}) skoku k aktuálnej hodnote \texttt{instruction pointer}-u.
+Prevádza sa pretypovanie v prípade nutnosti.\\
 \\\texttt{IST\_Jmpnz dist cond}\\
 Inštrukcia pre vykonanie podmieneného skoku.\\
-V prípade, že hodnota v operande \texttt{cond} nieje rovná '0' tak sa prevedie
+V prípade, že hodnota v operande \texttt{cond} nieje rovná \texttt{0} tak sa prevedie
 pripočítanie vzdialenosti (\texttt{dist}) skoku k aktuálnej hodnote \texttt{instruction pointer}u. \\
 \\\texttt{IST\_Push a}\\
-Vloženie položky na relatívnej pozícií \texttt{a} na vrchol zásobniku.\\
+Vloženie položky na relatívnej adrese \texttt{a} na vrchol zásobniku.\\
 V prípade, že je položka na relatívnej pozícií typu \texttt{VT\_String}, dôjde k vytvorenie \texttt{Weak Reference}.\\
 \\\texttt{IST\_PushC a}\\
 Vloženie konštanty na pozícií \texttt{a} v tabuľke konštánt na vrchol zásobniku.\\
 \\\texttt{IST\_PushRef a}\\
 Na vrchol zásobníku sa vloží \texttt{Strong Reference} na položku na relatívnej pozícií \texttt{a}.\\
-Pokiaľ sa na relatívnej pozícií \texttt{a} nachádza \texttt{Strong Reference}, je k jeho hodnote pripočítané \texttt{a}.\\
+Pokiaľ sa na relatívnej adrese \texttt{a} nachádza \texttt{Strong Reference}, je k jeho hodnote pripočítané \texttt{a}.\\
 \\\texttt{IST\_Reserve N}\\
 Rezervuje miesto pre \texttt{N} položiek na zásobníku, pre neskoršie použitie.\\
 \\\texttt{IST\_Pop N}\\
