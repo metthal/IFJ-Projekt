@@ -496,7 +496,9 @@ EXPR $\Rightarrow$ var \\
 \subsection{Inštrukčná sada}
 
 \textbf{IST\_Mov a b}\\
-Presunutie operandu \textbf{a} do oberandu \textbf{b}. \\
+Presunutie operandu \textbf{a} do operandu \textbf{b}. \\
+\textbf{IST\_MovC a b} \\
+Presunutie konštanty \textbf{a} do operandu \textbf{b}. \\
 \textbf{IST\_Jmp dist}\\
 Inštrukcia pre vykonanie nepodmieneného skoku.\\
 Pripočítanie vzdialenosti(\textbf{dist}) skoku k aktuálnej hodnote instruction
@@ -504,6 +506,11 @@ pointeru.\\
 \textbf{IST\_Jmpz dist cond}\\
 Inštrukcia pre vykonanie podmieneného skoku.\\
 V prípade ze hodnota v operande \textbf{cond} je rovna '0' tak sa prevedie
+pripočítanie vzdialenosti (\textbf{dist}) skoku k aktuálnej hodnote instruction
+pointeru.Prevádza sa pretypovanie v prípade nutnosti.\\
+\textbf{IST\_Jmpnz dist cond}\\
+Inštrukcia pre vykonanie podmieneného skoku.\\
+V prípade ze hodnota v operande \textbf{cond} nieje rovna '0' tak sa prevedie
 pripočítanie vzdialenosti (\textbf{dist}) skoku k aktuálnej hodnote instruction
 pointeru.Prevádza sa pretypovanie v prípade nutnosti.\\
 \textbf{IST\_Push}\\
@@ -515,12 +522,42 @@ Inštrukcia rezervuje miesto pre \textbf{N} položiek na zásobníku, pre neskor
  použitie.\\
 \textbf{IST\_Pop N}\\
 Inštrukcia vytiahne \textbf{N} polozkiek zo zásobníku.\\
+\textbf{IST\_ClearExpr offset} \\
+Inštrukcia odstráni výraz zo zásobníku. Relátívna adresa je zadaná v \textbf{offset}.\\
 \textbf{IST\_Call adressIndex}\\
 Inštrukcia v vloží na zásobník Stack pointer a Instruction Pointer. Nastaví
 Stack Pointer na vrchol zásobniku a nastaví Instruction Pointer na adresu
 \textbf{AdressTable[adressIndex]}.\\
 \textbf{IST\_NUllify offset}\\
 Inštrukcia nastaví položku na adrese \textbf{offset} v zásobniku na NULL.\\
+\textbf{IST\_BoolVal a res } \\
+Inštrukcia prevedie akýkoľvek udajový typ na boolean.\\
+\textbf{a} hodnota ktorá sa ma previesť, \textbf{res} cieľ kde bude hodnota uložená typu
+boolean. \\
+\textbf{IST\_DoubleVal a res } \\
+Inštrukcia prevedie akýkoľvek udajový typ na Double.\\
+\textbf{a} hodnota ktorá sa ma previesť, \textbf{res} cieľ kde bude hodnota uložená typu
+double. \\
+\textbf{IST\_IntVal a res } \\
+Inštrukcia prevedie akýkoľvek udajový typ na Int.\\
+\textbf{a} hodnota ktorá sa ma previesť, \textbf{res} cieľ kde bude hodnota uložená typu
+int. \\
+\textbf{IST\_StrVal a res } \\
+Inštrukcia prevedie akýkoľvek udajový typ na string.\\
+\textbf{a} hodnota ktorá sa ma previesť, \textbf{res} cieľ kde bude hodnota uložená typu
+string. \\
+\textbf{IST\_FindString a b res} \\
+Inštrukcia vyhľadá v stringu \textbf{a} string \textbf{b} a v prípade zhody
+uloží index zaciatku podretazca do \textbf{res}.\\
+\textbf{IST\_GetString res} \\
+Inštrukcia načíta string zo štandartného vstupu, a uloží do \textbf{res}. \\
+\textbf{IST\_GetSubString a b res}\\
+Inštrukcia vrati podreťazec reťazca, \textbf{a} je zaciatočný index a \textbf{b} je
+ukončovací index reťazca. Výsledný podreťazec sa bude nachádzať v \textbf{res}.\\
+\textbf{IST\_PutString res}\\
+Inštrukcia vypíše na štandartný výstup string uložený v \textbf{res}.\\
+\textbf{IST\_SortString a res}\\
+Inštrukcia zatriedi reťazec uložený v \textbf{res}, \textbf{a} je dĺžka reťazca.\\
 \textbf{IST\_Add res a b}\\
 Vykoná \textbf{a} + \textbf{b} a výsledok uloží do \textbf{res}.\\
 \textbf{a}, \textbf{b}, \textbf{res} sú relatívne adresy na zásobníku.\\
@@ -548,6 +585,11 @@ Porovná \textbf{a}, \textbf{b} ak je \textbf{a} vačšie do operandu \textbf{re
 \textbf{IST\_GreaterEq res a b}\\
 Porovná \textbf{a}, \textbf{b} ak je \textbf{a} vačšie alebo rovné, do operandu \textbf{res} vloží '1' inak '0'.\\
 \textbf{a}, \textbf{b}, \textbf{res} sú relatívne adresy na zásobníku.\\
+\textbf{IST\_And a b res}\\
+Inštrukcia vykoná logický AND u \textbf{a}, \textbf{b} a výsledok zapíše do \textbf{res}.\\
+\textbf{IST\_Or a b res}\\
+Inštrukcia vykoná logický OR u \textbf{a}, \textbf{b} a výsledok zapíše do \textbf{res}.\\
+\textbf{IST\_Not a b res}\\
 
 % koniec dokumentace
 \end{document}
