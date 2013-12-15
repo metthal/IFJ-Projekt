@@ -304,11 +304,11 @@ kedy sa do miesta pre návrtovú hodnotu vloží referencia na premennú do ktor
 výsledok funkcie priradiť. Pri priradení do \texttt{Strong Reference} dochádza k dereferncií a teda
 priamemu priradeniu bez zbytočných kopíí.
 
-\texttt{Weak Reference} sa používa pre parametre funkcií, ktoré sú typu String, kvôli časovej náročnosti
-kopírovania reťazca. Pri priradení do \texttt{Weak Reference} dochádza k nahradenie referencie
+\texttt{Weak Reference} sa používa pre parametre funkcií, ktoré sú typu \texttt{String}, kvôli časovej náročnosti
+kopírovania reťazca. Pri priradení do \texttt{Weak Reference} dochádza k nahradeniu referencie
 novou hodnotou predstavujúcou výsledok výrazu, ktorý bol priradený. Pri všetkých ostatných použitiach
-\texttt{Weak Reference} dochádza k jej dereferencií. Pri snahe vložiť na zásobník referenciu na \texttt{Weak Reference}
-je vytvorená \texttt{Weak Reference} na miesto kam ukazuje pôvodná \texttt{Weak Reference}.
+\texttt{Weak Reference} dochádza k jej dereferencii. Pri vytváraní referencie na \texttt{Weak Reference}
+je na zásobníku vytvorená nová \texttt{Weak Reference} ukazujúca na rovnaké miesto ako pôvodná referencia.
 
 \texttt{Const Reference} je referencia do tabuľky konštánt, chová sa presne tak isto ako \texttt{Weak Reference},
 až na to že sa používa všade kde sa vo výraze nachádza konštanta.
@@ -326,7 +326,7 @@ Volanie vstavanej funkcie sa potom líši v tom, že namiesto \texttt{IST\_Call}
 príslušná inštrukcia vstavanej funckie a táto nastaví aj návratovú hodnotu.
 
 Pre konverziu parametrov vstavaných funkcií na požadovaný typ sa využívajú už existujúce
-konverzné funkcie, napríklad v prípade prevodu na \texttt{string} sa využije funkcia
+konverzné funkcie, napríklad v prípade prevodu na \texttt{String} sa využije funkcia
 \texttt{valueToString}, ktorá je však využitá aj pri vstavanej funkcii \texttt{strval}.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -339,42 +339,38 @@ konverzné funkcie, napríklad v prípade prevodu na \texttt{string} sa využije
 \subsection{Merge sort}
 Na implementáciu radiaceho algoritmu sme využili Merge sort. Ide o radenie
  typu rozdeľuj a panuj (angl. divide and conquer), v našej implementácií stabilný
- algoritmus s časovou zložitosťou \BigO{N \log{N}}. Princíp alogritmu je jednoduchý.
+ algoritmus s časovou zložitosťou \BigO{N \log{N}}. Princíp alogritmu je nasledovný.
  Pole sa rozdelí na menšie podpolia (v našom prípade veľkosti 1). Následne sa
  po pároch spoja, tak aby výsledné pole bolo tiež zoradené.
 
 Naša implementácia je tzv. zhora-dolu (angl. top-down) s pomocným poľom o
  rovnakej veľkosti ako zdrojové pole. Tieto polia striedajú svoju funkciu, z
- jedného sa číta do druhého píše, čím sa odstráni potreba kopírovania
- medzivýsledku spať do zdrojového poľa. Toto sa ľahko uskutoční jednoduchou
- zámenou argumentou v rekurzívnom volaní funkcie. Celá logika našej funkcie
- \texttt{stringCharSortDivide()} spočíva teda v rozdelení zdrojového poľa rekurzívnym
- volaním (s vymenením zdrojovým a cieľovým poľom) na polovice v prípade že jeho
+ jedného sa číta do druhého zapisuje, čím sa odstránila potreba kopírovania
+ medzivýsledku späť do zdrojového poľa. Toto sa uskutoční jednoduchou
+ zámenou argumentou v rekurzívnom volaní funkcie. Logika funkcie \texttt{stringCharSortDivide}
+ spočíva teda v rozdelení zdrojového poľa rekurzívnym
+ volaním (s vymeneným zdrojovým a cieľovým poľom) na polovice v prípade, že jeho
  veľkosť je vačšia než 2, a následným spojením týchto 2 polovíc, pri ktorom sa
  vždy vyberie prvok podľa váhy z danej polovice.
-
-% mozno obrazok sem dat? odpoved: NIE uz bez obrazkov to bude dost velke :D 
 
 %=============================================================================
 \subsection{KMP substring search}
 Knuth-Morris-Prattov algoritmus zrýchľuje vyhľadávanie podreťazca v reťazci, za
- využita informácie o výskyte podreťazcov v hľadanom reťazci ktoré sa
- zhodujú so prefixom hľadaného reťazca. Túto informáciu bude držat pomocná
+ využita informácie o výskyte podreťazcov v hľadanom reťazci, ktoré sa
+ zhodujú s prefixom hľadaného reťazca. Túto informáciu bude držat pomocná
  tabuľka, ktorú musíme pred hľadaním zostaviť.
 
 Základný vyhľadávací algoritmus porovnáva podreťazec s reťazcom postupne po
- každom znaku. KMP sa vyhýba porovaniu toho istého znaku v prípade že bol
- porovnaný predošlými porovnaniami a nie je možné aby bol súčasťou podreťazca
+ znaku. KMP sa vyhýba porovaniu toho istého znaku v prípade, že už bol
+ porovnaný a nie je možné aby bol súčasťou podreťazca
  ktorý je prefixom hľadaného reťazca. Samotné vyhľadávanie má teda zložitosť
  len \BigO{N}.
 
-Naša pomocná tabuľka bude držať indexy, od ktorých musíme znova začať porovnávať.
- Zostavíme ju jednoducho postupným porovnávaním podreťazcou hľadaného reťazca s
+Pomocná tabuľka indexov uchováva pozície, od ktorých musíme znova začať porovnávať.
+ Zostavíme ju postupným porovnávaním podreťazcov hľadaného reťazca s
  jeho prefixom. V prípade že neexistuje podreťazec o veľkosti väčšej než 1
- shodujúci sa so prefixom, bude tabuľka plná núl.
-
-Vyhľadávanie je jednoduché, v prípade neshody sa podľa tabuľky nastaví ktorým
- písmenom z podreťazca sa má pokračovať porovnávanie.
+ zhodujúci sa s prefixom, bude tabuľka plná núl. Pri vyhľadávaní sa v prípade nezhody podľa tabuľky
+ nastaví ktorým písmenom z podreťazca sa má pokračovať.
 
 %=============================================================================
 \subsection{Hash table}
@@ -383,43 +379,42 @@ Hash tabuľka je typ abstraktnej dátovej štruktúry, ktorý implementuje oper�
  zložitosťou \BigO{1}.
 
  V našej implementácií používame hash funkciu \texttt{djb2} (autor Bernstein). Ide o
- pomerne jednoduchú a rýchlu funkciu, pričom vypočítaný hash ukladáme spolu so
- záznamom v tabuľke pre zrychlénie rekalkulácie pozície záznamu v prípade
- zmeny veľkosti tabuľky. Pri vyhľadavaní v tabuľke sa vypočíta hash z klúča,
- urobí sa modulo podľa veľkosti tabuľky (zvyčajne mocnina 2 takže vcelku rýchla
- operácia), pristúpi sa na daný prvok poľa kde sa zistí index záznamu (a v
- prípade že nastala kolízia, iteruje sa cez odkaz na ďalší záznam), pričom vždy
- sa musia porovnať porovnať klúče.
+ rýchlu funkciu, a navyše vypočítaný hash ukladáme spolu so
+ záznamom v tabuľke pre zrýchlenie rekalkulácie pozície záznamu v prípade
+ zmeny veľkosti tabuľky. Pri vyhľadavaní v tabuľke sa vypočíta hash z kľúča,
+ urobí sa modulo podľa veľkosti tabuľky (zvyčajne mocnina 2) a pristúpi sa na daný prvok
+ poľa kde sa zistí index záznamu. V prípade že nastala kolízia, iteruje sa cez odkaz na ďalší záznam, 
+ pričom je vždy potrebné porovnať kľúče.
 
-Interne naša tabuľka používa vektor na ukladanie záznamov. Takáto implementácia
- šetrí pamäť a zrýchľuje zmenu veľkosti tabuľky no nevýhodou je väčšia záťaž na
- cache procesoru (taktiež operácia mazania záznamu by bola komplikovanejšia,
- pokiaľ by sme ju implementovali). Pri kolízií uložíme do predošlého záznamu
+Interne naša tabuľka využíva na ukladanie záznamov vektor. Takáto implementácia
+ šetrí pamäť a zrýchľuje zmenu veľkosti tabuľky, no nevýhodou je väčšia záťaž na
+ cache procesoru, a taktiež operácia mazania záznamu by bola komplikovanejšia,
+ pokiaľ by sme ju implementovali. Pri kolízii uložíme do predošlého záznamu
  odkaz na ďaľší záznam.
 
-Zmena veľkosti tabuľky sa deje pri záťaži 0,75. Zahodí sa staré pole indexov a
- alokuje sa dvojnásobne väčšie. Následne sa postupne vkladajú všetky odkazy na
+Zmena veľkosti tabuľky sa deje pri jej zaplnení nad 75\%. Staré pole indexov sa uvoľní a
+ alokuje sa dvojnásobne väčšie. Následne sa nanovo vložia všetky odkazy na
  záznamy z vektora do tabuľky, príp. sa vložia ako odkaz cez existujúci záznam.
 
 \section{Práca v tíme}
-Tým o 5 ľuďoch už vyžaduje opatrenia, aby bol vývoj riadený, aby každý vedel, čo treba robiť,
+Tým o 5 ľuďoch už vyžaduje opatrenia, aby bol vývoj riadený, aby každý vedel, čo treba robiť a
 čo robia ostatní. Tieto opatrenia bolo potrebné zaviesť hneď na začiatku, ešte predtým ako sa
 začne vývojový cyklus. Nasledujúca kapitola popíše všetky technológie a metodiky, ktoré boli použité.
 
 \subsection{Verzovací systém}
-Keďže celý tím musí pracovať na jedných a tých istých zdrojových súboroch, tak
+Keďže celý tím musí pracovať na jedných a tých istých zdrojových súboroch,
 bol zvolený distribuovaný verzovací systém \texttt{git}, pričom náš spoločný vzdialený
-repozitoár bol na \texttt{github}e. Keďže nebolo dostatok času na vysvetlenie
-pokročilej práce s \texttt{git}om všetkým členom tímu, tak za hlavnú vývojovú vetvu
-bola zvolená \texttt{master} vetva, ktorá vždy musela byť v kompilovatelnom stave, čo
+repozitoár bol na \texttt{github}-e. Keďže nebol dostatok času na vysvetlenie
+pokročilej práce s \texttt{git}-om všetkým členom tímu, tak za hlavnú vývojovú vetvu
+bola zvolená \texttt{master} vetva, ktorá vždy musela byť v kompilovateľnom stave, čo
 sa vždy až na pár výnimočných momentov podarilo. Ďaľšie vetvy pribúdali až v neskorších vývojových
 fázach, kedy sa optimalizoval už fungujúci kód.
 
 \subsection{Agilný vývoj}
 Spôsob agilného vývoja sme zvolili sprinty, kedy sme sa v týždenných intervaloch
-stretávali a debatovali o riešeniach problémov a o tom čo sa bude v najsledujúcom sprinte
-robiť. Každý sprint sme sa snažili iteratívne pridať nejaku funkcionalitu do interpretu
-až sme nakoniec nedospeli k výslednému celku. Po dokončení začala optimalizačná časť, 
+stretávali a debatovali o riešeniach problémov a o tom, čo sa bude v najsledujúcom sprinte
+robiť. Každý sprint sme sa snažili iteratívne pridať nejaku funkcionalitu do projektu
+až pokým sme nedospeli k výslednému celku. Po dokončení začala optimalizačná časť, 
 ktorá však už nebola riadená osobnými meetingami, ale písomnou formou.
 
 \subsection{Rozdelenie práce}
